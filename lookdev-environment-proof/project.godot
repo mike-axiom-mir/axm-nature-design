@@ -1,0 +1,10 @@
+[application]
+config/name="AXM Nature Materials Environment Context Proof"
+
+[display]
+window/size/viewport_width=1100
+window/size/viewport_height=720
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
