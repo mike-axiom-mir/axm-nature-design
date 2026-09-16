@@ -1,0 +1,57 @@
+name: Geometry tapered cap winding evidence
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile
+        run: python -m compileall -q src tools tests
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+      - name: Checkout exact east-rear Organic source donor
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          ref: a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12
+          path: _donors/east-rear
+      - name: Build exact three-source topology repair evidence
+        if: matrix.python == '3.11'
+        run: |
+          python tools/build_topology_repair_evidence.py \
+            evidence/tapered-cap-winding-001 \
+            _donors/east-rear/examples/east_rear_tree_neutral_001.json \
+            a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          summary = json.loads(Path('evidence/tapered-cap-winding-001/summary.json').read_text())
+          assert summary['state'] == 'PASS_3_REAL_OUTPUTS', summary
+          assert summary['source_count'] == 3, summary
+          rear = [item for item in summary['items'] if item['study_id'] == 'east-rear-tree-neutral-001']
+          assert len(rear) == 1, summary
+          assert rear[0]['provenance_kind'] == 'EXACT_EXTERNAL_DONOR', rear[0]
+          assert rear[0]['provenance_ref'] == 'a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12', rear[0]
+          PY
+      - name: Record exact workflow head
+        if: matrix.python == '3.11'
+        run: git rev-parse HEAD > evidence/tapered-cap-winding-001/exact-head.txt
+      - name: Upload exact topology repair evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tapered-cap-winding-001-evidence
+          path: evidence/tapered-cap-winding-001
+          if-no-files-found: error
