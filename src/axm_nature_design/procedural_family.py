@@ -1,8 +1,9 @@
-"""Bounded deterministic procedural variation for the first Nature sapling.
+"""Bounded deterministic procedural branch/crown variation for Nature tree studies.
 
-This module deliberately varies only already-authored branch/crown degrees of freedom.
-It does not generate species, rewrite trunk/flex semantics, or promote one source study
-into a universal vegetation system.
+The original v0.1 contract was authored around the first sapling.  The reusable
+mechanism is narrower than a vegetation generator: vary only already-authored
+branch/crown degrees of freedom, retain exact source ownership, rerun the source
+Organic Form evaluator, and HOLD instead of widening bounds.
 """
 from __future__ import annotations
 
@@ -15,9 +16,11 @@ from pathlib import Path
 
 from .organic_form import build_evidence, build_mesh, digest, validate_source
 
-FAMILY_SCHEMA = "axm.nature-sapling-variation-family/v0.1"
+LEGACY_FAMILY_SCHEMA = "axm.nature-sapling-variation-family/v0.1"
+FAMILY_SCHEMA = "axm.nature-branch-crown-variation-family/v0.2"
 RECEIPT_SCHEMA = "axm.nature-sapling-variation-receipt/v0.1"
 
+_SUPPORTED_FAMILY_SCHEMAS = {LEGACY_FAMILY_SCHEMA, FAMILY_SCHEMA}
 _ALLOWED_BOUNDS = {
     "branch_length_scale",
     "branch_yaw_jitter_deg",
@@ -26,6 +29,14 @@ _ALLOWED_BOUNDS = {
     "leaf_yaw_jitter_deg",
     "leaf_pitch_jitter_deg",
 }
+_MUTABLE_SOURCE_KEYS = {
+    "study_id",
+    "branches",
+    "leaf_clusters",
+    "procedural_provenance",
+    "truth_boundary",
+}
+_GENERIC_SOURCE_PROVENANCE = {"repository", "ref", "path", "study_id", "expected_digest"}
 
 
 def _canonical_bytes(value: object) -> bytes:
@@ -52,16 +63,21 @@ def _range_pair(value, name: str) -> tuple[float, float]:
 
 
 def validate_family(family: dict) -> None:
-    if family.get("schema") != FAMILY_SCHEMA:
+    schema = family.get("schema")
+    if schema not in _SUPPORTED_FAMILY_SCHEMAS:
         raise ValueError("unsupported family schema")
     if not family.get("family_id"):
         raise ValueError("family_id required")
     base = family.get("base_source", {})
     if not base.get("study_id") or not base.get("expected_digest"):
         raise ValueError("base_source study_id and expected_digest required")
+    if schema == FAMILY_SCHEMA:
+        missing = sorted(key for key in _GENERIC_SOURCE_PROVENANCE if not base.get(key))
+        if missing:
+            raise ValueError(f"generic base_source provenance incomplete: {missing}")
     bounds = family.get("bounds", {})
     if set(bounds) != _ALLOWED_BOUNDS:
-        raise ValueError("family bounds must use only the declared v0.1 mutation contract")
+        raise ValueError("family bounds must use only the declared branch/crown mutation contract")
     for name, value in bounds.items():
         _range_pair(value, name)
     if _range_pair(bounds["branch_length_scale"], "branch_length_scale")[0] <= 0:
@@ -183,8 +199,8 @@ def derive_candidate(base_source: dict, family: dict, seed: int, attempt: int = 
         })
 
     candidate["study_id"] = f"{base_source['study_id']}-variant-{int(seed)}-{int(attempt):02d}"
-    candidate["procedural_provenance"] = {
-        "family_schema": FAMILY_SCHEMA,
+    provenance = {
+        "family_schema": family["schema"],
         "family_id": family["family_id"],
         "family_digest": fam_hash,
         "base_source_digest": base_hash,
@@ -194,6 +210,12 @@ def derive_candidate(base_source: dict, family: dict, seed: int, attempt: int = 
         "branch_variation": branch_variation,
         "leaf_variation": leaf_variation,
     }
+    if family["schema"] == FAMILY_SCHEMA:
+        provenance["base_source_provenance"] = {
+            key: family["base_source"][key]
+            for key in ("repository", "ref", "path", "study_id", "expected_digest")
+        }
+    candidate["procedural_provenance"] = provenance
     candidate["truth_boundary"] = (
         base_source["truth_boundary"]
         + " This derived variant additionally does not establish species variation, biological growth, "
@@ -232,9 +254,12 @@ def variation_metrics(base_source: dict, candidate: dict, family: dict) -> dict:
         branch["points"][0] == base_branches[branch["id"]]["points"][0]
         for branch in candidate["branches"]
     )
-    immutable_fields_preserved = all(
+    expected_keys = set(base_source) | {"procedural_provenance"}
+    candidate_keys_ok = set(candidate) == expected_keys
+    immutable_fields_preserved = candidate_keys_ok and all(
         candidate[key] == base_source[key]
-        for key in ("trunk", "flex_zones", "design_checks", "donor_provenance", "environment_handoff", "weather_handoff")
+        for key in base_source
+        if key not in _MUTABLE_SOURCE_KEYS
     )
     return {
         "branch_tip_moves": moved,
