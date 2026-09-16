@@ -1,0 +1,47 @@
+name: Organic east rear tree evidence
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile
+        run: python -m compileall -q src tools tests
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+      - name: Build exact rear-tree evidence
+        if: matrix.python == '3.11'
+        run: python tools/build_rear_tree.py evidence/east-rear-tree-neutral-001
+      - name: Validate exact retained contract
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("evidence/east-rear-tree-neutral-001")
+          report = json.loads((root / "evidence.json").read_text())
+          assert report["status"] == "PASS_REAR_SOURCE_ENVELOPE", report
+          assert all(report["checks"].values()), report
+          assert report["vertices"] == 390, report
+          assert report["triangles"] == 570, report
+          assert report["receiving_context"]["replacement_target"] == "proxy:nature-tree-east-a", report
+          assert report["receiving_context"]["seed"] == 29, report
+          print(json.dumps(report, indent=2))
+          PY
+      - name: Upload exact rear-tree evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: east-rear-tree-neutral-001-evidence
+          path: evidence/east-rear-tree-neutral-001
+          if-no-files-found: error

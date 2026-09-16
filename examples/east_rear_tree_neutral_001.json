@@ -1,0 +1,487 @@
+{
+  "schema": "axm.nature-organic-form-study/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "coordinate_system": "+X east/right, +Y north/forward, +Z up; metres",
+  "purpose": "One source-owned porous rear/right vegetation form candidate for the retained seed-29 east-a Nature slot after the east-foreground hierarchy gate cleared; taller asymmetric crown preserves deeper-scene permeability without hidden receiving-scene scaling.",
+  "environment_handoff": {
+    "repository": "mike-axiom-mir/axm-map-design",
+    "pr": 4,
+    "head": "cdac7d1316631b3b130d5e558de2aee462a21d40",
+    "seed": 29,
+    "replacement_target": "proxy:nature-tree-east-a",
+    "proxy_position_m": [
+      6.089407,
+      2.004654,
+      2.098546
+    ],
+    "proxy_size_m": [
+      1.678837,
+      1.678837,
+      4.197092
+    ],
+    "proxy_rotation_deg": -5.415604,
+    "placement_policy": "PRESERVE_TARGET_CENTER_XY__GROUND_SOURCE_MIN_Z__NO_FORM_SCALE__NO_EXTRA_ROTATION",
+    "status": "CANDIDATE_REPLACEMENT_NOT_COMPOSED"
+  },
+  "weather_handoff": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pr": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "visual_wind_xy": [
+      1.0,
+      0.35
+    ],
+    "status": "CONTEXT_ONLY_NOT_APPLIED_TO_FORM"
+  },
+  "donor_provenance": {
+    "repository": "mike-axiom-mir/axm-universal-creation",
+    "commit": "b434a349cf159b392148b4dc9d68146573531a60",
+    "path": "src/axm_uc/rts_mesh.py",
+    "mechanism": "small stylized vegetation using a stem plus simple planar leaf blades; receiving implementation is independently authored and re-tested in nature-design",
+    "license": "Apache-2.0",
+    "evidence_relation": "DONOR_HINT_NOT_INHERITED_PASS"
+  },
+  "form_intent": {
+    "minimum_clear_trunk_before_primary_branch_m": 1.8,
+    "fit_without_receiver_scale_or_rotation": true,
+    "distinct_from_compact_east_tree": true,
+    "scene_read_intent": "TALLER_ASYMMETRIC_POROUS_REAR_CROWN_NOT_AESTHETIC_ACCEPTANCE"
+  },
+  "trunk": [
+    {
+      "id": "base",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.18
+    },
+    {
+      "id": "lower",
+      "position": [
+        -0.02,
+        0.01,
+        0.78
+      ],
+      "radius": 0.15
+    },
+    {
+      "id": "mid",
+      "position": [
+        0.03,
+        -0.02,
+        1.55
+      ],
+      "radius": 0.12
+    },
+    {
+      "id": "upper",
+      "position": [
+        -0.04,
+        0.02,
+        2.35
+      ],
+      "radius": 0.09
+    },
+    {
+      "id": "crown",
+      "position": [
+        0.03,
+        0.0,
+        3.15
+      ],
+      "radius": 0.06
+    },
+    {
+      "id": "tip",
+      "position": [
+        0.0,
+        0.01,
+        4.0
+      ],
+      "radius": 0.032
+    }
+  ],
+  "branches": [
+    {
+      "id": "south-low",
+      "points": [
+        [
+          0.01,
+          -0.01,
+          1.82
+        ],
+        [
+          0.24,
+          -0.24,
+          2.12
+        ],
+        [
+          0.44,
+          -0.43,
+          2.45
+        ]
+      ],
+      "radii": [
+        0.058,
+        0.036,
+        0.019
+      ]
+    },
+    {
+      "id": "north-low",
+      "points": [
+        [
+          -0.01,
+          0.01,
+          2.02
+        ],
+        [
+          -0.27,
+          0.22,
+          2.3
+        ],
+        [
+          -0.51,
+          0.39,
+          2.6
+        ]
+      ],
+      "radii": [
+        0.055,
+        0.034,
+        0.018
+      ]
+    },
+    {
+      "id": "east-mid",
+      "points": [
+        [
+          -0.01,
+          0.0,
+          2.45
+        ],
+        [
+          0.31,
+          0.1,
+          2.74
+        ],
+        [
+          0.55,
+          0.18,
+          3.05
+        ]
+      ],
+      "radii": [
+        0.049,
+        0.03,
+        0.016
+      ]
+    },
+    {
+      "id": "west-high",
+      "points": [
+        [
+          0.0,
+          0.0,
+          2.76
+        ],
+        [
+          -0.3,
+          -0.12,
+          3.04
+        ],
+        [
+          -0.53,
+          -0.22,
+          3.33
+        ]
+      ],
+      "radii": [
+        0.045,
+        0.028,
+        0.014
+      ]
+    },
+    {
+      "id": "north-top",
+      "points": [
+        [
+          0.01,
+          0.0,
+          3.16
+        ],
+        [
+          0.1,
+          0.3,
+          3.43
+        ],
+        [
+          0.17,
+          0.52,
+          3.7
+        ]
+      ],
+      "radii": [
+        0.039,
+        0.024,
+        0.012
+      ]
+    }
+  ],
+  "leaf_clusters": [
+    {
+      "id": "south-low-leaves",
+      "center": [
+        0.44,
+        -0.43,
+        2.45
+      ],
+      "length": 0.21,
+      "width": 0.12,
+      "blades": [
+        [
+          320,
+          18
+        ],
+        [
+          5,
+          24
+        ],
+        [
+          48,
+          14
+        ],
+        [
+          92,
+          20
+        ]
+      ]
+    },
+    {
+      "id": "north-low-leaves",
+      "center": [
+        -0.51,
+        0.39,
+        2.6
+      ],
+      "length": 0.2,
+      "width": 0.12,
+      "blades": [
+        [
+          142,
+          20
+        ],
+        [
+          186,
+          14
+        ],
+        [
+          228,
+          22
+        ],
+        [
+          272,
+          16
+        ]
+      ]
+    },
+    {
+      "id": "east-mid-leaves",
+      "center": [
+        0.55,
+        0.18,
+        3.05
+      ],
+      "length": 0.21,
+      "width": 0.11,
+      "blades": [
+        [
+          8,
+          19
+        ],
+        [
+          54,
+          26
+        ],
+        [
+          102,
+          15
+        ],
+        [
+          148,
+          22
+        ]
+      ]
+    },
+    {
+      "id": "west-high-leaves",
+      "center": [
+        -0.53,
+        -0.22,
+        3.33
+      ],
+      "length": 0.2,
+      "width": 0.11,
+      "blades": [
+        [
+          190,
+          16
+        ],
+        [
+          236,
+          23
+        ],
+        [
+          282,
+          13
+        ],
+        [
+          330,
+          20
+        ]
+      ]
+    },
+    {
+      "id": "north-top-leaves",
+      "center": [
+        0.17,
+        0.52,
+        3.7
+      ],
+      "length": 0.19,
+      "width": 0.1,
+      "blades": [
+        [
+          70,
+          18
+        ],
+        [
+          114,
+          26
+        ],
+        [
+          160,
+          14
+        ],
+        [
+          208,
+          20
+        ]
+      ]
+    },
+    {
+      "id": "crown-tip-leaves",
+      "center": [
+        0.0,
+        0.01,
+        4.0
+      ],
+      "length": 0.17,
+      "width": 0.09,
+      "blades": [
+        [
+          20,
+          28
+        ],
+        [
+          82,
+          20
+        ],
+        [
+          144,
+          30
+        ],
+        [
+          216,
+          18
+        ],
+        [
+          292,
+          25
+        ]
+      ]
+    }
+  ],
+  "flex_zones": [
+    {
+      "id": "trunk-lower-flex",
+      "center": [
+        -0.02,
+        0.01,
+        0.78
+      ],
+      "radius": 0.28,
+      "status": "DECLARED_NOT_DEFORMATION_TESTED"
+    },
+    {
+      "id": "trunk-upper-flex",
+      "center": [
+        -0.04,
+        0.02,
+        2.35
+      ],
+      "radius": 0.22,
+      "status": "DECLARED_NOT_DEFORMATION_TESTED"
+    },
+    {
+      "id": "south-low-branch-flex",
+      "center": [
+        0.01,
+        -0.01,
+        1.82
+      ],
+      "radius": 0.14,
+      "status": "DECLARED_NOT_DEFORMATION_TESTED"
+    },
+    {
+      "id": "north-low-branch-flex",
+      "center": [
+        -0.01,
+        0.01,
+        2.02
+      ],
+      "radius": 0.14,
+      "status": "DECLARED_NOT_DEFORMATION_TESTED"
+    },
+    {
+      "id": "east-mid-branch-flex",
+      "center": [
+        -0.01,
+        0.0,
+        2.45
+      ],
+      "radius": 0.12,
+      "status": "DECLARED_NOT_DEFORMATION_TESTED"
+    },
+    {
+      "id": "west-high-branch-flex",
+      "center": [
+        0.0,
+        0.0,
+        2.76
+      ],
+      "radius": 0.12,
+      "status": "DECLARED_NOT_DEFORMATION_TESTED"
+    }
+  ],
+  "design_checks": {
+    "height_m": [
+      4.0,
+      4.15
+    ],
+    "crown_width_x_m": [
+      1.35,
+      1.6
+    ],
+    "crown_depth_y_m": [
+      1.1,
+      1.45
+    ],
+    "minimum_branch_tip_height_m": 2.4,
+    "trunk_taper": "STRICTLY_DECREASING",
+    "ground_min_z_m": -0.012
+  },
+  "truth_boundary": "This is a stylized authored rear/right vegetation form study for one retained scene envelope. It does not establish botanical species correctness, biological growth, production topology, rigging, wind physics, deformation quality, environment replacement acceptance, engine/runtime readiness, gameplay, CANON, production readiness, or mastery."
+}

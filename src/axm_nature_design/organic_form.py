@@ -69,7 +69,8 @@ def _add_tapered_segment(mesh, region_id, a, b, r0, r1, sides=8):
     for i in range(sides):
         j = (i + 1) % sides
         a0, a1, b0, b1 = start+i, start+j, start+sides+i, start+sides+j
-        mesh["triangles"].extend([[a0,b0,b1],[a0,b1,a1],[c0,a1,a0],[c1,b0,b1]])
+        # Source-lineage migration: cap perimeter traversal must oppose adjacent side faces.
+        mesh["triangles"].extend([[a0,b0,b1],[a0,b1,a1],[c0,a0,a1],[c1,b1,b0]])
     mesh["regions"].append({"id": region_id, "triangle_start": tri_start, "triangle_count": sides*4, "kind": "tapered-segment"})
 
 

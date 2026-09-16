@@ -1,0 +1,49 @@
+name: Geometry source topology migration evidence
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile
+        run: python -m compileall -q src tools tests
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+      - name: Build exact source-topology migration evidence
+        if: matrix.python == '3.11'
+        run: |
+          python tools/build_source_topology_migration_evidence.py evidence/source-topology-migration-001
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          summary = json.loads(Path('evidence/source-topology-migration-001/summary.json').read_text())
+          assert summary['state'] == 'PASS_SOURCE_GENERATOR_MIGRATION_3_REAL_OUTPUTS', summary
+          assert summary['source_count'] == 3, summary
+          assert summary['geometry_oracle_ref'] == 'e2224d4bf88f7e68503072c884e5a726b8d0c53d', summary
+          for item in summary['items']:
+              assert item['migrated_mesh_digest'] == item['proven_reindex_digest'], item
+              assert item['migrated_mesh_digest'] != item['historical_mesh_digest'], item
+              assert item['topology']['shared_edge_orientation_conflicts'] == 0, item
+          PY
+      - name: Record exact workflow head
+        if: matrix.python == '3.11'
+        run: git rev-parse HEAD > evidence/source-topology-migration-001/exact-head.txt
+      - name: Upload exact source-topology migration evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-topology-migration-001-evidence
+          path: evidence/source-topology-migration-001
+          if-no-files-found: error
