@@ -1,5 +1,5 @@
 {
-  "schema": "axm.nature-visual-wind-response-study/v0.1",
+  "schema": "axm.nature-visual-wind-response-study/v0.2",
   "study_id": "sapling-wind-response-001",
   "source_provenance": {
     "repository": "mike-axiom-mir/axm-nature-design",
@@ -13,17 +13,36 @@
     "repository": "mike-axiom-mir/axm-weather-design",
     "pr": 2,
     "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
-    "visual_wind_xy": [1.0, 0.35],
+    "visual_wind_xy": [
+      1.0,
+      0.35
+    ],
     "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED",
     "relationship": "CONSUMES_SOURCE_OWNED_VISUAL_DIRECTION_WITHOUT_INHERITING_WEATHER_PASS"
   },
-  "response": {
+  "prior_visual_baseline": {
+    "head": "4ef316157844fc2236a7671ce9e90a5435cba2c5",
+    "artifact_id": 10427854091,
     "profile": "HEIGHT_WEIGHTED_HALF_SINE_DOWNWIND_VISUAL_SWAY",
-    "duration_s": 0.5,
-    "sample_times_s": [0.0, 0.25, 0.5],
-    "anchor_z_m": 0.92,
-    "max_tip_offset_m": 0.18,
-    "purpose": "One bounded visual-only downwind sway pulse that returns exactly to the source mesh, providing a falsifiable bridge from Weather direction to real Nature geometry."
+    "art_direction_result": "PASS_BOUNDED_VISIBLE_RESPONSE_PROOF / HOLD_ART_DIRECTION_SWAY_PROFILE_001",
+    "relationship": "RETAINED_BEFORE_EVIDENCE_NOT_REWRITTEN"
   },
-  "truth_boundary": "PASS only means this exact sapling mesh receives a deterministic bounded visual-only downwind deformation at the retained sample times, keeps its lower anchor and topology, and returns exactly to neutral. It does not establish physical wind, plant biomechanics, rigging/skinning, production deformation quality, environment acceptance, engine particles, runtime performance, collision, gameplay, art-direction acceptance, CANON, production readiness, or VFX mastery."
+  "response": {
+    "profile": "HIERARCHICAL_TRUNK_BRANCH_LEAF_HALF_SINE_VISUAL_SWAY",
+    "duration_s": 0.5,
+    "sample_times_s": [
+      0.0,
+      0.125,
+      0.25,
+      0.375,
+      0.5
+    ],
+    "anchor_z_m": 0.92,
+    "max_displacement_ceiling_m": 0.18,
+    "primary_height_offset_m": 0.12,
+    "branch_tip_secondary_offset_m": 0.045,
+    "leaf_tip_secondary_offset_m": 0.015,
+    "purpose": "Repair the held global height-shear look with one bounded source-owned response hierarchy: reduced primary height sway plus branch/crown-tip give and leaf-tip give, preserving the same visual direction, lower anchor, 0.18 m ceiling and exact neutral return."
+  },
+  "truth_boundary": "PASS only means this exact sapling mesh receives a deterministic bounded visual-only hierarchical downwind deformation at the retained sample times, keeps its lower anchor and topology, preserves leaf-to-support continuity, stays within the retained 0.18 m displacement ceiling, and returns exactly to neutral. It does not establish physical wind, plant biomechanics, rigging/skinning, production deformation quality, continuous playback quality, environment acceptance, engine particles, runtime performance, collision, gameplay, art-direction acceptance, CANON, production readiness, or VFX mastery."
 }
