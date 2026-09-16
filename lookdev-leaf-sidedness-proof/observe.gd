@@ -213,10 +213,10 @@ func compare_images(a: Image, b: Image) -> Dictionary:
         for x in range(a.get_width()):
             var pa := a.get_pixel(x, y)
             var pb := b.get_pixel(x, y)
-            var dr := abs(pa.r - pb.r)
-            var dg := abs(pa.g - pb.g)
-            var db := abs(pa.b - pb.b)
-            var local_max := max(dr, max(dg, db))
+            var dr: float = absf(pa.r - pb.r)
+            var dg: float = absf(pa.g - pb.g)
+            var db: float = absf(pa.b - pb.b)
+            var local_max: float = maxf(dr, maxf(dg, db))
             if local_max > threshold:
                 changed += 1
             max_channel_delta = max(max_channel_delta, local_max)
