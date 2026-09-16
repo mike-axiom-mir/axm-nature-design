@@ -11,7 +11,8 @@ from axm_nature_design.rear_tree_study import evaluate
 
 SOURCE = ROOT / "examples" / "east_rear_tree_neutral_001.json"
 EXPECTED_SOURCE_DIGEST = "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307"
-EXPECTED_MESH_DIGEST = "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48"
+HISTORICAL_MESH_DIGEST = "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48"
+MIGRATED_MESH_DIGEST = "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31"
 
 
 class RearTreeStudyTests(unittest.TestCase):
@@ -23,7 +24,8 @@ class RearTreeStudyTests(unittest.TestCase):
         self.assertEqual(report["status"], "PASS_REAR_SOURCE_ENVELOPE")
         self.assertTrue(all(report["checks"].values()))
         self.assertEqual(report["source_digest"], EXPECTED_SOURCE_DIGEST)
-        self.assertEqual(report["mesh_digest"], EXPECTED_MESH_DIGEST)
+        self.assertEqual(report["mesh_digest"], MIGRATED_MESH_DIGEST)
+        self.assertNotEqual(report["mesh_digest"], HISTORICAL_MESH_DIGEST)
         self.assertEqual(report["vertices"], 390)
         self.assertEqual(report["triangles"], 570)
         self.assertEqual(report["receiving_context"]["replacement_target"], "proxy:nature-tree-east-a")
