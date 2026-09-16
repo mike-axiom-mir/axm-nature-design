@@ -124,7 +124,10 @@ func proof_material(culling: String) -> StandardMaterial3D:
     var material := StandardMaterial3D.new()
     material.albedo_color = Color(0.57, 0.78, 0.47, 1.0)
     material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-    material.cull_mode = BaseMaterial3D.CULL_DISABLED if culling == "disabled" else BaseMaterial3D.CULL_BACK
+    if culling == "disabled":
+        material.cull_mode = BaseMaterial3D.CULL_DISABLED
+    else:
+        material.cull_mode = BaseMaterial3D.CULL_BACK
     return material
 
 func camera_spec(context: String) -> Dictionary:
@@ -244,8 +247,9 @@ func _initialize() -> void:
     var exact_head := FileAccess.get_file_as_string(exact_head_path).strip_edges()
 
     var payloads := {}
-    for sample_id in SAMPLE_IDS:
-        var path := GENERATED_DIR + "/frame_" + sample_id + "ms_mesh.json"
+    for sample_id_value in SAMPLE_IDS:
+        var sample_id := String(sample_id_value)
+        var path: String = GENERATED_DIR + "/frame_" + sample_id + "ms_mesh.json"
         var payload := read_json(path)
         if payload.is_empty():
             fail("missing migrated sample payload: " + path)
@@ -256,9 +260,12 @@ func _initialize() -> void:
     var images := {}
     var expected_woody_triangles := -1
     var expected_leaf_triangles := -1
-    for context in CONTEXTS:
-        for sample_id in SAMPLE_IDS:
-            for culling in ["disabled", "back"]:
+    for context_value in CONTEXTS:
+        var context := String(context_value)
+        for sample_id_value in SAMPLE_IDS:
+            var sample_id := String(sample_id_value)
+            for culling_value in ["disabled", "back"]:
+                var culling := String(culling_value)
                 var result := await capture_sample(payloads[sample_id] as Dictionary, sample_id, culling, context)
                 var key := "%s/%s/%s" % [context, sample_id, culling]
                 captures[key] = result["record"]
@@ -272,8 +279,10 @@ func _initialize() -> void:
                     return
 
     var culling_comparisons := {}
-    for context in CONTEXTS:
-        for sample_id in SAMPLE_IDS:
+    for context_value in CONTEXTS:
+        var context := String(context_value)
+        for sample_id_value in SAMPLE_IDS:
+            var sample_id := String(sample_id_value)
             var comparison := pixel_difference(images["%s/%s/disabled" % [context, sample_id]], images["%s/%s/back" % [context, sample_id]])
             if int(comparison["changed_pixels"]) != 0:
                 fail("backface culling changed exact woody migrated-wind output in %s at %sms" % [context, sample_id])
@@ -282,7 +291,8 @@ func _initialize() -> void:
 
     var neutral_return := {}
     var neutral_to_peak := {}
-    for context in CONTEXTS:
+    for context_value in CONTEXTS:
+        var context := String(context_value)
         var returned := pixel_difference(images["%s/0000/back" % context], images["%s/0500/back" % context])
         if int(returned["changed_pixels"]) != 0:
             fail("target-host exact neutral return drifted in " + context)
