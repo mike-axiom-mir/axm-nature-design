@@ -119,7 +119,7 @@ class WindResponseTests(unittest.TestCase):
             write_comparison_svg(meshes, b, 'front')
             self.assertEqual(a.read_bytes(), b.read_bytes())
             text = a.read_text(encoding='utf-8')
-            self.assertEqual(text.count('t='), 5)
+            self.assertEqual(text.count('>t='), 5)
             self.assertIn('hierarchical visual-only', text)
             self.assertIn('<line', text)
 
