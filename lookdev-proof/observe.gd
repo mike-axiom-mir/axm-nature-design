@@ -7,7 +7,7 @@ const RECEIPT := "res://material-lookdev-runtime-receipt.json"
 var receipt := {
     "schema":"axm.nature-sapling-material-lookdev-runtime/v0.1",
     "promotion_effect":"NONE",
-    "truth_boundary":"Godot 4.7.2 GL Compatibility captures of byte-retained baseline/candidate GLBs under two fixed contexts. Successful import/capture does not itself prove aesthetic acceptance, renderer equivalence, botanical correctness, or runtime readiness."
+    "truth_boundary":"Godot 4.7.2 GL Compatibility captures of byte-retained baseline/candidate GLBs under three fixed contexts. Successful import/capture does not itself prove aesthetic acceptance, renderer equivalence, botanical correctness, or runtime readiness."
 }
 
 func write_receipt()->void:
@@ -83,6 +83,9 @@ func make_viewport(context:String)->Dictionary:
     if context=="neutral_three_quarter":
         env.ambient_light_color=Color(0.62,0.66,0.72,1.0)
         env.ambient_light_energy=0.75
+    elif context=="crown_close":
+        env.ambient_light_color=Color(0.50,0.54,0.60,1.0)
+        env.ambient_light_energy=0.58
     else:
         env.ambient_light_color=Color(0.34,0.37,0.42,1.0)
         env.ambient_light_energy=0.42
@@ -97,18 +100,25 @@ func make_viewport(context:String)->Dictionary:
     if context=="neutral_three_quarter":
         sun.light_energy=1.55
         sun.rotation_degrees=Vector3(-48,-32,0)
+    elif context=="crown_close":
+        sun.light_energy=1.95
+        sun.rotation_degrees=Vector3(-42,-46,0)
     else:
         sun.light_energy=2.15
         sun.rotation_degrees=Vector3(-24,128,0)
     root3d.add_child(sun)
 
     var camera:=Camera3D.new()
-    camera.fov=48
     camera.near=0.05
     camera.far=80
     root3d.add_child(camera)
     camera.make_current()
-    camera.look_at_from_position(Vector3(6.2,3.7,7.4),Vector3(0.0,2.35,0.0),Vector3.UP)
+    if context=="crown_close":
+        camera.fov=40
+        camera.look_at_from_position(Vector3(3.25,3.65,3.85),Vector3(0.0,3.35,0.0),Vector3.UP)
+    else:
+        camera.fov=48
+        camera.look_at_from_position(Vector3(6.2,3.7,7.4),Vector3(0.0,2.35,0.0),Vector3.UP)
 
     return {"viewport":viewport,"root":root3d,"camera":camera}
 
@@ -144,7 +154,7 @@ func capture_asset(path:String,context:String,capture_path:String)->Dictionary:
 
 func _initialize()->void:
     var rows={}
-    for context in ["neutral_three_quarter","grazing_side_key"]:
+    for context in ["neutral_three_quarter","grazing_side_key","crown_close"]:
         var baseline_name="res://baseline-%s.png" % context
         var candidate_name="res://candidate-%s.png" % context
         var baseline:=await capture_asset(BASELINE,context,baseline_name)
