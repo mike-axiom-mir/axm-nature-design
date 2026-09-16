@@ -1,0 +1,207 @@
+name: Materials family sidedness composition evidence
+
+on:
+  push:
+    branches: [studio/materials-sapling-lookdev-001]
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "tools/build_leaf_sidedness_material_multisource.py"
+      - "lookdev-leaf-sidedness-multisource-proof/**"
+      - ".github/workflows/materials-family-sidedness-composition.yml"
+  pull_request:
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "tools/build_leaf_sidedness_material_multisource.py"
+      - "lookdev-leaf-sidedness-multisource-proof/**"
+      - ".github/workflows/materials-family-sidedness-composition.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-family-sidedness-composition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Nature Materials lane
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout exact Geometry leaf candidate donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da3adbef4de8cddb8f3ebe841d39bb31a8936f5f
+          path: .geometry-leaf
+
+      - name: Compile shared builder and run inherited Materials tests
+        run: |
+          python -m compileall -q tools/build_leaf_sidedness_material_multisource.py
+          PYTHONPATH=src python -m unittest tests.test_materials_lookdev -v
+
+      - name: Build exact family plus sidedness composition packet
+        env:
+          AXM_MATERIALS_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python tools/build_leaf_sidedness_material_multisource.py \
+            --geometry-root .geometry-leaf \
+            --profile lookdev/nature_woody_foliage_family_001.json \
+            --output evidence/material-family-sidedness-composition-001
+
+      - name: Validate exact composition boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/material-family-sidedness-composition-001')
+          data=json.loads((root/'comparison.json').read_text())
+          assert data['state']=='PASS_EXACT_MULTI_SOURCE_LEAF_SIDEDNESS_MATERIAL_AB_PACKET',data
+          assert data['profile_mode']=='BOUNDED_THREE_SOURCE_FAMILY_CANDIDATE',data
+          assert data['review_material_profile']['family_id']=='nature-woody-foliage-family-001',data
+          assert data['review_material_profile']['supported_source_scope']==[
+              'sapling-neutral-001','compact-east-tree-neutral-001','east-rear-tree-neutral-001'
+          ],data
+          assert all(data['global_checks'].values()),data['global_checks']
+          assert data['truth_boundary']['family_candidate_composition_observed'] is True,data['truth_boundary']
+          assert data['truth_boundary']['runtime_cost_accepted'] is False,data['truth_boundary']
+          expected={'sapling-neutral-001','compact-east-tree-neutral-001','east-rear-tree-neutral-001'}
+          assert set(data['studies'])==expected,data['studies'].keys()
+          for name,row in data['studies'].items():
+              assert all(row['checks'].values()),(name,row['checks'])
+              c=row['comparison_contract']
+              assert c['baseline_vertices']==390 and c['baseline_triangles']==570,(name,c)
+              assert c['explicit_vertices']==490 and c['explicit_triangles']==620,(name,c)
+              assert c['triangle_delta']==50,(name,c)
+              assert c['material_color_metallic_roughness']=='IDENTICAL_BOTH_STRATEGIES',(name,c)
+          print(json.dumps({'profile_mode':data['profile_mode'],'global_checks':data['global_checks']},indent=2))
+          PY
+
+      - name: Derive composition-specific proof host without duplicating renderer logic
+        run: |
+          set -euo pipefail
+          rm -rf lookdev-family-sidedness-composition-proof
+          cp -R lookdev-leaf-sidedness-multisource-proof lookdev-family-sidedness-composition-proof
+          rm -rf lookdev-family-sidedness-composition-proof/generated
+          mkdir -p lookdev-family-sidedness-composition-proof/generated
+          cp evidence/material-family-sidedness-composition-001/comparison.json lookdev-family-sidedness-composition-proof/generated/
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('lookdev-family-sidedness-composition-proof/observe.gd')
+          lines=path.read_text().splitlines()
+          out=[]
+          replaced_receipt=False
+          replaced_schema=False
+          replaced_truth=False
+          for line in lines:
+              if line.startswith('const RECEIPT_PATH :='):
+                  out.append('const RECEIPT_PATH := "res://family-sidedness-composition-runtime-receipt.json"')
+                  replaced_receipt=True
+              elif line.strip().startswith('"schema":') and not replaced_schema:
+                  out.append('    "schema": "axm.nature-material-family-sidedness-composition-runtime/v0.1",')
+                  replaced_schema=True
+              elif line.strip().startswith('"truth_boundary":') and not replaced_truth:
+                  out.append('    "truth_boundary": "Pinned Godot 4.7.2 GL Compatibility observation of the already-evidenced bounded three-source woody/foliage family candidate composed with two existing leaf-sidedness strategies across three exact Nature sources and three fixed contexts. Geometry, material scalars, lighting and camera derivation are held fixed within each A/B. This does not choose a final sidedness strategy, prove target-device runtime cost, Environment/VFX acceptance, botanical correctness, CANON, production readiness, or Materials mastery."')
+                  replaced_truth=True
+              else:
+                  out.append(line)
+          assert replaced_receipt and replaced_schema and replaced_truth,(replaced_receipt,replaced_schema,replaced_truth)
+          path.write_text('\n'.join(out)+'\n')
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Render family candidate with both sidedness strategies across three sources
+        run: |
+          set -euo pipefail
+          rm -f lookdev-family-sidedness-composition-proof/family-sidedness-composition-runtime-receipt.json
+          rm -f lookdev-family-sidedness-composition-proof/*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x760x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path lookdev-family-sidedness-composition-proof \
+            --script observe.gd
+
+      - name: Validate real target-host composition evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('lookdev-family-sidedness-composition-proof')
+          receipt=json.loads((root/'family-sidedness-composition-runtime-receipt.json').read_text())
+          packet=json.loads(Path('evidence/material-family-sidedness-composition-001/comparison.json').read_text())
+          assert receipt['state']=='PASS_TARGET_HOST_MULTI_SOURCE_LEAF_SIDEDNESS_AB_CAPTURED',receipt
+          assert receipt['schema']=='axm.nature-material-family-sidedness-composition-runtime/v0.1',receipt
+          assert receipt['promotion_effect']=='NONE',receipt
+          assert packet['profile_mode']=='BOUNDED_THREE_SOURCE_FAMILY_CANDIDATE',packet
+          expected={'sapling-neutral-001','compact-east-tree-neutral-001','east-rear-tree-neutral-001'}
+          assert set(receipt['studies'])==expected,receipt['studies'].keys()
+          changed=[]
+          for study_name,study in receipt['studies'].items():
+              assert set(study['contexts'])=={'whole_three_quarter','crown_back','crown_low_grazing'},(study_name,study['contexts'])
+              for context_name,row in study['contexts'].items():
+                  assert row['material_twosided']['state']=='PASS',(study_name,context_name,row)
+                  assert row['explicit_backfaces']['state']=='PASS',(study_name,context_name,row)
+                  assert row['material_twosided']['capture']['bytes']>3000,(study_name,context_name,row)
+                  assert row['explicit_backfaces']['capture']['bytes']>3000,(study_name,context_name,row)
+                  assert row['material_twosided']['tree']['triangles']==570,(study_name,context_name,row)
+                  assert row['explicit_backfaces']['tree']['triangles']==620,(study_name,context_name,row)
+                  delta=row['pixel_delta']
+                  assert delta['state']=='PASS',(study_name,context_name,delta)
+                  assert delta['total_pixels']==720*560,(study_name,context_name,delta)
+                  changed.append(delta['changed_percent'])
+          summary={
+              'state':'PASS_TARGET_HOST_FAMILY_SIDEDNESS_COMPOSITION_CAPTURED',
+              'comparison_count':len(changed),
+              'changed_percent_min':min(changed),
+              'changed_percent_max':max(changed),
+              'changed_percent_mean':sum(changed)/len(changed),
+              'preference_promoted':False,
+              'runtime_cost_accepted':False,
+          }
+          (root/'family-sidedness-composition-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print(json.dumps(summary,indent=2))
+          PY
+
+      - name: Copy exact head binding into artifact
+        run: cp evidence/material-family-sidedness-composition-001/exact-head.txt lookdev-family-sidedness-composition-proof/exact-head.txt
+
+      - name: Upload exact family plus sidedness composition evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-material-family-sidedness-composition-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/material-family-sidedness-composition-001/comparison.json
+            lookdev-family-sidedness-composition-proof/exact-head.txt
+            lookdev-family-sidedness-composition-proof/observe.gd
+            lookdev-family-sidedness-composition-proof/family-sidedness-composition-runtime-receipt.json
+            lookdev-family-sidedness-composition-proof/family-sidedness-composition-summary.json
+            lookdev-family-sidedness-composition-proof/*.png
+          if-no-files-found: warn
+          retention-days: 30
