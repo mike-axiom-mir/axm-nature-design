@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import copy
 import json
+import sys
 import unittest
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 
 from axm_nature_design.materials_lookdev import apply_profile, build_material_evidence, validate_profile
 from axm_nature_design.organic_form import load_source
 from axm_nature_design.uc_surface_bridge import adapt_source_for_uc
 
-ROOT = Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "lookdev" / "sapling_material_profile_001.json"
 SOURCE = ROOT / "examples" / "sapling_neutral_001.json"
 
