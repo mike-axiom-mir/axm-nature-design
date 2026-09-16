@@ -1,0 +1,29 @@
+{
+  "schema": "axm.nature-visual-wind-response-study/v0.1",
+  "study_id": "sapling-wind-response-001",
+  "source_provenance": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 1,
+    "head": "fbc202449981f2bac153951c561ed0ed6120c936",
+    "source_digest": "a61207b23c441b2cc0becd165fa62289bb7e51065ae0d6fa56bf9f3cab036cc1",
+    "mesh_digest": "89b835bd8f3e728206543d210787f1bbd1cc1bacb6d01f6695caf3ea1a63fa4c",
+    "relationship": "STACKED_VISUAL_RESPONSE_DOES_NOT_REWRITE_ORGANIC_SOURCE"
+  },
+  "weather_provenance": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pr": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "visual_wind_xy": [1.0, 0.35],
+    "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED",
+    "relationship": "CONSUMES_SOURCE_OWNED_VISUAL_DIRECTION_WITHOUT_INHERITING_WEATHER_PASS"
+  },
+  "response": {
+    "profile": "HEIGHT_WEIGHTED_HALF_SINE_DOWNWIND_VISUAL_SWAY",
+    "duration_s": 0.5,
+    "sample_times_s": [0.0, 0.25, 0.5],
+    "anchor_z_m": 0.92,
+    "max_tip_offset_m": 0.18,
+    "purpose": "One bounded visual-only downwind sway pulse that returns exactly to the source mesh, providing a falsifiable bridge from Weather direction to real Nature geometry."
+  },
+  "truth_boundary": "PASS only means this exact sapling mesh receives a deterministic bounded visual-only downwind deformation at the retained sample times, keeps its lower anchor and topology, and returns exactly to neutral. It does not establish physical wind, plant biomechanics, rigging/skinning, production deformation quality, environment acceptance, engine particles, runtime performance, collision, gameplay, art-direction acceptance, CANON, production readiness, or VFX mastery."
+}
