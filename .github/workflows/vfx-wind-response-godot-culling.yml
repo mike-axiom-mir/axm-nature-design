@@ -91,7 +91,8 @@ jobs:
             --display-driver x11 \
             --rendering-method gl_compatibility \
             --path target-proof-vfx \
-            --script observe_migrated_wind_response.gd
+            --script observe_migrated_wind_response.gd \
+            2>&1 | tee evidence/sapling-wind-response-migrated-001/godot-target-host.log
           cp target-proof-vfx/vfx-migrated-wind-godot-culling-receipt.json evidence/sapling-wind-response-migrated-001/
           cp target-proof-vfx/wind-*.png evidence/sapling-wind-response-migrated-001/
 
