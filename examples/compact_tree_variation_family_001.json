@@ -1,0 +1,31 @@
+{
+  "schema": "axm.nature-branch-crown-variation-family/v0.2",
+  "family_id": "compact-east-tree-branch-crown-variation-001",
+  "base_source": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "ref": "64116d63fc76daa1623b5fd5046a4e6074100bda",
+    "path": "examples/compact_east_tree_neutral_001.json",
+    "study_id": "compact-east-tree-neutral-001",
+    "expected_digest": "9c87cf26f02f7adee832908652942218ec779c9029a0611aae1fb66eb0f62f54"
+  },
+  "purpose": "Reuse the bounded branch/crown mutator on the exact compact east-foreground source without changing trunk, form intent, flex zones, donor provenance, environment handoff, weather handoff or receiving-scene semantics.",
+  "attempt_limit": 32,
+  "evidence_seeds": [17, 59, 131],
+  "bounds": {
+    "branch_length_scale": [0.94, 1.0],
+    "branch_yaw_jitter_deg": [-7.0, 7.0],
+    "leaf_length_scale": [0.92, 1.0],
+    "leaf_width_scale": [0.92, 1.0],
+    "leaf_yaw_jitter_deg": [-14.0, 14.0],
+    "leaf_pitch_jitter_deg": [-5.0, 0.0]
+  },
+  "acceptance": {
+    "max_envelope_m": [1.6, 1.6, 4.0],
+    "minimum_moved_branch_tips": 4,
+    "minimum_branch_tip_move_m": 0.012,
+    "minimum_changed_leaf_blades": 16,
+    "minimum_leaf_angle_change_deg": 1.5
+  },
+  "failure_policy": "Reject candidates that fail the exact source Organic Form evaluator, exceed the exact east-b reserved envelope, lose branch attachments, mutate any top-level source field outside study_id/branches/leaf_clusters/truth_boundary/procedural_provenance, or fail material-difference gates. After attempt_limit, HOLD; never widen bounds automatically.",
+  "truth_boundary": "This profile proves only bounded deterministic branch/crown variation around the exact compact east-foreground source. It does not establish a new species, biological growth, scene acceptance, deformation, materials, runtime readiness, CANON, production readiness, or Procedural Design mastery."
+}
