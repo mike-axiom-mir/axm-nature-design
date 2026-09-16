@@ -8,6 +8,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from axm_nature_design.organic_form import digest, load_source
 from axm_nature_design.procedural_family import (
+    FAMILY_SCHEMA,
     derive_candidate,
     family_digest,
     generate_accepted_variant,
@@ -57,6 +58,37 @@ class ProceduralSaplingFamilyTests(unittest.TestCase):
         for field in ("trunk", "flex_zones", "design_checks", "donor_provenance", "environment_handoff", "weather_handoff"):
             self.assertEqual(candidate[field], self.source[field])
 
+    def test_generic_contract_preserves_source_specific_top_level_fields(self):
+        source = copy.deepcopy(self.source)
+        source["form_intent"] = {
+            "minimum_clear_trunk_before_primary_branch_m": 1.5,
+            "fit_without_receiver_scale_or_rotation": True,
+        }
+        family = copy.deepcopy(self.family)
+        family["schema"] = FAMILY_SCHEMA
+        family["family_id"] = "local-generic-preservation-probe"
+        family["base_source"] = {
+            "repository": "mike-axiom-mir/axm-nature-design",
+            "ref": "fbc202449981f2bac153951c561ed0ed6120c936",
+            "path": "examples/sapling_neutral_001.json",
+            "study_id": source["study_id"],
+            "expected_digest": digest(source),
+        }
+        result = generate_accepted_variant(source, family, 11)
+        self.assertEqual(result["receipt"]["state"], "PASS_BOUNDED_VARIANT")
+        self.assertTrue(result["receipt"]["metrics"]["immutable_fields_preserved"])
+        self.assertEqual(result["candidate"]["form_intent"], source["form_intent"])
+        self.assertEqual(
+            result["candidate"]["procedural_provenance"]["base_source_provenance"],
+            family["base_source"],
+        )
+
+    def test_generic_contract_requires_exact_source_provenance(self):
+        family = copy.deepcopy(self.family)
+        family["schema"] = FAMILY_SCHEMA
+        with self.assertRaisesRegex(ValueError, "generic base_source provenance incomplete"):
+            validate_family(family)
+
     def test_branch_leaf_clusters_follow_varied_branch_tips(self):
         result = generate_accepted_variant(self.source, self.family, 101)
         self.assertEqual(result["receipt"]["state"], "PASS_BOUNDED_VARIANT")
@@ -76,7 +108,7 @@ class ProceduralSaplingFamilyTests(unittest.TestCase):
     def test_unknown_mutation_axis_fails_closed(self):
         bad = copy.deepcopy(self.family)
         bad["bounds"]["trunk_height_scale"] = [0.9, 1.1]
-        with self.assertRaisesRegex(ValueError, "declared v0.1 mutation contract"):
+        with self.assertRaisesRegex(ValueError, "declared branch/crown mutation contract"):
             validate_family(bad)
 
     def test_impossible_envelope_returns_hold_without_widening(self):
