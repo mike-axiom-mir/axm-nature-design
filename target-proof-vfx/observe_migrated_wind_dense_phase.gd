@@ -5,7 +5,6 @@ const OUTPUT_RECEIPT := "res://vfx-migrated-wind-dense-phase-receipt.json"
 const BG := Color(0.025, 0.030, 0.036, 1.0)
 const EXPECTED_MIGRATED_MESH_DIGEST := "47dd4d82651138299d05071df3e8a410f21f673ab8d42b936d7222eb5351b862"
 const EXPECTED_PHASE_COUNT := 17
-const EXPECTED_ANCHOR_INDICES := [0, 4, 8, 12, 16]
 const CONTEXTS := ["ground_oblique", "high_oblique"]
 
 var receipt := {
@@ -15,18 +14,18 @@ var receipt := {
     "renderer_boundary": "Godot 4.7.2 GL Compatibility. One persistent MeshInstance3D per camera receives 17 direct source-evaluated migrated woody meshes. Leaf blades remain excluded to preserve the Geometry-owned sidedness lane. No wall-clock cadence is asserted.",
 }
 
+func read_json(path: String) -> Dictionary:
+    if not FileAccess.file_exists(path):
+        return {}
+    var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+    return parsed as Dictionary if parsed is Dictionary else {}
+
 func sha256_file(path: String) -> String:
     var bytes := FileAccess.get_file_as_bytes(path)
     var ctx := HashingContext.new()
     ctx.start(HashingContext.HASH_SHA256)
     ctx.update(bytes)
     return ctx.finish().hex_encode()
-
-func read_json(path: String) -> Dictionary:
-    if not FileAccess.file_exists(path):
-        return {}
-    var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
-    return parsed as Dictionary if parsed is Dictionary else {}
 
 func write_receipt() -> void:
     var file := FileAccess.open(OUTPUT_RECEIPT, FileAccess.WRITE)
@@ -53,7 +52,7 @@ func woody_triangle_indices(payload: Dictionary) -> Array:
     if not (triangles is Array) or not (regions is Array) or triangles.is_empty() or regions.is_empty():
         fail("dense migrated mesh lacks triangles or regions")
         return []
-    var included := []
+    var included: Array = []
     included.resize(triangles.size())
     included.fill(false)
     for region_value in regions:
@@ -61,8 +60,8 @@ func woody_triangle_indices(payload: Dictionary) -> Array:
             fail("Nature mesh region is not an object")
             return []
         var region := region_value as Dictionary
-        var start := int(region.get("triangle_start", -1))
-        var count := int(region.get("triangle_count", -1))
+        var start: int = int(region.get("triangle_start", -1))
+        var count: int = int(region.get("triangle_count", -1))
         if start < 0 or count <= 0 or start + count > triangles.size():
             fail("Nature mesh region triangle range is invalid")
             return []
@@ -73,7 +72,7 @@ func woody_triangle_indices(payload: Dictionary) -> Array:
                 fail("woody triangle region overlap detected")
                 return []
             included[triangle_index] = true
-    var result := []
+    var result: Array = []
     for triangle_index in range(included.size()):
         if bool(included[triangle_index]):
             result.append(triangle_index)
@@ -87,17 +86,17 @@ func build_woody_mesh(payload: Dictionary) -> Dictionary:
     if not (vertices is Array) or not (triangles is Array):
         fail("dense migrated mesh lacks vertex/triangle arrays")
         return {}
-    var selected := woody_triangle_indices(payload)
+    var selected: Array = woody_triangle_indices(payload)
     var surface := SurfaceTool.new()
     surface.begin(Mesh.PRIMITIVE_TRIANGLES)
     for triangle_index_value in selected:
-        var triangle_index := int(triangle_index_value)
+        var triangle_index: int = int(triangle_index_value)
         var triangle = triangles[triangle_index]
         if not (triangle is Array) or triangle.size() != 3:
             fail("Nature triangle is malformed")
             return {}
         for local_index in [0, 2, 1]:
-            var vertex_index := int(triangle[local_index])
+            var vertex_index: int = int(triangle[local_index])
             if vertex_index < 0 or vertex_index >= vertices.size():
                 fail("Nature triangle index is out of range")
                 return {}
@@ -131,7 +130,7 @@ func camera_spec(context: String) -> Dictionary:
     return {"position": Vector3(3.9, 2.35, 4.4), "target": Vector3(0.0, 1.8, 0.0), "fov": 39.0}
 
 func changed_from_background(image: Image) -> int:
-    var changed := 0
+    var changed: int = 0
     for y in range(image.get_height()):
         for x in range(image.get_width()):
             var pixel := image.get_pixel(x, y)
@@ -143,8 +142,8 @@ func changed_from_background(image: Image) -> int:
 func pixel_difference(first: Image, second: Image) -> Dictionary:
     if first.get_width() != second.get_width() or first.get_height() != second.get_height():
         return {"comparable": false, "changed_pixels": -1, "max_channel_delta": 1.0}
-    var changed := 0
-    var max_delta := 0.0
+    var changed: int = 0
+    var max_delta: float = 0.0
     for y in range(first.get_height()):
         for x in range(first.get_width()):
             var a := first.get_pixel(x, y)
@@ -154,6 +153,14 @@ func pixel_difference(first: Image, second: Image) -> Dictionary:
             if delta > 0.0:
                 changed += 1
     return {"comparable": true, "changed_pixels": changed, "max_channel_delta": max_delta}
+
+func normalized_anchor_indices(raw: Variant) -> Array:
+    if not (raw is Array):
+        return []
+    var result: Array = []
+    for value in raw:
+        result.append(int(value))
+    return result
 
 func capture_context(context: String, samples: Array) -> Dictionary:
     var viewport := SubViewport.new()
@@ -175,7 +182,7 @@ func capture_context(context: String, samples: Array) -> Dictionary:
     var instance := MeshInstance3D.new()
     instance.material_override = proof_material()
     root3d.add_child(instance)
-    var receiver_instance_id := instance.get_instance_id()
+    var receiver_instance_id: int = int(instance.get_instance_id())
 
     var camera := Camera3D.new()
     camera.near = 0.03
@@ -189,17 +196,17 @@ func capture_context(context: String, samples: Array) -> Dictionary:
     for _warmup in range(12):
         await process_frame
 
-    var images := []
-    var records := []
-    var expected_woody_triangles := -1
-    var expected_leaf_triangles := -1
+    var images: Array = []
+    var records: Array = []
+    var expected_woody_triangles: int = -1
+    var expected_leaf_triangles: int = -1
     for sample_value in samples:
         if not (sample_value is Dictionary):
             fail("dense source sample metadata is malformed")
             return {}
         var sample := sample_value as Dictionary
-        var index := int(sample.get("index", -1))
-        var payload_name := String(sample.get("payload", ""))
+        var index: int = int(sample.get("index", -1))
+        var payload_name: String = String(sample.get("payload", ""))
         var payload := read_json(GENERATED_DIR + "/" + payload_name)
         if payload.is_empty():
             fail("missing dense migrated source mesh: " + payload_name)
@@ -217,18 +224,18 @@ func capture_context(context: String, samples: Array) -> Dictionary:
         instance.mesh = built["mesh"]
         for _settle in range(3):
             await process_frame
-        if instance.get_instance_id() != receiver_instance_id:
+        if int(instance.get_instance_id()) != receiver_instance_id:
             fail("dense phase receiver MeshInstance3D identity changed")
             return {}
         var image := viewport.get_texture().get_image()
         if image == null or image.is_empty():
             fail("empty Godot dense-phase capture")
             return {}
-        var image_path := "res://dense-%s-%02d.png" % [context, index]
+        var image_path: String = "res://dense-%s-%02d.png" % [context, index]
         if image.save_png(image_path) != OK:
             fail("could not save Godot dense-phase capture")
             return {}
-        var visible_pixels := changed_from_background(image)
+        var visible_pixels: int = changed_from_background(image)
         if visible_pixels < 250:
             fail("insufficient woody geometry in dense-phase capture: " + str(visible_pixels))
             return {}
@@ -245,7 +252,7 @@ func capture_context(context: String, samples: Array) -> Dictionary:
             "receiver_instance_id": receiver_instance_id,
         })
 
-    var adjacent := []
+    var adjacent: Array = []
     for index in range(images.size() - 1):
         var comparison := pixel_difference(images[index], images[index + 1])
         comparison["from_index"] = index
@@ -255,9 +262,10 @@ func capture_context(context: String, samples: Array) -> Dictionary:
             return {}
         adjacent.append(comparison)
 
-    var symmetry := []
-    for index in range((images.size() + 1) / 2):
-        var mirror_index := images.size() - 1 - index
+    var symmetry: Array = []
+    var symmetry_count: int = int((images.size() + 1) / 2.0)
+    for index in range(symmetry_count):
+        var mirror_index: int = images.size() - 1 - index
         var comparison := pixel_difference(images[index], images[mirror_index])
         comparison["index"] = index
         comparison["mirror_index"] = mirror_index
@@ -271,7 +279,8 @@ func capture_context(context: String, samples: Array) -> Dictionary:
         fail("dense target-host sequence no longer returns exactly to neutral in " + context)
         return {}
 
-    var neutral_to_peak := pixel_difference(images[0], images[images.size() / 2])
+    var peak_index: int = int(images.size() / 2.0)
+    var neutral_to_peak := pixel_difference(images[0], images[peak_index])
     if int(neutral_to_peak["changed_pixels"]) <= 0:
         fail("dense target-host peak is not visibly distinct in " + context)
         return {}
@@ -303,7 +312,7 @@ func _initialize() -> void:
     if int(summary.get("dense_phase_count", -1)) != EXPECTED_PHASE_COUNT:
         fail("dense phase count drifted")
         return
-    if summary.get("retained_anchor_indices", []) != EXPECTED_ANCHOR_INDICES:
+    if normalized_anchor_indices(summary.get("retained_anchor_indices", [])) != [0, 4, 8, 12, 16]:
         fail("retained five-sample anchor indices drifted")
         return
     var samples = summary.get("samples", [])
@@ -315,11 +324,11 @@ func _initialize() -> void:
     if not FileAccess.file_exists(exact_head_path):
         fail("exact VFX head binding is missing")
         return
-    var exact_head := FileAccess.get_file_as_string(exact_head_path).strip_edges()
+    var exact_head: String = FileAccess.get_file_as_string(exact_head_path).strip_edges()
 
     var contexts := {}
     for context_value in CONTEXTS:
-        var context := String(context_value)
+        var context: String = String(context_value)
         var result := await capture_context(context, samples)
         if result.is_empty():
             return
@@ -330,7 +339,7 @@ func _initialize() -> void:
     receipt["vfx_head"] = exact_head
     receipt["migrated_neutral_mesh_digest"] = EXPECTED_MIGRATED_MESH_DIGEST
     receipt["dense_phase_count"] = EXPECTED_PHASE_COUNT
-    receipt["retained_anchor_indices"] = EXPECTED_ANCHOR_INDICES
+    receipt["retained_anchor_indices"] = [0, 4, 8, 12, 16]
     receipt["phase_step_s"] = float(summary.get("phase_step_s", -1.0))
     receipt["contexts"] = contexts
     receipt["truth_boundary"] = {
