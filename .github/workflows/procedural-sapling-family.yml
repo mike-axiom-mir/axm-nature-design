@@ -11,7 +11,24 @@ jobs:
       matrix:
         python: ["3.11", "3.13"]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Checkout exact compact-tree source dependency
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 64116d63fc76daa1623b5fd5046a4e6074100bda
+          path: .studio-deps/compact-tree
+      - name: Checkout exact east-rear-tree source dependency
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12
+          path: .studio-deps/east-rear-tree
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -22,10 +39,24 @@ jobs:
       - name: Build exact retained procedural evidence
         if: matrix.python == '3.11'
         run: python tools/build_sapling_variation_evidence.py evidence/sapling-variation-family-001
+      - name: Build three-source branch-crown evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_tree_branch_crown_cross_source_evidence.py
+          evidence/tree-branch-crown-cross-source-001
+          --compact-root .studio-deps/compact-tree
+          --rear-root .studio-deps/east-rear-tree
       - name: Upload exact retained procedural evidence
         if: matrix.python == '3.11'
         uses: actions/upload-artifact@v4
         with:
           name: sapling-variation-family-001-evidence
           path: evidence/sapling-variation-family-001
+          if-no-files-found: error
+      - name: Upload exact cross-source procedural evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tree-branch-crown-cross-source-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/tree-branch-crown-cross-source-001
           if-no-files-found: error
