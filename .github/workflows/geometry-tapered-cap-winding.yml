@@ -1,0 +1,31 @@
+name: Geometry tapered cap winding evidence
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile
+        run: python -m compileall -q src tools tests
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+      - name: Build exact topology repair evidence
+        if: matrix.python == '3.11'
+        run: python tools/build_topology_repair_evidence.py evidence/tapered-cap-winding-001
+      - name: Upload exact topology repair evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tapered-cap-winding-001-evidence
+          path: evidence/tapered-cap-winding-001
+          if-no-files-found: error
