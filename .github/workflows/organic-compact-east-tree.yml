@@ -1,0 +1,31 @@
+name: Organic compact east tree evidence
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile
+        run: python -m compileall -q src tools tests
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+      - name: Build exact compact-tree evidence
+        if: matrix.python == '3.11'
+        run: python tools/build_compact_east_tree.py evidence/compact-east-tree-neutral-001
+      - name: Upload exact compact-tree evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: compact-east-tree-neutral-001-evidence
+          path: evidence/compact-east-tree-neutral-001
+          if-no-files-found: error
