@@ -55,11 +55,14 @@ def main() -> None:
     if not verification["geometry_validation"]["winding_matches_vertex_normals"]:
         raise SystemExit("UC winding/normal verification failed")
 
+    receiving_head = os.environ.get("AXM_RECEIVING_HEAD", os.environ.get("GITHUB_SHA", "LOCAL_UNBOUND"))
+    workflow_sha = os.environ.get("GITHUB_SHA", "LOCAL_UNBOUND")
     evidence = {
         "schema": "axm.nature-uc-surface-bridge-run/v0.1",
         "state": "PASS_EXACT_NATURE_SURFACE_TO_UC_GLB_WITH_EXPLICIT_LEAF_BACKFACES",
         "receiving_repository": "mike-axiom-mir/axm-nature-design",
-        "receiving_head": os.environ.get("GITHUB_SHA", "LOCAL_UNBOUND"),
+        "receiving_head": receiving_head,
+        "workflow_sha": workflow_sha,
         "uc_repository": "mike-axiom-mir/axm-universal-creation",
         "uc_commit": os.environ.get("AXM_UC_COMMIT", "UNBOUND"),
         "source_digest": bridge["source_digest"],
@@ -87,6 +90,8 @@ def main() -> None:
     evidence_path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({
         "state": evidence["state"],
+        "receiving_head": evidence["receiving_head"],
+        "workflow_sha": evidence["workflow_sha"],
         "glb_sha256": evidence["glb_sha256"],
         "triangles": verification["triangles"],
         "primitives": verification["primitives"],
