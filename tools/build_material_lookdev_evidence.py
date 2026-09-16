@@ -90,7 +90,7 @@ def main() -> None:
         "candidate_glb_sha256": sha256(candidate_glb_path),
         "baseline_uc_verification": baseline_verification,
         "candidate_uc_verification": candidate_verification,
-        "comparison_contexts_requested": ["neutral_three_quarter", "grazing_side_key"],
+        "comparison_contexts_requested": ["neutral_three_quarter", "grazing_side_key", "crown_close"],
         "truth_boundary": "Exact neutral sapling geometry and explicit leaf-backface bridge are unchanged. This run proves only a bounded woody/foliage PBR-scalar material overlay plus UC GLB publication/verification. Visual quality requires direct retained target-render inspection.",
         "non_claims": [
             "No UV or texture quality claim; this candidate intentionally uses no texture maps.",
