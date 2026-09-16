@@ -1,0 +1,53 @@
+name: Geometry leaf backface candidate evidence
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile
+        run: python -m compileall -q src tools tests
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+      - name: Build exact leaf-backface candidate evidence
+        if: matrix.python == '3.11'
+        run: |
+          python tools/build_leaf_backface_candidate_evidence.py evidence/leaf-backface-candidate-001
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          summary = json.loads(Path('evidence/leaf-backface-candidate-001/summary.json').read_text())
+          assert summary['state'] == 'PASS_EXPLICIT_LEAF_BACKFACE_CANDIDATE_3_REAL_OUTPUTS', summary
+          assert summary['source_count'] == 3, summary
+          assert summary['base_source_migration_ref'] == '4ddbe66e5c02d22407ef773d5346a2fe6f349a2d', summary
+          for item in summary['items']:
+              assert item['pairs']['leaf_blades'] == 25, item
+              assert item['pairs']['exact_position_pairs'] == 25, item
+              assert item['pairs']['opposite_winding_pairs'] == 25, item
+              assert item['candidate_vertices'] == 490, item
+              assert item['candidate_triangles'] == 620, item
+              assert item['topology']['nonmanifold_edges'] == 0, item
+              assert item['topology']['shared_edge_orientation_conflicts'] == 0, item
+          PY
+      - name: Record exact workflow head
+        if: matrix.python == '3.11'
+        run: git rev-parse HEAD > evidence/leaf-backface-candidate-001/exact-head.txt
+      - name: Upload exact leaf-backface candidate evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: leaf-backface-candidate-001-evidence
+          path: evidence/leaf-backface-candidate-001
+          if-no-files-found: error
