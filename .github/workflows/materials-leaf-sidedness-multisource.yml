@@ -1,0 +1,160 @@
+name: Materials multi-source leaf sidedness evidence
+
+on:
+  push:
+    branches: [studio/materials-sapling-lookdev-001]
+    paths:
+      - "tools/build_leaf_sidedness_material_multisource.py"
+      - "lookdev-leaf-sidedness-multisource-proof/**"
+      - "lookdev/sapling_material_profile_001.json"
+      - ".github/workflows/materials-leaf-sidedness-multisource.yml"
+  pull_request:
+    paths:
+      - "tools/build_leaf_sidedness_material_multisource.py"
+      - "lookdev-leaf-sidedness-multisource-proof/**"
+      - "lookdev/sapling_material_profile_001.json"
+      - ".github/workflows/materials-leaf-sidedness-multisource.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-multi-source-leaf-sidedness-material-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Nature Materials lane
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout exact Geometry leaf candidate donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da3adbef4de8cddb8f3ebe841d39bb31a8936f5f
+          path: .geometry-leaf
+
+      - name: Compile Materials evidence builder
+        run: |
+          python -m compileall -q tools/build_leaf_sidedness_material_multisource.py
+          PYTHONPATH=src python -m unittest tests.test_materials_lookdev -v
+
+      - name: Build three-source sidedness A/B packet
+        env:
+          AXM_MATERIALS_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python tools/build_leaf_sidedness_material_multisource.py \
+            --geometry-root .geometry-leaf \
+            --output evidence/leaf-sidedness-material-multisource-001
+
+      - name: Validate exact multi-source boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/leaf-sidedness-material-multisource-001')
+          data=json.loads((root/'comparison.json').read_text())
+          assert data['state']=='PASS_EXACT_MULTI_SOURCE_LEAF_SIDEDNESS_MATERIAL_AB_PACKET',data
+          assert all(data['global_checks'].values()),data['global_checks']
+          assert data['geometry_donor']['head']=='da3adbef4de8cddb8f3ebe841d39bb31a8936f5f',data['geometry_donor']
+          expected={'sapling-neutral-001','compact-east-tree-neutral-001','east-rear-tree-neutral-001'}
+          assert set(data['studies'])==expected,data['studies'].keys()
+          assert data['review_material_profile']['source_scope']=='sapling-neutral-001',data['review_material_profile']
+          for name,row in data['studies'].items():
+              assert all(row['checks'].values()),(name,row['checks'])
+              c=row['comparison_contract']
+              assert c['baseline_vertices']==390 and c['baseline_triangles']==570,(name,c)
+              assert c['explicit_vertices']==490 and c['explicit_triangles']==620,(name,c)
+              assert c['triangle_delta']==50,(name,c)
+              assert c['material_color_metallic_roughness']=='IDENTICAL_BOTH_STRATEGIES',(name,c)
+          print(json.dumps({'global_checks':data['global_checks'],'studies':{k:v['comparison_contract'] for k,v in data['studies'].items()}},indent=2))
+          PY
+
+      - name: Stage exact packet into Godot proof host
+        run: |
+          rm -rf lookdev-leaf-sidedness-multisource-proof/generated
+          mkdir -p lookdev-leaf-sidedness-multisource-proof/generated
+          cp evidence/leaf-sidedness-material-multisource-001/comparison.json lookdev-leaf-sidedness-multisource-proof/generated/
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Render two-sided material versus explicit backfaces across three sources
+        run: |
+          set -euo pipefail
+          rm -f lookdev-leaf-sidedness-multisource-proof/leaf-sidedness-multisource-runtime-receipt.json
+          rm -f lookdev-leaf-sidedness-multisource-proof/*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x760x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path lookdev-leaf-sidedness-multisource-proof \
+            --script observe.gd
+
+      - name: Validate target-host receipt without preference promotion
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('lookdev-leaf-sidedness-multisource-proof')
+          receipt=json.loads((root/'leaf-sidedness-multisource-runtime-receipt.json').read_text())
+          assert receipt['state']=='PASS_TARGET_HOST_MULTI_SOURCE_LEAF_SIDEDNESS_AB_CAPTURED',receipt
+          assert receipt['promotion_effect']=='NONE',receipt
+          assert receipt['geometry_donor']['head']=='da3adbef4de8cddb8f3ebe841d39bb31a8936f5f',receipt['geometry_donor']
+          expected={'sapling-neutral-001','compact-east-tree-neutral-001','east-rear-tree-neutral-001'}
+          assert set(receipt['studies'])==expected,receipt['studies'].keys()
+          for study_name,study in receipt['studies'].items():
+              assert set(study['contexts'])=={'whole_three_quarter','crown_back','crown_low_grazing'},(study_name,study['contexts'])
+              for context_name,row in study['contexts'].items():
+                  assert row['material_twosided']['state']=='PASS',(study_name,context_name,row)
+                  assert row['explicit_backfaces']['state']=='PASS',(study_name,context_name,row)
+                  assert row['material_twosided']['capture']['bytes']>3000,(study_name,context_name,row)
+                  assert row['explicit_backfaces']['capture']['bytes']>3000,(study_name,context_name,row)
+                  assert row['material_twosided']['tree']['triangles']==570,(study_name,context_name,row)
+                  assert row['explicit_backfaces']['tree']['triangles']==620,(study_name,context_name,row)
+                  delta=row['pixel_delta']
+                  assert delta['state']=='PASS',(study_name,context_name,delta)
+                  assert delta['total_pixels']==720*560,(study_name,context_name,delta)
+                  assert 0.0 <= delta['changed_percent'] <= 100.0,(study_name,context_name,delta)
+          print(json.dumps(receipt,indent=2))
+          PY
+
+      - name: Copy exact head binding into artifact
+        run: cp evidence/leaf-sidedness-material-multisource-001/exact-head.txt lookdev-leaf-sidedness-multisource-proof/exact-head.txt
+
+      - name: Upload exact multi-source leaf sidedness Materials evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-leaf-sidedness-material-multisource-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/leaf-sidedness-material-multisource-001/comparison.json
+            lookdev-leaf-sidedness-multisource-proof/exact-head.txt
+            lookdev-leaf-sidedness-multisource-proof/leaf-sidedness-multisource-runtime-receipt.json
+            lookdev-leaf-sidedness-multisource-proof/*.png
+          if-no-files-found: warn
+          retention-days: 30
