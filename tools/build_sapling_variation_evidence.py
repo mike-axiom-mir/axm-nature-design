@@ -19,6 +19,17 @@ def write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def write_variant_svg(mesh: dict, path: Path, view: str, study_id: str) -> None:
+    """Reuse the baseline wire writer while correcting its baseline-only title in derived evidence."""
+    write_svg(mesh, path, view)
+    text = path.read_text(encoding="utf-8")
+    baseline_label = f"sapling-neutral-001 / {view}"
+    variant_label = f"{study_id} / {view}"
+    if baseline_label not in text:
+        raise RuntimeError("baseline SVG label changed; refusing to mislabel procedural evidence")
+    path.write_text(text.replace(baseline_label, variant_label, 1), encoding="utf-8")
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         raise SystemExit("usage: build_sapling_variation_evidence.py OUTPUT_DIR")
@@ -46,13 +57,14 @@ def main() -> int:
         write_json(seed_dir / "mesh.json", mesh)
         write_json(seed_dir / "receipt.json", receipt)
         for view in ("front", "side", "top"):
-            write_svg(mesh, seed_dir / f"{view}.svg", view)
+            write_variant_svg(mesh, seed_dir / f"{view}.svg", view, candidate["study_id"])
 
         source_digests.add(receipt["candidate_source_digest"])
         mesh_digests.add(receipt["candidate_mesh_digest"])
         rows.append({
             "seed": int(seed),
             "accepted_attempt": int(receipt["accepted_attempt"]),
+            "candidate_study_id": candidate["study_id"],
             "candidate_source_digest": receipt["candidate_source_digest"],
             "candidate_mesh_digest": receipt["candidate_mesh_digest"],
             "moved_branch_tips": receipt["metrics"]["moved_branch_tips"],
