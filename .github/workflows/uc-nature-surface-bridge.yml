@@ -1,0 +1,37 @@
+name: UC nature surface bridge evidence
+
+on:
+  push:
+    branches: [studio/uc-nature-surface-bridge-001]
+  pull_request:
+
+jobs:
+  exact-nature-uc-bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Nature Design candidate
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile bridge sources
+        run: python -m compileall -q src tests tools
+      - name: Run Nature bridge unit tests
+        run: PYTHONPATH=src python -m unittest tests.test_uc_surface_bridge -v
+      - name: Checkout exact Universal Creation
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 49ef11ca42b2079dffbd595daa8ea8626b99d2ab
+          path: .uc
+      - name: Build exact Nature -> UC -> GLB evidence
+        env:
+          AXM_UC_COMMIT: 49ef11ca42b2079dffbd595daa8ea8626b99d2ab
+        run: PYTHONPATH=src:.uc/src python tools/build_uc_surface_bridge_evidence.py
+      - name: Upload exact bridge evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: sapling-uc-surface-bridge-001-evidence
+          path: evidence/sapling-uc-surface-bridge-001
+          if-no-files-found: error
