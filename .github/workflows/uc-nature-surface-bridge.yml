@@ -28,6 +28,7 @@ jobs:
       - name: Build exact Nature -> UC -> GLB evidence
         env:
           AXM_UC_COMMIT: 49ef11ca42b2079dffbd595daa8ea8626b99d2ab
+          AXM_RECEIVING_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
         run: PYTHONPATH=src:.uc/src python tools/build_uc_surface_bridge_evidence.py
       - name: Upload exact bridge evidence
         uses: actions/upload-artifact@v4
