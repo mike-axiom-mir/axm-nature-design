@@ -1,0 +1,153 @@
+name: Materials sapling lookdev evidence
+
+on:
+  push:
+    branches: [studio/materials-sapling-lookdev-001]
+  pull_request:
+    paths:
+      - "lookdev/**"
+      - "lookdev-proof/**"
+      - "src/axm_nature_design/materials_lookdev.py"
+      - "tests/test_materials_lookdev.py"
+      - "tools/build_material_lookdev_evidence.py"
+      - ".github/workflows/materials-sapling-lookdev.yml"
+      - "src/axm_nature_design/uc_surface_bridge.py"
+      - "src/axm_nature_design/organic_form.py"
+      - "examples/sapling_neutral_001.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-sapling-lookdev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Nature Materials lane
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compile and test source-preserving material overlay
+        run: |
+          python -m compileall -q src tests tools
+          PYTHONPATH=src python -m unittest tests.test_materials_lookdev tests.test_uc_surface_bridge -v
+
+      - name: Checkout exact Universal Creation provider
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 49ef11ca42b2079dffbd595daa8ea8626b99d2ab
+          path: .uc
+
+      - name: Build exact baseline and candidate GLBs
+        env:
+          AXM_UC_COMMIT: 49ef11ca42b2079dffbd595daa8ea8626b99d2ab
+          AXM_RECEIVING_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: PYTHONPATH=src:.uc/src python tools/build_material_lookdev_evidence.py
+
+      - name: Validate structural lookdev evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('evidence/sapling-material-lookdev-001/evidence.json')
+          e=json.loads(p.read_text())
+          assert e['state']=='PASS_SOURCE_PRESERVING_LOOKDEV_COMPARISON_READY_FOR_TARGET_RENDER',e
+          m=e['material_evidence']
+          assert m['state']=='PASS_BOUNDED_MATERIAL_PROFILE_STRUCTURE',m
+          assert m['checks']['geometry_unchanged'] is True,m
+          assert m['checks']['materials_changed'] is True,m
+          assert m['checks']['candidate_roughness_separation_increased'] is True,m
+          assert m['checks']['candidate_luminance_separation_not_reduced'] is True,m
+          assert e['baseline_uc_verification']['triangles']==620,e
+          assert e['candidate_uc_verification']['triangles']==620,e
+          print(json.dumps(e,indent=2))
+          PY
+
+      - name: Stage exact GLBs into bounded proof host
+        run: |
+          rm -rf lookdev-proof/generated
+          mkdir -p lookdev-proof/generated
+          cp evidence/sapling-material-lookdev-001/sapling_baseline_proof_materials.glb lookdev-proof/generated/
+          cp evidence/sapling-material-lookdev-001/sapling_candidate_lookdev.glb lookdev-proof/generated/
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Render exact baseline and candidate in two contexts
+        run: |
+          set -euo pipefail
+          rm -f lookdev-proof/material-lookdev-runtime-receipt.json \
+            lookdev-proof/baseline-neutral_three_quarter.png \
+            lookdev-proof/candidate-neutral_three_quarter.png \
+            lookdev-proof/baseline-grazing_side_key.png \
+            lookdev-proof/candidate-grazing_side_key.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x760x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path lookdev-proof \
+            --script observe.gd
+
+      - name: Validate target-host capture evidence only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('lookdev-proof')
+          r=json.loads((root/'material-lookdev-runtime-receipt.json').read_text())
+          assert r['state']=='PASS_TARGET_HOST_COMPARISON_READY_FOR_VISUAL_REVIEW',r
+          assert r['promotion_effect']=='NONE',r
+          for context,row in r['contexts'].items():
+            for kind in ('baseline','candidate'):
+              assert row[kind]['state']=='PASS',(context,kind,row[kind])
+              assert row[kind]['import']['surfaces']>=2,(context,kind,row[kind])
+              assert row[kind]['capture']['bytes']>2000,(context,kind,row[kind])
+          for name in (
+            'baseline-neutral_three_quarter.png','candidate-neutral_three_quarter.png',
+            'baseline-grazing_side_key.png','candidate-grazing_side_key.png'):
+            assert (root/name).stat().st_size>2000,name
+          print(json.dumps(r,indent=2))
+          PY
+
+      - name: Upload exact material comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sapling-material-lookdev-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            lookdev/sapling_material_profile_001.json
+            evidence/sapling-material-lookdev-001/evidence.json
+            evidence/sapling-material-lookdev-001/baseline_surface.json
+            evidence/sapling-material-lookdev-001/candidate_surface.json
+            evidence/sapling-material-lookdev-001/sapling_baseline_proof_materials.glb
+            evidence/sapling-material-lookdev-001/sapling_candidate_lookdev.glb
+            lookdev-proof/material-lookdev-runtime-receipt.json
+            lookdev-proof/baseline-neutral_three_quarter.png
+            lookdev-proof/candidate-neutral_three_quarter.png
+            lookdev-proof/baseline-grazing_side_key.png
+            lookdev-proof/candidate-grazing_side_key.png
+          if-no-files-found: warn
+          retention-days: 30
