@@ -96,14 +96,16 @@ jobs:
             sudo apt-get install -y xvfb
           fi
 
-      - name: Render exact baseline and candidate in two contexts
+      - name: Render exact baseline and candidate in three contexts
         run: |
           set -euo pipefail
           rm -f lookdev-proof/material-lookdev-runtime-receipt.json \
             lookdev-proof/baseline-neutral_three_quarter.png \
             lookdev-proof/candidate-neutral_three_quarter.png \
             lookdev-proof/baseline-grazing_side_key.png \
-            lookdev-proof/candidate-grazing_side_key.png
+            lookdev-proof/candidate-grazing_side_key.png \
+            lookdev-proof/baseline-crown_close.png \
+            lookdev-proof/candidate-crown_close.png
           xvfb-run --auto-servernum --server-args="-screen 0 1000x760x24" \
             .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
             --display-driver x11 \
@@ -120,6 +122,7 @@ jobs:
           r=json.loads((root/'material-lookdev-runtime-receipt.json').read_text())
           assert r['state']=='PASS_TARGET_HOST_COMPARISON_READY_FOR_VISUAL_REVIEW',r
           assert r['promotion_effect']=='NONE',r
+          assert set(r['contexts'])=={'neutral_three_quarter','grazing_side_key','crown_close'},r
           for context,row in r['contexts'].items():
             for kind in ('baseline','candidate'):
               assert row[kind]['state']=='PASS',(context,kind,row[kind])
@@ -127,7 +130,8 @@ jobs:
               assert row[kind]['capture']['bytes']>2000,(context,kind,row[kind])
           for name in (
             'baseline-neutral_three_quarter.png','candidate-neutral_three_quarter.png',
-            'baseline-grazing_side_key.png','candidate-grazing_side_key.png'):
+            'baseline-grazing_side_key.png','candidate-grazing_side_key.png',
+            'baseline-crown_close.png','candidate-crown_close.png'):
             assert (root/name).stat().st_size>2000,name
           print(json.dumps(r,indent=2))
           PY
@@ -149,5 +153,7 @@ jobs:
             lookdev-proof/candidate-neutral_three_quarter.png
             lookdev-proof/baseline-grazing_side_key.png
             lookdev-proof/candidate-grazing_side_key.png
+            lookdev-proof/baseline-crown_close.png
+            lookdev-proof/candidate-crown_close.png
           if-no-files-found: warn
           retention-days: 30
