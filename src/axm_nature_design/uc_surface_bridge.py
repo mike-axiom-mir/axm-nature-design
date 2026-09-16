@@ -1,13 +1,16 @@
 """Explicit Nature Design -> Universal Creation surface handoff.
 
-This module keeps Nature source semantics local while translating the current
-sapling triangle body into Universal Creation's strict axm.surface-3d/v0.1
-contract. It also closes one renderer-facing gap for planar leaf cards without
-changing UC: leaf faces are emitted with explicit opposite-winding back faces so
-the retained GLB does not depend on an unproven two-sided material extension.
+This module keeps Nature source semantics local while translating Nature triangle
+bodies into Universal Creation's strict axm.surface-3d/v0.1 contract. It also
+closes one renderer-facing gap for planar leaf cards without changing UC: leaf
+faces are emitted with explicit opposite-winding back faces so retained GLBs do
+not depend on an unproven two-sided material extension.
 
 The bridge is intentionally static. It does not carry flex zones, wind state,
 rigging, animation, environment placement, or final look-development semantics.
+Callers may provide an exact source-owned mesh candidate when a separate Nature
+lane is testing a reindex-only topology change; source authority and mesh digest
+remain explicit in the returned receipt.
 """
 from __future__ import annotations
 
@@ -16,12 +19,13 @@ import json
 import math
 from typing import Any
 
-from .organic_form import build_mesh, digest as nature_digest, validate_source
+from .organic_form import build_mesh, digest as nature_digest, structural_checks, validate_source
 
-BRIDGE_SCHEMA = "axm.nature-uc-surface-bridge-evidence/v0.1"
+BRIDGE_SCHEMA = "axm.nature-uc-surface-bridge-evidence/v0.2"
 UC_SURFACE_SCHEMA = "axm.surface-3d/v0.1"
 SOURCE_COORDINATES = "+X east/right, +Y north/forward, +Z up; metres"
 TARGET_COORDINATES = "+X right, +Y up, +Z forward; metres"
+MESH_SCHEMA = "axm.nature-triangle-mesh/v0.1"
 
 # Proof-only materials make the two structural groups inspectable. They are not
 # a Nature look-development contract and are deliberately owned by this bridge,
@@ -116,13 +120,29 @@ def _emit_face(group: dict[str, Any], points: list[list[float]], normal: list[fl
     group["indices"].extend([base, base + 1, base + 2])
 
 
-def adapt_source_for_uc(source: dict[str, Any]) -> dict[str, Any]:
-    """Build a strict UC surface from the exact Nature source without mutation."""
+def adapt_mesh_for_uc(
+    source: dict[str, Any],
+    mesh: dict[str, Any],
+    *,
+    mesh_relation: str = "CALLER_PROVIDED_SOURCE_OWNED_MESH",
+) -> dict[str, Any]:
+    """Translate one exact Nature mesh into the bounded UC surface contract.
+
+    This deliberately accepts an explicit mesh so a separately owned Nature lane
+    can prove a reindex-only candidate without rewriting the Organic source or
+    teaching Universal Creation what a trunk, branch, cap, or leaf means.
+    """
     validate_source(source)
     if source.get("coordinate_system") != SOURCE_COORDINATES:
         raise ValueError("unsupported Nature coordinate system; refusing implicit conversion")
+    if not isinstance(mesh, dict) or mesh.get("schema") != MESH_SCHEMA:
+        raise ValueError("unsupported Nature mesh schema")
+    if not isinstance(mesh_relation, str) or not mesh_relation.strip() or len(mesh_relation) > 120:
+        raise ValueError("mesh_relation must be bounded non-empty text")
+    structural = structural_checks(mesh)
+    if not structural["pass"]:
+        raise ValueError(f"Nature mesh failed structural checks: {structural}")
 
-    mesh = build_mesh(source)
     owners = _region_by_triangle(mesh)
     vertices = mesh["vertices"]
     groups = {"woody": _empty_group("woody"), "foliage": _empty_group("foliage")}
@@ -160,6 +180,8 @@ def adapt_source_for_uc(source: dict[str, Any]) -> dict[str, Any]:
         "target_coordinate_system": TARGET_COORDINATES,
         "source_digest": nature_digest(source),
         "source_mesh_digest": nature_digest(mesh),
+        "mesh_relation": mesh_relation.strip(),
+        "source_structural_checks": structural,
         "source_triangles": len(mesh["triangles"]),
         "source_leaf_triangles": source_leaf_triangles,
         "emitted_triangles": sum(len(group["indices"]) // 3 for group in surface["primitives"]),
@@ -168,5 +190,11 @@ def adapt_source_for_uc(source: dict[str, Any]) -> dict[str, Any]:
         "material_scope": "PROOF_ONLY_GROUPING_NOT_LOOKDEV",
         "surface_digest": digest(surface),
         "surface": surface,
-        "truth_boundary": "Static Nature mesh -> UC surface handoff only. No two-sided material extension, final leaf shader, wind/deformation state, environment placement, target-engine import, visual acceptance, runtime cost, or production readiness is claimed.",
+        "truth_boundary": "Static source-owned Nature mesh -> UC surface handoff only. Explicit mesh candidates preserve their own digest and provenance. No two-sided material extension, final leaf shader, wind/deformation state, environment placement, target-engine import, visual acceptance, runtime cost, source migration, or production readiness is claimed.",
     }
+
+
+def adapt_source_for_uc(source: dict[str, Any]) -> dict[str, Any]:
+    """Build and translate the exact Organic generator baseline without mutation."""
+    mesh = build_mesh(source)
+    return adapt_mesh_for_uc(source, mesh, mesh_relation="SOURCE_GENERATOR_BASELINE")
