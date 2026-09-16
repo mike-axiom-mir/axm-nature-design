@@ -1,0 +1,96 @@
+name: UC nature topology preflight evidence
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/uc_surface_bridge.py"
+      - "tests/test_uc_topology_preflight.py"
+      - "tools/build_uc_topology_preflight_evidence.py"
+      - ".github/workflows/uc-nature-topology-preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-topology-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact Technical Art PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact Geometry donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: deddc890a03684e20322c607741180b6de376ab4
+          path: .geometry
+
+      - name: Checkout exact Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 37eabf250f54c2dccaf81bfa2002129e53c1eaff
+          path: .uc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compile and test explicit mesh bridge
+        run: |
+          python -m compileall -q src tests tools
+          PYTHONPATH=src python -m unittest tests.test_uc_surface_bridge tests.test_uc_topology_preflight -v
+
+      - name: Build exact Geometry -> UC topology-preflight evidence
+        env:
+          AXM_RECEIVING_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          rm -rf evidence/nature-uc-topology-preflight-001
+          mkdir -p evidence/nature-uc-topology-preflight-001
+          PYTHONPATH=src:.uc/src python tools/build_uc_topology_preflight_evidence.py \
+            --geometry-root .geometry \
+            --uc-root .uc \
+            --out evidence/nature-uc-topology-preflight-001
+          git rev-parse HEAD > evidence/nature-uc-topology-preflight-001/exact-technical-art-head.txt
+          git -C .geometry rev-parse HEAD > evidence/nature-uc-topology-preflight-001/exact-geometry-head.txt
+          git -C .uc rev-parse HEAD > evidence/nature-uc-topology-preflight-001/exact-uc-head.txt
+
+      - name: Validate bounded topology-preflight decision
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-uc-topology-preflight-001')
+          r=json.loads((root/'uc-topology-preflight-overall.json').read_text())
+          head=(root/'exact-technical-art-head.txt').read_text().strip()
+          assert r['state']=='PASS_EXACT_NATURE_TOPOLOGY_PREFLIGHT_THROUGH_UC_GLB',r
+          assert r['receiving_head']==head,(r['receiving_head'],head)
+          assert r['geometry_commit']=='deddc890a03684e20322c607741180b6de376ab4',r
+          assert r['uc_commit']=='37eabf250f54c2dccaf81bfa2002129e53c1eaff',r
+          assert r['pipeline_decision']['uc_core_change_required'] is False,r
+          assert r['pipeline_decision']['nature_domain_semantics_moved_to_uc'] is False,r
+          for study in r['studies'].values():
+              assert study['flipped_triangle_count']==260,study
+              assert study['uc_source_topology_preflight']['baseline']['orientation_conflict_edge_count']==260,study
+              assert study['uc_source_topology_preflight']['candidate']['orientation_conflict_edge_count']==0,study
+              assert study['uc_emitted_woody_topology_preflight']['baseline']['orientation_conflict_edge_count']==260,study
+              assert study['uc_emitted_woody_topology_preflight']['candidate']['orientation_conflict_edge_count']==0,study
+              assert study['uc_glb']['baseline']['verification']['geometry_validation']['winding_matches_vertex_normals'] is True,study
+              assert study['uc_glb']['candidate']['verification']['geometry_validation']['winding_matches_vertex_normals'] is True,study
+          assert r['truth_boundary']['target_engine_culling_rendered'] is False,r
+          print(json.dumps(r['pipeline_decision'],indent=2))
+          PY
+
+      - name: Retain exact Technical Art topology evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-uc-topology-preflight-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-uc-topology-preflight-001
+          if-no-files-found: warn
+          retention-days: 30
