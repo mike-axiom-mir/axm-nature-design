@@ -1,0 +1,23 @@
+{
+  "schema": "axm.nature-sapling-material-profile/v0.1",
+  "profile_id": "sapling-material-lookdev-001",
+  "source_scope": "sapling-neutral-001",
+  "renderer_scope": "PBR scalars only; no texture, UV, subsurface, transmission, normal-map, or two-sided-material claim",
+  "materials": {
+    "woody": {
+      "color": "#5C3B27FF",
+      "metallic": 0.0,
+      "roughness": 0.84
+    },
+    "foliage": {
+      "color": "#5A823EFF",
+      "metallic": 0.0,
+      "roughness": 0.58
+    }
+  },
+  "intent": {
+    "woody": "Keep the young trunk matte and darker than the foliage without introducing bark texture claims.",
+    "foliage": "Increase leaf-versus-wood value/chroma and roughness separation so the sparse crown reads as a distinct surface family under more than one light direction."
+  },
+  "truth_boundary": "Derived look-development profile only. Exact source form and UC bridge geometry remain unchanged. This profile does not establish botanical color correctness, bark or leaf texture detail, subsurface/transmission, final art direction, renderer equivalence, runtime cost, CANON, production readiness, or materials mastery."
+}
