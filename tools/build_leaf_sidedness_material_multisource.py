@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Build a bounded three-source Materials A/B packet for Nature leaf sidedness.
 
-This extends the existing one-sapling renderer comparison without replacing it.
-For each exact current Nature source from Geometry PR #10 it compares:
+For each exact current Nature source from Geometry PR #10 this compares:
 
 A. migrated single-sided source geometry + foliage culling disabled at material level;
 B. Geometry PR #10's explicit disjoint opposite-wound leaf backfaces + ordinary culling.
 
-The scalar review materials are held identical between strategies. Reusing the
-existing sapling lookdev values on the two additional studies is observation-only
-and does not widen that profile's source ownership or claim material adoption.
+The scalar/color material payload is held identical between strategies. By default
+this preserves the historical sapling-profile reference proof. A caller may instead
+supply the already-evidenced three-source woody/foliage family profile to test the
+composition of that family candidate with the sidedness strategies without changing
+geometry, source ownership, or runtime acceptance.
 """
 from __future__ import annotations
 
@@ -21,7 +22,13 @@ from pathlib import Path
 
 SCHEMA = "axm.nature-leaf-sidedness-material-multisource/v0.2"
 GEOMETRY_HEAD = "da3adbef4de8cddb8f3ebe841d39bb31a8936f5f"
-PROFILE_FILE = "lookdev/sapling_material_profile_001.json"
+DEFAULT_PROFILE_FILE = Path("lookdev/sapling_material_profile_001.json")
+FAMILY_PROFILE_FILE = Path("lookdev/nature_woody_foliage_family_001.json")
+EXPECTED_STUDIES = (
+    "sapling-neutral-001",
+    "compact-east-tree-neutral-001",
+    "east-rear-tree-neutral-001",
+)
 STUDIES = (
     ("sapling-neutral-001", "examples/sapling_neutral_001.json"),
     ("compact-east-tree-neutral-001", "examples/compact_east_tree_neutral_001.json"),
@@ -33,7 +40,51 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--geometry-root", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--profile",
+        type=Path,
+        default=DEFAULT_PROFILE_FILE,
+        help=(
+            "Material profile to hold identical across sidedness strategies. "
+            "Supported inputs are the historical sapling profile and the bounded "
+            "three-source woody/foliage family profile."
+        ),
+    )
     return parser.parse_args()
+
+
+def load_profile(path: Path) -> tuple[dict, str, str]:
+    profile = json.loads(path.read_text())
+    schema = profile.get("schema")
+    if schema == "axm.nature-sapling-material-profile/v0.1":
+        if profile.get("source_scope") != "sapling-neutral-001":
+            raise SystemExit("reference Materials profile source scope drifted")
+        return (
+            profile,
+            "SAPLING_REVIEW_REFERENCE_ONLY",
+            (
+                "The existing sapling lookdev scalar values are reused unchanged only as a fixed "
+                "renderer reference so sidedness strategies can be compared across three source "
+                "forms. This does not widen sapling_material_profile_001 source ownership to "
+                "compact-east or east-rear trees."
+            ),
+        )
+    if schema == "axm.nature-woody-foliage-material-family/v0.1":
+        if profile.get("family_id") != "nature-woody-foliage-family-001":
+            raise SystemExit("unexpected woody/foliage family identity")
+        if profile.get("supported_source_scope") != list(EXPECTED_STUDIES):
+            raise SystemExit("bounded woody/foliage family source scope drifted")
+        return (
+            profile,
+            "BOUNDED_THREE_SOURCE_FAMILY_CANDIDATE",
+            (
+                "The separately evidenced bounded three-source woody/foliage family candidate is "
+                "held identical across both sidedness strategies. This composes two existing "
+                "Materials candidates for direct rendering without promoting either strategy into "
+                "Environment, Runtime, CANON, or final Art Direction."
+            ),
+        )
+    raise SystemExit(f"unsupported Materials profile schema: {schema!r}")
 
 
 def main() -> int:
@@ -44,11 +95,7 @@ def main() -> int:
     from axm_nature_design.organic_form import build_mesh, digest
     from axm_nature_design.leaf_backface_candidate import add_explicit_leaf_backfaces, evaluate
 
-    profile = json.loads(Path(PROFILE_FILE).read_text())
-    if profile.get("schema") != "axm.nature-sapling-material-profile/v0.1":
-        raise SystemExit("unexpected Materials profile schema")
-    if profile.get("source_scope") != "sapling-neutral-001":
-        raise SystemExit("reference Materials profile source scope drifted")
+    profile, profile_mode, review_policy = load_profile(args.profile)
 
     studies: dict[str, dict] = {}
     source_digests: set[str] = set()
@@ -136,8 +183,16 @@ def main() -> int:
         and len(source_digests) == 3,
         "three_distinct_baseline_meshes": len(baseline_digests) == 3,
         "three_distinct_explicit_meshes": len(explicit_digests) == 3,
-        "reference_material_profile_remains_sapling_scoped": profile["source_scope"]
-        == "sapling-neutral-001",
+        "material_profile_mode_is_supported": profile_mode
+        in {"SAPLING_REVIEW_REFERENCE_ONLY", "BOUNDED_THREE_SOURCE_FAMILY_CANDIDATE"},
+        "family_scope_exact_when_family_mode": (
+            profile_mode != "BOUNDED_THREE_SOURCE_FAMILY_CANDIDATE"
+            or profile.get("supported_source_scope") == list(EXPECTED_STUDIES)
+        ),
+        "sapling_scope_exact_when_reference_mode": (
+            profile_mode != "SAPLING_REVIEW_REFERENCE_ONLY"
+            or profile.get("source_scope") == "sapling-neutral-001"
+        ),
     }
     if not all(global_checks.values()):
         raise SystemExit(f"multi-source leaf sidedness checks failed: {global_checks}")
@@ -152,16 +207,24 @@ def main() -> int:
             "pr": 10,
             "status": "THREE_EXACT_CURRENT_SOURCE_OUTPUTS_REBUILT_FROM_PINNED_DONOR",
         },
+        "material_profile_path": str(args.profile),
+        "profile_mode": profile_mode,
         "review_material_profile": profile,
-        "review_material_policy": (
-            "The existing sapling lookdev scalar values are reused unchanged only as a fixed renderer "
-            "reference so sidedness strategies can be compared across three source forms. This does not "
-            "widen sapling_material_profile_001 source ownership to compact-east or east-rear trees."
+        "review_material_policy": review_policy,
+        "renderer_truth_boundary": (
+            "Pinned Godot 4.7.2 GL Compatibility observation of three exact Nature source forms "
+            "comparing material-level disabled foliage culling against explicit opposite-wound "
+            "leaf backface geometry while the selected material profile, lighting and camera "
+            "derivation are held fixed within each source/context. This does not prove final leaf "
+            "shader/normals, botanical correctness, target-device runtime cost, Environment/VFX "
+            "acceptance, CANON, production readiness, or Materials mastery."
         ),
         "studies": studies,
         "global_checks": global_checks,
         "truth_boundary": {
             "cross_source_material_profile_adoption": False,
+            "family_candidate_composition_observed": profile_mode
+            == "BOUNDED_THREE_SOURCE_FAMILY_CANDIDATE",
             "two_sided_material_visual_equivalence_proven": False,
             "explicit_geometry_preferred": False,
             "material_cull_disabled_preferred": False,
@@ -181,6 +244,7 @@ def main() -> int:
         json.dumps(
             {
                 "state": payload["state"],
+                "profile_mode": profile_mode,
                 "global_checks": global_checks,
                 "studies": {
                     key: value["comparison_contract"] for key, value in studies.items()
