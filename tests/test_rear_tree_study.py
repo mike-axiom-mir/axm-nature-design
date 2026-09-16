@@ -11,7 +11,7 @@ from axm_nature_design.rear_tree_study import evaluate
 
 SOURCE = ROOT / "examples" / "east_rear_tree_neutral_001.json"
 EXPECTED_SOURCE_DIGEST = "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307"
-EXPECTED_MESH_DIGEST = "d1c1f6530f5e922bd0c77a973c6fabd439e283bd8752c94f5f7d30a13d24d637"
+EXPECTED_MESH_DIGEST = "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48"
 
 
 class RearTreeStudyTests(unittest.TestCase):

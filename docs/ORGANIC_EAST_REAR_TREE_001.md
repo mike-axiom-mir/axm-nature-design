@@ -32,7 +32,7 @@ Expected exact source digest from the authored JSON:
 `0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307`
 
 Expected exact baseline mesh digest from the current Organic generator:
-`d1c1f6530f5e922bd0c77a973c6fabd439e283bd8752c94f5f7d30a13d24d637`
+`d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48`
 
 Expected generated body:
 - `390` vertices;
