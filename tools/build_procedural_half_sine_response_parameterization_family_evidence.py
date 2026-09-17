@@ -167,10 +167,11 @@ def main() -> int:
             raise RuntimeError("response family digest depends on case iteration order")
 
         failure_controls = []
+        drift_provider_contract = copy.deepcopy(contract)
+        drift_provider_contract["vfx_provider"]["ref"] = "0000000000000000000000000000000000000000"
         failure_controls.append(_expect_rejection(
             "vfx-provider-head-drift",
-            lambda: (_ for _ in ()).throw(ValueError("VFX provider head drift"))
-            if provider_head == contract["vfx_provider"]["ref"] else None,
+            lambda: _validate_provider_root(vfx_root, drift_provider_contract),
         ))
         failure_controls.append(_expect_rejection(
             "duplicate-source-identity",
