@@ -75,10 +75,10 @@ func fill_mesh(mesh: ArrayMesh, payload: Dictionary, index_after_normals: bool =
     # post-normal vertex tuples afterwards; it never regenerates normals from a
     # smaller position domain.
     surface.generate_normals()
-    var pre_index_vertex_count := surface.get_vertex_count()
+    var pre_index_vertex_count: int = int(surface.get_vertex_count())
     if index_after_normals:
         surface.index()
-    var post_index_vertex_count := surface.get_vertex_count()
+    var post_index_vertex_count: int = int(surface.get_vertex_count())
     surface.commit(mesh)
     if mesh.get_surface_count() != 1:
         return {}
