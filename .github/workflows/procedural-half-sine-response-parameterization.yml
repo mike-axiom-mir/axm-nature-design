@@ -1,0 +1,72 @@
+name: Procedural Nature half-sine response parameter family
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Checkout exact VFX owner response head
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: cef2ad78d8e36a55ada5dad07329f1a7125d48de
+          path: .studio-deps/vfx-wind-response-current
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile
+        run: python -m compileall -q src tools tests
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+      - name: Build exact two-source parameterization evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_procedural_half_sine_response_parameterization_family_evidence.py
+          evidence/nature-half-sine-response-parameterization-family-001
+          --vfx-root .studio-deps/vfx-wind-response-current
+      - name: Verify bounded family summary
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('evidence/nature-half-sine-response-parameterization-family-001/summary.json').read_text())
+          assert data['state'] == 'PASS_BOUNDED_TWO_SOURCE_HALF_SINE_RESPONSE_PARAMETERIZATION_FAMILY'
+          assert data['decision'] == 'PASS_OWNER_VFX_STATE_PARAMETERIZATION_ONLY__NO_VFX_RUNTIME_OR_MAP_ADOPTION'
+          assert data['vfx_provider_head'] == 'cef2ad78d8e36a55ada5dad07329f1a7125d48de'
+          assert data['response_profile'] == 'HIERARCHICAL_TRUNK_BRANCH_LEAF_HALF_SINE_VISUAL_SWAY'
+          assert data['weather_semantics'] == 'VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED'
+          assert data['case_count'] == 2
+          assert data['tested_exact_state_count'] == 34
+          assert data['distinct_source_count'] == 2
+          assert data['distinct_neutral_count'] == 2
+          assert data['distinct_peak_count'] == 2
+          assert data['distinct_response_ceiling_count'] == 2
+          assert data['max_reconstruction_residual_m'] <= 1e-12
+          assert data['family_digest'] == data['reverse_order_family_digest']
+          assert data['all_failure_controls_rejected'] is True
+          assert len(data['failure_controls']) == 6
+          for case in data['cases']:
+              assert case['state_count'] == 17
+              assert case['interval_count'] == 16
+              assert case['all_states_within_tolerance'] is True
+              assert case['max_reconstruction_residual_m'] <= 1e-12
+          PY
+      - name: Upload exact retained parameterization evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-half-sine-response-parameterization-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-half-sine-response-parameterization-family-001
+          if-no-files-found: error
