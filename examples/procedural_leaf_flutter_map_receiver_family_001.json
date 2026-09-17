@@ -1,0 +1,69 @@
+{
+  "schema": "axm.nature-procedural-leaf-flutter-map-receiver-family/v0.1",
+  "family_id": "nature-branch-crown-map-leaf-flutter-receiver-compatibility-001",
+  "relation": "EXERCISE_EXACT_MAP_LEAF_FLUTTER_RECEIVER_HELPERS_ACROSS_ACCEPTED_PROCEDURAL_VARIANTS_NO_MAP_ADOPTION",
+  "map_receiver": {
+    "repository": "mike-axiom-mir/axm-map-design",
+    "ref": "7713cbe5863c3bc38dabb6236eb4b393401224b6",
+    "path": "tools/environment_nature_leaf_flutter_current_world.py",
+    "git_blob": "128f4881760b01a687ac13e56676822fd1dd7b10",
+    "schema": "axm.environment-nature-leaf-flutter-receiving/v0.1",
+    "parent_policy_id": "source-woody-back__source-foliage-two-sided-001",
+    "vfx_source_head": "ecade64227ba1d3d1faf029ca7188ea63c2560ec",
+    "geometry_leaf_head": "da3adbef4de8cddb8f3ebe841d39bb31a8936f5f",
+    "structure_result": "PASS_CURRENT_WORLD_NATURE_LEAF_FLUTTER_STRUCTURE",
+    "woody_surface_cull": "CULL_BACK",
+    "foliage_surface_cull": "CULL_DISABLED",
+    "explicit_leaf_backface_geometry_adopted": false
+  },
+  "vfx_provider": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "ref": "9d446359defe1e663d4d9cc683ca0b9cac6bf6c0",
+    "path": "tools/build_sapling_leaf_flutter_candidate.py",
+    "git_blob": "b64b1edb531c65ebb75bed403a8e1ae951938bb3"
+  },
+  "duration_s": 0.5,
+  "normalized_phases": [0.0, 0.0625, 0.125, 0.1875, 0.25, 0.3125, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.6875, 0.75, 0.8125, 0.875, 0.9375, 1.0],
+  "cases": [
+    {
+      "case_id": "sapling-west-a",
+      "source_path": "examples/sapling_neutral_001.json",
+      "family_path": "examples/sapling_variation_family_001.json",
+      "receiver_translation_m": [0.75, -1.25, 0.5]
+    },
+    {
+      "case_id": "compact-east-b",
+      "source_path": "examples/compact_east_tree_neutral_001.json",
+      "family_path": "examples/compact_tree_variation_family_001.json",
+      "receiver_translation_m": [-2.0, 0.625, 1.125]
+    },
+    {
+      "case_id": "east-rear-a",
+      "source_path": "examples/east_rear_tree_neutral_001.json",
+      "family_path": "examples/east_rear_tree_variation_family_001.json",
+      "receiver_translation_m": [1.5, 2.25, -0.375]
+    }
+  ],
+  "expected_source_case_count": 3,
+  "expected_variants_per_source": 3,
+  "expected_total_outputs": 9,
+  "expected_baseline_vertices": 390,
+  "expected_baseline_triangles": 570,
+  "expected_foliage_triangle_count": 50,
+  "expected_foliage_vertex_domain_count": 100,
+  "expected_receiver_states_per_output": 17,
+  "failure_policy": "FAIL_CLOSED_ON_MAP_RECEIVER_IDENTITY_DRIFT_FOLIAGE_PARTITION_DRIFT_NON_TRANSLATION_RECEIVER_DRIFT_OR_FLUTTER_DOMAIN_ESCAPE",
+  "truth_boundary": {
+    "map_source_or_composition_changed": false,
+    "map_receiver_code_copied_into_nature": false,
+    "procedural_mutator_rewritten": false,
+    "procedural_family_bounds_rewritten": false,
+    "vfx_effect_reauthored": false,
+    "procedural_variants_adopted_by_map": false,
+    "current_world_render_or_art_acceptance": false,
+    "physical_wind_or_biomechanics": false,
+    "runtime_or_target_device_acceptance": false,
+    "uc_or_profession_fabric_promotion": false,
+    "canon_or_production_readiness": false
+  }
+}
