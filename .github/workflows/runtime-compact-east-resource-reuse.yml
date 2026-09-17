@@ -1,0 +1,168 @@
+name: Runtime compact-east resource reuse evidence
+
+on:
+  push:
+    branches: [studio/runtime-compact-east-resource-reuse-001]
+    paths:
+      - "target-proof-vfx/observe_compact_east_tree_runtime_reuse.gd"
+      - "tools/verify_compact_east_runtime_reuse.py"
+      - ".github/workflows/runtime-compact-east-resource-reuse.yml"
+      - "tools/build_compact_east_tree_wind_candidate.py"
+      - "src/axm_nature_design/wind_response.py"
+      - "src/axm_nature_design/source_topology_migration.py"
+      - "examples/compact_east_tree_neutral_001.json"
+      - "examples/compact_east_tree_wind_candidate_001.json"
+  pull_request:
+    paths:
+      - "target-proof-vfx/observe_compact_east_tree_runtime_reuse.gd"
+      - "tools/verify_compact_east_runtime_reuse.py"
+      - ".github/workflows/runtime-compact-east-resource-reuse.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compact-east-resource-reuse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Runtime head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Runtime head and VFX ancestry
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          OBSERVED="$(git rev-parse HEAD)"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > exact-head.txt
+          git cat-file -e cef2ad78d8e36a55ada5dad07329f1a7125d48de^{commit}
+          git merge-base --is-ancestor cef2ad78d8e36a55ada5dad07329f1a7125d48de HEAD
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Rebuild exact compact-east VFX prerequisite
+        run: |
+          set -euo pipefail
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -v
+          rm -rf evidence/compact-east-runtime-resource-reuse-001
+          mkdir -p evidence/compact-east-runtime-resource-reuse-001/vfx
+          python tools/build_compact_east_tree_wind_candidate.py evidence/compact-east-runtime-resource-reuse-001/vfx
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/compact-east-runtime-resource-reuse-001/vfx')
+          s=json.loads((root/'summary.json').read_text())
+          assert s['state']=='PASS_COMPACT_EAST_TREE_BOUNDED_VISUAL_RESPONSE_CANDIDATE', s
+          assert s['sample_count']==17, s
+          assert s['migrated_neutral_mesh_digest']=='420135f6effbadb1b344675948b9ddc471dcb83177702888f0b32327c5121c18', s
+          assert all(s['checks'].values()), s
+          PY
+          rm -rf target-proof-vfx/generated-compact-east-runtime
+          mkdir -p target-proof-vfx/generated-compact-east-runtime
+          cp evidence/compact-east-runtime-resource-reuse-001/vfx/summary.json target-proof-vfx/generated-compact-east-runtime/
+          cp evidence/compact-east-runtime-resource-reuse-001/vfx/phase_*_mesh.json target-proof-vfx/generated-compact-east-runtime/
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Measure rebuild-every-update control
+        run: |
+          set -euo pipefail
+          rm -f target-proof-vfx/compact-east-runtime-rebuild_resources_control.json target-proof-vfx/compact-east-runtime-rebuild_resources_control-*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof-vfx \
+            --script observe_compact_east_tree_runtime_reuse.gd -- rebuild_resources_control \
+            2>&1 | tee evidence/compact-east-runtime-resource-reuse-001/control-godot.log
+
+      - name: Measure stable ArrayMesh candidate
+        run: |
+          set -euo pipefail
+          rm -f target-proof-vfx/compact-east-runtime-reuse_arraymesh_candidate.json target-proof-vfx/compact-east-runtime-reuse_arraymesh_candidate-*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof-vfx \
+            --script observe_compact_east_tree_runtime_reuse.gd -- reuse_arraymesh_candidate \
+            2>&1 | tee evidence/compact-east-runtime-resource-reuse-001/candidate-godot.log
+
+      - name: Compare exact before and after evidence
+        run: |
+          set -euo pipefail
+          out=evidence/compact-east-runtime-resource-reuse-001
+          cp target-proof-vfx/compact-east-runtime-rebuild_resources_control.json "$out/control.json"
+          cp target-proof-vfx/compact-east-runtime-reuse_arraymesh_candidate.json "$out/candidate.json"
+          python tools/verify_compact_east_runtime_reuse.py \
+            --control "$out/control.json" \
+            --candidate "$out/candidate.json" \
+            --image-root target-proof-vfx \
+            --runtime-head "$(cat exact-head.txt)" \
+            --output "$out/comparison.json" \
+            --negative-control-output "$out/negative-control.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          out=Path('evidence/compact-east-runtime-resource-reuse-001')
+          data=json.loads((out/'comparison.json').read_text())
+          neg=json.loads((out/'negative-control.json').read_text())
+          assert data['state']=='PASS_COMPACT_EAST_ARRAYMESH_RESOURCE_REUSE', data
+          assert all(data['checks'].values()), data
+          assert data['visual_tradeoff_for_art_director']=='NONE_OBSERVED_34_MATCHED_FRAMES_BYTE_IDENTICAL', data
+          assert neg['expected_fail_closed'] is True, neg
+          m=data['measurements']
+          print(json.dumps({
+              'state':data['state'],
+              'total_updates_per_mode':m['total_updates_per_mode'],
+              'control_resource_constructions':m['control_resource_constructions'],
+              'candidate_resource_constructions':m['candidate_resource_constructions'],
+              'resource_construction_reduction_percent':m['resource_construction_reduction_percent'],
+              'timing':m['timing'],
+              'visual_tradeoff_for_art_director':data['visual_tradeoff_for_art_director'],
+          }, indent=2))
+          PY
+
+      - name: Retain exact matched frames and head binding
+        if: always()
+        run: |
+          set -euo pipefail
+          out=evidence/compact-east-runtime-resource-reuse-001
+          mkdir -p "$out/rendered"
+          cp exact-head.txt "$out/exact-head.txt"
+          cp target-proof-vfx/compact-east-runtime-*.png "$out/rendered/" 2>/dev/null || true
+
+      - name: Upload exact compact-east Runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compact-east-runtime-resource-reuse-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/compact-east-runtime-resource-reuse-001
+          if-no-files-found: warn
+          retention-days: 30
