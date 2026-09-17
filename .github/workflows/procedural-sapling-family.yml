@@ -36,6 +36,13 @@ jobs:
           repository: mike-axiom-mir/axm-nature-design
           ref: 9d446359defe1e663d4d9cc683ca0b9cac6bf6c0
           path: .studio-deps/vfx-leaf-flutter
+      - name: Checkout exact Map leaf-flutter receiver
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-map-design
+          ref: 7713cbe5863c3bc38dabb6236eb4b393401224b6
+          path: .studio-deps/map-leaf-flutter-receiver
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -127,6 +134,44 @@ jobs:
           assert data['zero_duration_control_rejected'] is True
           assert data['decision'] == 'PASS_DERIVED_VFX_COMPATIBILITY_FAMILY_ONLY__NO_SOURCE_OR_RECEIVER_ADOPTION'
           PY
+      - name: Exercise exact Map leaf-flutter receiver contract across all nine procedural outputs
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_procedural_leaf_flutter_map_receiver_family_evidence.py
+          evidence/tree-procedural-leaf-flutter-map-receiver-family-001
+          --vfx-root .studio-deps/vfx-leaf-flutter
+          --map-root .studio-deps/map-leaf-flutter-receiver
+      - name: Verify procedural Map receiver compatibility summary
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('evidence/tree-procedural-leaf-flutter-map-receiver-family-001/summary.json')
+          data = json.loads(p.read_text())
+          assert data['state'] == 'PASS_PROCEDURAL_VARIANTS_CURRENT_WORLD_LEAF_FLUTTER_RECEIVER_COMPATIBILITY'
+          assert data['map_receiver']['head'] == '7713cbe5863c3bc38dabb6236eb4b393401224b6'
+          assert data['map_receiver']['git_blob'] == '128f4881760b01a687ac13e56676822fd1dd7b10'
+          assert data['source_case_count'] == 3
+          assert data['retained_output_count'] == 9
+          assert data['receiver_states_per_output'] == 17
+          assert data['tested_receiver_states_total'] == 153
+          assert data['tested_interior_receiver_states_total'] == 135
+          assert data['distinct_variant_source_digests'] == 9
+          assert data['distinct_baseline_receiver_digests'] == 9
+          assert data['distinct_midpoint_receiver_digests'] == 9
+          assert data['materially_different_receiver_translation_contexts'] == 3
+          assert data['all_outputs_materially_distinct'] is True
+          assert data['all_candidate_checks_pass'] is True
+          assert data['all_failure_controls_rejected'] is True
+          for output in data['outputs']:
+              controls = {row['label']: row for row in output['failure_controls']}
+              assert controls['foliage-partition-count-drift']['rejected'] is True
+              assert controls['non-translation-receiver-drift']['exception'] == 'ValueError'
+              assert controls['non-translation-receiver-drift']['message'] == 'non-translation receiver drift rejected'
+              assert controls['flutter-domain-escape']['rejected'] is True
+          assert data['decision'] == 'PASS_RECEIVER_COMPATIBILITY_FAMILY_ONLY__NO_MAP_SOURCE_OR_ART_ADOPTION'
+          PY
       - name: Upload exact retained procedural evidence
         if: matrix.python == '3.11'
         uses: actions/upload-artifact@v4
@@ -154,4 +199,11 @@ jobs:
         with:
           name: tree-procedural-leaf-flutter-family-001-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/tree-procedural-leaf-flutter-family-001
+          if-no-files-found: error
+      - name: Upload exact procedural Map receiver compatibility evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tree-procedural-leaf-flutter-map-receiver-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/tree-procedural-leaf-flutter-map-receiver-family-001
           if-no-files-found: error
