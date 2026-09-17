@@ -3,7 +3,7 @@ extends SceneTree
 const GENERATED_DIR := "res://generated-compact-east-runtime"
 const EXPECTED_PARENT_HEAD := "cef2ad78d8e36a55ada5dad07329f1a7125d48de"
 const EXPECTED_NEUTRAL_DIGEST := "420135f6effbadb1b344675948b9ddc471dcb83177702888f0b32327c5121c18"
-const VALID_MODES := ["rebuild_resources_control", "reuse_arraymesh_candidate", "reuse_arraymesh_post_normal_index_candidate"]
+const VALID_MODES := ["rebuild_resources_control", "reuse_arraymesh_candidate", "reuse_arraymesh_compressed_attributes_candidate"]
 const CONTEXTS := ["ground_oblique", "crown_oblique"]
 const BG := Color(0.025, 0.030, 0.036, 1.0)
 const SETTLE_FRAMES := 3
@@ -57,7 +57,7 @@ func make_material() -> StandardMaterial3D:
     created_materials += 1
     return material
 
-func fill_mesh(mesh: ArrayMesh, payload: Dictionary, index_after_normals: bool = false) -> Dictionary:
+func fill_mesh(mesh: ArrayMesh, payload: Dictionary, compress_attributes: bool = false) -> Dictionary:
     var vertices = payload.get("vertices", [])
     var triangles = payload.get("triangles", [])
     if not (vertices is Array) or not (triangles is Array):
@@ -70,16 +70,9 @@ func fill_mesh(mesh: ArrayMesh, payload: Dictionary, index_after_normals: bool =
         var triangle := triangle_value as Array
         for local_index in [0, 2, 1]:
             surface.add_vertex(source_to_godot(vertices[int(triangle[local_index])] as Array))
-    # Important ordering boundary: normals are finalized on the exact historical
-    # triangle-corner stream first. The candidate may only deduplicate complete
-    # post-normal vertex tuples afterwards; it never regenerates normals from a
-    # smaller position domain.
     surface.generate_normals()
-    var pre_index_vertex_count: int = int(surface.get_vertex_count())
-    if index_after_normals:
-        surface.index()
-    var post_index_vertex_count: int = int(surface.get_vertex_count())
-    surface.commit(mesh)
+    var commit_flags := Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES if compress_attributes else 0
+    surface.commit(mesh, commit_flags)
     if mesh.get_surface_count() != 1:
         return {}
     var arrays := mesh.surface_get_arrays(0)
@@ -89,18 +82,18 @@ func fill_mesh(mesh: ArrayMesh, payload: Dictionary, index_after_normals: bool =
         stored_vertex_count = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
     if arrays.size() > Mesh.ARRAY_INDEX and arrays[Mesh.ARRAY_INDEX] != null:
         stored_index_count = (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size()
+    var surface_format := int(mesh.surface_get_format(0))
     return {
-        "pre_index_vertex_count": pre_index_vertex_count,
-        "post_index_vertex_count": post_index_vertex_count,
         "stored_vertex_count": stored_vertex_count,
         "stored_index_count": stored_index_count,
-        "position_normal_index_model_bytes": stored_vertex_count * 24 + stored_index_count * 4,
-        "index_after_normals": index_after_normals,
+        "surface_format": surface_format,
+        "compressed_attributes_flag_present": (surface_format & int(Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES)) != 0,
+        "requested_compressed_attributes": compress_attributes,
     }
 
 func apply_phase(root3d: Node3D, mode: String, payload: Dictionary) -> Dictionary:
     var start_usec := Time.get_ticks_usec()
-    var index_after_normals := mode == "reuse_arraymesh_post_normal_index_candidate"
+    var compress_attributes := mode == "reuse_arraymesh_compressed_attributes_candidate"
     var mesh_storage := {}
     if mode == "rebuild_resources_control":
         if tree_node != null:
@@ -122,11 +115,11 @@ func apply_phase(root3d: Node3D, mode: String, payload: Dictionary) -> Dictionar
             created_meshes += 1
             tree_node = MeshInstance3D.new()
             created_nodes += 1
-            tree_node.name = "compact-east-tree-runtime-indexed" if index_after_normals else "compact-east-tree-runtime-reuse"
+            tree_node.name = "compact-east-tree-runtime-compressed" if compress_attributes else "compact-east-tree-runtime-reuse"
             tree_node.mesh = tree_mesh
             tree_node.material_override = tree_material
             root3d.add_child(tree_node)
-        mesh_storage = fill_mesh(tree_mesh, payload, index_after_normals)
+        mesh_storage = fill_mesh(tree_mesh, payload, compress_attributes)
     if mesh_storage.is_empty():
         return {}
     var elapsed := Time.get_ticks_usec() - start_usec
@@ -204,7 +197,7 @@ func _initialize() -> void:
     var args := OS.get_cmdline_user_args()
     var mode := String(args[0]) if args.size() > 0 else ""
     var receipt := {
-        "schema": "axm.nature-compact-east-runtime-resource-reuse/v0.2",
+        "schema": "axm.nature-compact-east-runtime-resource-reuse/v0.3",
         "state": "NOT_RUN",
         "mode": mode,
         "parent_vfx_head": EXPECTED_PARENT_HEAD,
@@ -311,8 +304,8 @@ func _initialize() -> void:
     receipt["retained_samples"] = retained_samples
     receipt["truth_boundary"] = {
         "exact_vfx_source_phases_consumed": true,
-        "only_resource_lifecycle_or_post_normal_indexing_differs_between_modes": true,
-        "post_normal_index_candidate_indexes_only_after_generate_normals": true,
+        "only_resource_lifecycle_or_attribute_compression_differs_between_modes": true,
+        "compression_candidate_uses_mesh_array_flag_compress_attributes": true,
         "neutral_unshaded_proof_material": true,
         "culling_disabled_for_response_isolation": true,
         "target_device_performance_tested": false,
