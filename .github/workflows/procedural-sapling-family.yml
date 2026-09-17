@@ -29,6 +29,13 @@ jobs:
           repository: mike-axiom-mir/axm-nature-design
           ref: da3adbef4de8cddb8f3ebe841d39bb31a8936f5f
           path: .studio-deps/geometry-leaf-backface
+      - name: Checkout exact VFX leaf-flutter provider
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 9d446359defe1e663d4d9cc683ca0b9cac6bf6c0
+          path: .studio-deps/vfx-leaf-flutter
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -88,6 +95,38 @@ jobs:
           assert data['all_failure_bounds_hold'] is True
           assert data['decision'] == 'PASS_DERIVED_REVIEW_FAMILY_ONLY__NO_SOURCE_OR_RECEIVER_ADOPTION'
           PY
+      - name: Exercise exact VFX leaf flutter across all nine procedural outputs
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_procedural_leaf_flutter_family_evidence.py
+          evidence/tree-procedural-leaf-flutter-family-001
+          --vfx-root .studio-deps/vfx-leaf-flutter
+      - name: Verify procedural leaf-flutter family summary
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('evidence/tree-procedural-leaf-flutter-family-001/summary.json')
+          data = json.loads(p.read_text())
+          assert data['state'] == 'PASS_PROCEDURAL_VARIANTS_VFX_LEAF_FLUTTER_COMPATIBILITY'
+          assert data['source_case_count'] == 3
+          assert data['retained_output_count'] == 9
+          assert data['tested_phase_count_per_output'] == 5
+          assert data['tested_mesh_states_total'] == 45
+          assert data['tested_interior_mesh_states_total'] == 27
+          assert data['distinct_variant_source_digests'] == 9
+          assert data['distinct_baseline_mesh_digests'] == 9
+          assert data['distinct_midpoint_flutter_digests'] == 9
+          assert data['distinct_interior_flutter_digests'] == 27
+          assert data['all_midpoint_outputs_materially_distinct'] is True
+          assert data['all_interior_outputs_materially_distinct'] is True
+          assert data['all_candidate_checks_pass'] is True
+          assert data['all_deterministic_replays_exact'] is True
+          assert data['all_malformed_leaf_controls_rejected'] is True
+          assert data['zero_duration_control_rejected'] is True
+          assert data['decision'] == 'PASS_DERIVED_VFX_COMPATIBILITY_FAMILY_ONLY__NO_SOURCE_OR_RECEIVER_ADOPTION'
+          PY
       - name: Upload exact retained procedural evidence
         if: matrix.python == '3.11'
         uses: actions/upload-artifact@v4
@@ -108,4 +147,11 @@ jobs:
         with:
           name: tree-procedural-leaf-backface-family-001-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/tree-procedural-leaf-backface-family-001
+          if-no-files-found: error
+      - name: Upload exact procedural leaf-flutter family evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tree-procedural-leaf-flutter-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/tree-procedural-leaf-flutter-family-001
           if-no-files-found: error

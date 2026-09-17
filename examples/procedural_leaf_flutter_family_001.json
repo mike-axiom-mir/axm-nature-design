@@ -1,0 +1,64 @@
+{
+  "schema": "axm.nature-procedural-leaf-flutter-family/v0.1",
+  "family_id": "nature-branch-crown-vfx-leaf-flutter-compatibility-001",
+  "relation": "APPLY_EXACT_VFX_LEAF_LOCAL_FLUTTER_TO_EACH_ACCEPTED_PROCEDURAL_VARIANT_NO_SOURCE_OR_RECEIVER_ADOPTION",
+  "vfx_provider": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "ref": "9d446359defe1e663d4d9cc683ca0b9cac6bf6c0",
+    "path": "tools/build_sapling_leaf_flutter_candidate.py",
+    "git_blob": "b64b1edb531c65ebb75bed403a8e1ae951938bb3",
+    "operation": [
+      "_leaf_topology",
+      "_apply_flutter"
+    ]
+  },
+  "source_lineage_ref": "4ddbe66e5c02d22407ef773d5346a2fe6f349a2d",
+  "duration_s": 0.5,
+  "normalized_phases": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "cases": [
+    {
+      "case_id": "sapling-west-a",
+      "source_path": "examples/sapling_neutral_001.json",
+      "family_path": "examples/sapling_variation_family_001.json"
+    },
+    {
+      "case_id": "compact-east-b",
+      "source_path": "examples/compact_east_tree_neutral_001.json",
+      "family_path": "examples/compact_tree_variation_family_001.json"
+    },
+    {
+      "case_id": "east-rear-a",
+      "source_path": "examples/east_rear_tree_neutral_001.json",
+      "family_path": "examples/east_rear_tree_variation_family_001.json"
+    }
+  ],
+  "expected_source_case_count": 3,
+  "expected_variants_per_source": 3,
+  "expected_total_outputs": 9,
+  "expected_leaf_blades_per_output": 25,
+  "expected_flutter_side_vertex_count": 50,
+  "expected_baseline_vertices": 390,
+  "expected_baseline_triangles": 570,
+  "failure_policy": "FAIL_CLOSED_NO_LEAF_TOPOLOGY_GUESSING_NO_ZERO_DURATION_NO_SOURCE_REWRITE_NO_VARIANT_WIDENING_NO_VFX_PROVIDER_FALLBACK",
+  "truth_boundary": {
+    "source_json_rewritten": false,
+    "procedural_mutator_rewritten": false,
+    "procedural_family_bounds_rewritten": false,
+    "vfx_provider_copied_into_procedural_lane": false,
+    "vfx_effect_reauthored": false,
+    "procedural_variants_become_source": false,
+    "whole_tree_wind_response_generalized": false,
+    "renderer_or_current_world_acceptance": false,
+    "wall_clock_playback_or_performance": false,
+    "physical_wind_or_biomechanics": false,
+    "gameplay_or_collision": false,
+    "uc_or_profession_fabric_promotion": false,
+    "canon_or_production_readiness": false
+  }
+}
