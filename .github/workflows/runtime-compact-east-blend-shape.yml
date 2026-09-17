@@ -106,7 +106,7 @@ jobs:
             --script observe_compact_east_tree_blend_shape_runtime.gd -- surface_resubmit_control \
             2>&1 | tee evidence/compact-east-runtime-single-blend-shape-001/control-godot.log
 
-      - name: Measure one-relative-blend-shape candidate
+      - name: Measure one-normalized-blend-shape candidate
         run: |
           set -euo pipefail
           rm -f target-proof-vfx/compact-east-blend-runtime-single_blend_shape_candidate.json target-proof-vfx/compact-east-blend-runtime-single_blend_shape_candidate-*.png
