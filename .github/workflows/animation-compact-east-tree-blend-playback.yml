@@ -1,0 +1,181 @@
+name: Animation compact east single-shape linear playback evidence
+
+on:
+  push:
+    branches: [studio/animation-compact-east-tree-phase-playback-001]
+    paths:
+      - "examples/compact_east_tree_neutral_001.json"
+      - "examples/compact_east_tree_wind_candidate_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/source_topology_migration.py"
+      - "src/axm_nature_design/wind_response.py"
+      - "tools/build_compact_east_tree_wind_candidate.py"
+      - "target-proof-animation/observe_compact_east_tree_blend_playback.gd"
+      - "target-proof-animation/project.godot"
+      - ".github/workflows/animation-compact-east-tree-blend-playback.yml"
+  pull_request:
+    paths:
+      - "examples/compact_east_tree_neutral_001.json"
+      - "examples/compact_east_tree_wind_candidate_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/source_topology_migration.py"
+      - "src/axm_nature_design/wind_response.py"
+      - "tools/build_compact_east_tree_wind_candidate.py"
+      - "target-proof-animation/observe_compact_east_tree_blend_playback.gd"
+      - "target-proof-animation/project.godot"
+      - ".github/workflows/animation-compact-east-tree-blend-playback.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compact-east-single-shape-animation-playback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Animation head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Animation, VFX and Runtime-reference identities
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          OBSERVED="$(git rev-parse HEAD)"
+          test "$OBSERVED" = "$EXPECTED"
+          git merge-base --is-ancestor cef2ad78d8e36a55ada5dad07329f1a7125d48de HEAD
+          git fetch --no-tags origin refs/heads/studio/runtime-compact-east-resource-reuse-001:refs/remotes/origin/animation-runtime-reference
+          test "$(git rev-parse refs/remotes/origin/animation-runtime-reference)" = '6ea4148da61d3806123712e2eaf19613df9ae1eb'
+          printf '%s\n' "$OBSERVED" > exact-head.txt
+          printf '%s\n' 'cef2ad78d8e36a55ada5dad07329f1a7125d48de' > vfx-parent-head.txt
+          printf '%s\n' '6ea4148da61d3806123712e2eaf19613df9ae1eb' > runtime-reference-head.txt
+          mkdir -p evidence/compact-east-tree-animation-blend-playback-001
+          git show 6ea4148da61d3806123712e2eaf19613df9ae1eb:target-proof-vfx/observe_compact_east_tree_blend_shape_runtime.gd > evidence/compact-east-tree-animation-blend-playback-001/runtime-single-shape-reference.gd
+          sha256sum evidence/compact-east-tree-animation-blend-playback-001/runtime-single-shape-reference.gd > evidence/compact-east-tree-animation-blend-playback-001/runtime-single-shape-reference.sha256
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Rebuild exact pinned VFX response states
+        run: |
+          set -euo pipefail
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -v
+          rm -rf evidence/compact-east-tree-wind-candidate-001
+          python tools/build_compact_east_tree_wind_candidate.py evidence/compact-east-tree-wind-candidate-001
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          root = Path('evidence/compact-east-tree-wind-candidate-001')
+          s = json.loads((root/'summary.json').read_text())
+          assert s['state'] == 'PASS_COMPACT_EAST_TREE_BOUNDED_VISUAL_RESPONSE_CANDIDATE', s
+          assert s['sample_count'] == 17, s
+          assert s['response']['duration_s'] == 0.5, s
+          assert s['response']['phase_count'] == 16, s
+          assert s['migrated_neutral_mesh_digest'] == '420135f6effbadb1b344675948b9ddc471dcb83177702888f0b32327c5121c18', s
+          payloads = [json.loads((root/f'phase_{i:02d}_mesh.json').read_text()) for i in range(17)]
+          v0 = payloads[0]['vertices']; vp = payloads[8]['vertices']
+          maximum = 0.0
+          for i, payload in enumerate(payloads):
+              w = math.sin(math.pi * i / 16.0)
+              for j, actual in enumerate(payload['vertices']):
+                  predicted = [v0[j][a] + w * (vp[j][a] - v0[j][a]) for a in range(3)]
+                  maximum = max(maximum, math.dist(actual, predicted))
+          assert maximum <= 1e-12, maximum
+          print({'source_half_sine_family_max_residual_m': maximum})
+          PY
+          rm -rf target-proof-animation/generated-compact-east
+          mkdir -p target-proof-animation/generated-compact-east
+          cp evidence/compact-east-tree-wind-candidate-001/summary.json target-proof-animation/generated-compact-east/
+          cp evidence/compact-east-tree-wind-candidate-001/phase_*_mesh.json target-proof-animation/generated-compact-east/
+          cp exact-head.txt target-proof-animation/generated-compact-east/
+          cp vfx-parent-head.txt target-proof-animation/generated-compact-east/
+          cp runtime-reference-head.txt target-proof-animation/generated-compact-east/
+          cp exact-head.txt evidence/compact-east-tree-animation-blend-playback-001/
+          cp vfx-parent-head.txt evidence/compact-east-tree-animation-blend-playback-001/
+          cp runtime-reference-head.txt evidence/compact-east-tree-animation-blend-playback-001/
+          cp evidence/compact-east-tree-wind-candidate-001/summary.json evidence/compact-east-tree-animation-blend-playback-001/vfx-summary.json
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Run capture-free single-shape AnimationPlayer witness
+        run: |
+          set -euo pipefail
+          rm -f target-proof-animation/compact-east-tree-blend-playback-receipt.json
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --headless \
+            --rendering-method gl_compatibility \
+            --path target-proof-animation \
+            --script observe_compact_east_tree_blend_playback.gd \
+            2>&1 | tee evidence/compact-east-tree-animation-blend-playback-001/godot-animation-blend-playback.log
+          cp target-proof-animation/compact-east-tree-blend-playback-receipt.json evidence/compact-east-tree-animation-blend-playback-001/
+
+      - name: Validate scoped Animation result
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('evidence/compact-east-tree-animation-blend-playback-001')
+          r = json.loads((root/'compact-east-tree-blend-playback-receipt.json').read_text())
+          head = (root/'exact-head.txt').read_text().strip()
+          assert r['state'] == 'PASS_COMPACT_EAST_SINGLE_SHAPE_LINEAR_ANIMATIONPLAYER_PLAYBACK_CHARACTERIZED', r
+          assert r['animation_head'] == head, (r.get('animation_head'), head)
+          assert r['vfx_parent_head'] == 'cef2ad78d8e36a55ada5dad07329f1a7125d48de', r
+          assert r['runtime_reference_head'] == '6ea4148da61d3806123712e2eaf19613df9ae1eb', r
+          assert r['sample_count_endpoint_inclusive'] == 17, r
+          assert r['dense_sample_count'] == 129, r
+          assert r['source_half_sine_family_max_residual_m'] <= 1e-12, r
+          assert r['max_authored_key_geometry_residual_m'] <= 2e-6, r
+          assert r['negative_peak_weight_mutation_geometry_residual_m'] > 0.001, r
+          assert r['max_dense_animationplayer_vs_manual_linear_weight_residual'] <= 1e-5, r
+          assert 0.0 < r['max_dense_linear_vs_analytic_half_sine_geometry_envelope_m'] <= 0.00066, r
+          assert r['real_playback_wrap_count'] == 3, r
+          assert r['max_real_playback_vs_manual_linear_weight_residual'] <= 1e-5, r
+          truth = r['truth_boundary']
+          assert truth['exact_vfx_source_states_reused_unchanged'] is True, truth
+          assert truth['runtime_single_shape_candidate_referenced_not_adopted'] is True, truth
+          assert truth['between_key_linear_motion_tested'] is True, truth
+          assert truth['between_key_motion_is_animation_candidate_not_vfx_source_truth'] is True, truth
+          assert truth['continuous_visual_smoothness_accepted'] is False, truth
+          assert truth['runtime_controller_or_state_machine'] is False, truth
+          assert truth['gameplay_or_collision'] is False, truth
+          assert truth['art_direction_or_visual_qa_acceptance'] is False, truth
+          print(json.dumps({
+              'state': r['state'],
+              'source_half_sine_family_max_residual_m': r['source_half_sine_family_max_residual_m'],
+              'max_authored_key_geometry_residual_m': r['max_authored_key_geometry_residual_m'],
+              'negative_peak_weight_mutation_geometry_residual_m': r['negative_peak_weight_mutation_geometry_residual_m'],
+              'max_dense_animationplayer_vs_manual_linear_weight_residual': r['max_dense_animationplayer_vs_manual_linear_weight_residual'],
+              'max_dense_linear_vs_analytic_half_sine_weight_delta': r['max_dense_linear_vs_analytic_half_sine_weight_delta'],
+              'max_dense_linear_vs_analytic_half_sine_geometry_envelope_m': r['max_dense_linear_vs_analytic_half_sine_geometry_envelope_m'],
+              'real_playback_wrap_count': r['real_playback_wrap_count'],
+              'real_playback_process_frames': r['real_playback_process_frames'],
+          }, indent=2))
+          PY
+          cp target-proof-animation/observe_compact_east_tree_blend_playback.gd evidence/compact-east-tree-animation-blend-playback-001/
+          cp .github/workflows/animation-compact-east-tree-blend-playback.yml evidence/compact-east-tree-animation-blend-playback-001/
+
+      - name: Retain exact single-shape Animation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compact-east-tree-animation-blend-playback-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/compact-east-tree-animation-blend-playback-001
+          if-no-files-found: warn
+          retention-days: 30
