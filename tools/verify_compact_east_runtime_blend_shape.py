@@ -21,7 +21,7 @@ PHASES = 17
 SOURCE_VERTICES = 390
 SOURCE_TRIANGLES = 570
 TRIANGLE_CORNERS = SOURCE_TRIANGLES * 3
-BLEND_SHAPE_RELATIVE = 1
+BLEND_SHAPE_NORMALIZED = 0
 PEAK_PHASE = 8
 MAX_SOURCE_LINEAR_RESIDUAL_M = 1e-12
 MAX_BAKED_VERTEX_RESIDUAL_M = 2e-6
@@ -196,7 +196,7 @@ def evaluate(control: dict[str, Any], candidate: dict[str, Any], image_root: Pat
             n_storage = n_update.get("mesh_storage", {})
             if int(c_storage.get("blend_shape_count", -1)) != 0:
                 representation_ok = False
-            if int(n_storage.get("blend_shape_count", -1)) != 1 or int(n_storage.get("blend_shape_mode", -1)) != BLEND_SHAPE_RELATIVE or n_storage.get("representation") != "ONE_RELATIVE_BLEND_SHAPE_NEUTRAL_TO_PEAK":
+            if int(n_storage.get("blend_shape_count", -1)) != 1 or int(n_storage.get("blend_shape_mode", -1)) != BLEND_SHAPE_NORMALIZED or n_storage.get("representation") != "ONE_NORMALIZED_BLEND_SHAPE_NEUTRAL_TO_PEAK":
                 representation_ok = False
             expected_weight = math.sin(math.pi * phase / (PHASES - 1))
             if abs(float(n_update.get("blend_shape_weight", math.inf)) - expected_weight) > 2e-7:
@@ -236,7 +236,7 @@ def evaluate(control: dict[str, Any], candidate: dict[str, Any], image_root: Pat
 
     stable_ids = all(len(values) == 1 and -1 not in values for values in candidate_ids.values())
     checks["exact_unindexed_triangle_corner_topology_preserved"] = topology_ok
-    checks["candidate_is_one_relative_blend_shape"] = representation_ok
+    checks["candidate_is_one_normalized_blend_shape"] = representation_ok
     checks["candidate_weights_match_exact_17_phase_half_sine"] = weights_ok
     checks["candidate_resource_ids_stable_all_retained_phases"] = stable_ids
     checks["candidate_baked_vertex_residual_within_2um"] = max_baked_vertex_distance <= MAX_BAKED_VERTEX_RESIDUAL_M
@@ -269,7 +269,7 @@ def evaluate(control: dict[str, Any], candidate: dict[str, Any], image_root: Pat
     )
 
     return {
-        "schema": "axm.nature-compact-east-runtime-single-blend-shape-comparison/v0.1",
+        "schema": "axm.nature-compact-east-runtime-single-blend-shape-comparison/v0.2",
         "state": state,
         "checks": checks,
         "parent_vfx_head": EXPECTED_PARENT,
@@ -304,8 +304,8 @@ def evaluate(control: dict[str, Any], candidate: dict[str, Any], image_root: Pat
         "visual_tradeoff_for_art_director": visual_tradeoff,
         "decision_note": (
             "The exact 17-state compact-east source is first proven representable by one neutral-to-peak linear shape under its existing half-sine phase weights. "
-            "The candidate then keeps one MeshInstance3D/ArrayMesh/material and changes only one blend-shape weight per update, replacing CPU surface regeneration. "
-            "PASS requires a real proof-host submission-time reduction and micrometer-scale baked position agreement; added blend-shape buffer cost and normal-lit raster differences remain explicit tradeoffs rather than hidden acceptance."
+            "The candidate stores one normalized peak blend shape so position and normal arrays remain valid absolute attributes, then keeps one MeshInstance3D/ArrayMesh/material and changes only one blend weight per update. "
+            "PASS requires a real proof-host submission-time reduction and micrometer-scale baked position agreement; added blend-shape buffer cost and simple normal-lit raster differences remain explicit tradeoffs rather than hidden acceptance."
         ),
         "truth_boundary": {
             "exact_compact_east_vfx_phases": True,
