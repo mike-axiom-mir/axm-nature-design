@@ -97,7 +97,7 @@ func storage_receipt(mesh: ArrayMesh) -> Dictionary:
     }
     if mesh.get_blend_shape_count() == 1:
         result["peak_phase"] = PEAK_PHASE
-        result["representation"] = "ONE_RELATIVE_BLEND_SHAPE_NEUTRAL_TO_PEAK"
+        result["representation"] = "ONE_NORMALIZED_BLEND_SHAPE_NEUTRAL_TO_PEAK"
     return result
 
 func fill_surface_control(mesh: ArrayMesh, payload: Dictionary) -> Dictionary:
@@ -107,15 +107,6 @@ func fill_surface_control(mesh: ArrayMesh, payload: Dictionary) -> Dictionary:
         return {}
     mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
     return storage_receipt(mesh)
-
-func subtract_vectors(a: PackedVector3Array, b: PackedVector3Array) -> PackedVector3Array:
-    var out := PackedVector3Array()
-    if a.size() != b.size():
-        return out
-    out.resize(a.size())
-    for index in range(a.size()):
-        out[index] = a[index] - b[index]
-    return out
 
 func build_blend_shape_mesh(mesh: ArrayMesh) -> Dictionary:
     if payloads.size() != PHASE_COUNT:
@@ -134,9 +125,9 @@ func build_blend_shape_mesh(mesh: ArrayMesh) -> Dictionary:
         return {}
     var blend_arrays := []
     blend_arrays.resize(Mesh.ARRAY_MAX)
-    blend_arrays[Mesh.ARRAY_VERTEX] = subtract_vectors(peak_vertices, neutral_vertices)
-    blend_arrays[Mesh.ARRAY_NORMAL] = subtract_vectors(peak_normals, neutral_normals)
-    mesh.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_RELATIVE
+    blend_arrays[Mesh.ARRAY_VERTEX] = peak_vertices
+    blend_arrays[Mesh.ARRAY_NORMAL] = peak_normals
+    mesh.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
     mesh.add_blend_shape("compact_east_peak")
     mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, neutral_arrays, [blend_arrays])
     return storage_receipt(mesh)
@@ -296,7 +287,7 @@ func _initialize() -> void:
     var args := OS.get_cmdline_user_args()
     var mode := String(args[0]) if args.size() > 0 else ""
     var receipt := {
-        "schema": "axm.nature-compact-east-runtime-single-blend-shape/v0.1",
+        "schema": "axm.nature-compact-east-runtime-single-blend-shape/v0.2",
         "state": "NOT_RUN",
         "mode": mode,
         "parent_vfx_head": EXPECTED_PARENT_HEAD,
@@ -421,7 +412,7 @@ func _initialize() -> void:
     receipt["truth_boundary"] = {
         "exact_vfx_source_phases_consumed": true,
         "control_rebuilds_same_unindexed_triangle_corner_surface": true,
-        "candidate_uses_one_relative_neutral_to_peak_blend_shape": mode == "single_blend_shape_candidate",
+        "candidate_uses_one_normalized_neutral_to_peak_blend_shape": mode == "single_blend_shape_candidate",
         "candidate_phase_updates_change_only_one_blend_weight_after_initial_build": mode == "single_blend_shape_candidate",
         "unshaded_silhouette_and_simple_normal_lit_frames_measured": true,
         "final_materials_or_leaf_sidedness_tested": false,
