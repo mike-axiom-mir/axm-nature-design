@@ -22,6 +22,13 @@ jobs:
           repository: mike-axiom-mir/axm-nature-design
           ref: 4ddbe66e5c02d22407ef773d5346a2fe6f349a2d
           path: .studio-deps/migrated-nature
+      - name: Checkout exact Geometry leaf-backface provider
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da3adbef4de8cddb8f3ebe841d39bb31a8936f5f
+          path: .studio-deps/geometry-leaf-backface
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -56,6 +63,31 @@ jobs:
           assert data['all_shared_edge_orientation_conflicts_zero'] is True
           assert data['all_failure_bounds_hold'] is True
           PY
+      - name: Derive exact Geometry leaf-backface candidate across all nine procedural outputs
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_procedural_leaf_backface_family_evidence.py
+          evidence/tree-procedural-leaf-backface-family-001
+          --geometry-root .studio-deps/geometry-leaf-backface
+      - name: Verify procedural leaf-backface family summary
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('evidence/tree-procedural-leaf-backface-family-001/summary.json')
+          data = json.loads(p.read_text())
+          assert data['state'] == 'PASS_PROCEDURAL_VARIANTS_EXPLICIT_LEAF_BACKFACE_DERIVATION'
+          assert data['source_case_count'] == 3
+          assert data['retained_output_count'] == 9
+          assert data['distinct_variant_source_digests'] == 9
+          assert data['distinct_baseline_mesh_digests'] == 9
+          assert data['distinct_candidate_mesh_digests'] == 9
+          assert data['all_outputs_materially_distinct'] is True
+          assert data['all_candidate_checks_pass'] is True
+          assert data['all_failure_bounds_hold'] is True
+          assert data['decision'] == 'PASS_DERIVED_REVIEW_FAMILY_ONLY__NO_SOURCE_OR_RECEIVER_ADOPTION'
+          PY
       - name: Upload exact retained procedural evidence
         if: matrix.python == '3.11'
         uses: actions/upload-artifact@v4
@@ -69,4 +101,11 @@ jobs:
         with:
           name: tree-branch-crown-migrated-lineage-001-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/tree-branch-crown-migrated-lineage-001
+          if-no-files-found: error
+      - name: Upload exact procedural leaf-backface family evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tree-procedural-leaf-backface-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/tree-procedural-leaf-backface-family-001
           if-no-files-found: error
