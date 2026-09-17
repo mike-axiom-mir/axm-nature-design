@@ -9,6 +9,7 @@ on:
       - "examples/sapling_neutral_001.json"
       - "examples/sapling_wind_response_migrated_001.json"
       - "tools/build_sapling_leaf_flutter_candidate.py"
+      - "tools/build_sapling_leaf_flutter_review.py"
       - "target-proof-vfx/observe_leaf_flutter_candidate.gd"
       - "target-proof-vfx/project.godot"
       - ".github/workflows/vfx-leaf-flutter-candidate.yml"
@@ -19,6 +20,7 @@ on:
       - "examples/sapling_neutral_001.json"
       - "examples/sapling_wind_response_migrated_001.json"
       - "tools/build_sapling_leaf_flutter_candidate.py"
+      - "tools/build_sapling_leaf_flutter_review.py"
       - "target-proof-vfx/observe_leaf_flutter_candidate.gd"
       - "target-proof-vfx/project.godot"
       - ".github/workflows/vfx-leaf-flutter-candidate.yml"
@@ -106,10 +108,7 @@ jobs:
           assert s['negative_control_duplicate_detachment_rejected'] is True, s
           assert s['samples'][0]['baseline_candidate_digest'] == s['samples'][0]['flutter_candidate_digest'], s
           assert s['samples'][-1]['baseline_candidate_digest'] == s['samples'][-1]['flutter_candidate_digest'], s
-          assert any(
-              row['baseline_candidate_digest'] != row['flutter_candidate_digest']
-              for row in s['samples'][1:-1]
-          ), s
+          assert any(row['baseline_candidate_digest'] != row['flutter_candidate_digest'] for row in s['samples'][1:-1]), s
           truth = s['truth_boundary']
           assert truth['existing_wind_response_reauthored'] is False, truth
           assert truth['geometry_leaf_candidate_reauthored'] is False, truth
@@ -118,12 +117,7 @@ jobs:
           assert truth['physical_wind_or_biomechanics'] is False, truth
           assert truth['gameplay_or_collision'] is False, truth
           assert truth['wall_clock_timing_or_target_performance'] is False, truth
-          print(json.dumps({
-              'state': s['state'],
-              'phase_count': len(s['samples']),
-              'max_observed_flutter_vertex_delta_m': s['max_observed_flutter_vertex_delta_m'],
-              'max_observed_abs_twist_deg': s['max_observed_abs_twist_deg'],
-          }, indent=2))
+          print(json.dumps({'state': s['state'], 'phase_count': len(s['samples']), 'max_observed_flutter_vertex_delta_m': s['max_observed_flutter_vertex_delta_m'], 'max_observed_abs_twist_deg': s['max_observed_abs_twist_deg']}, indent=2))
           PY
 
       - name: Download pinned Godot 4.7.2
@@ -192,12 +186,43 @@ jobs:
           assert truth['gameplay_or_collision'] is False, truth
           assert truth['runtime_cost_or_target_device_performance'] is False, truth
           assert truth['map_receiving_scene_equivalence'] is False, truth
-          print(json.dumps({
-              'state': r['state'],
-              'interior_renderer_visible_phase_counts': r['interior_renderer_visible_phase_counts'],
-              'max_changed_pixels_baseline_vs_flutter': r['max_changed_pixels_baseline_vs_flutter'],
-              'max_mean_abs_rgb_baseline_vs_flutter': r['max_mean_abs_rgb_baseline_vs_flutter'],
-          }, indent=2))
+          print(json.dumps({'state': r['state'], 'interior_renderer_visible_phase_counts': r['interior_renderer_visible_phase_counts'], 'max_changed_pixels_baseline_vs_flutter': r['max_changed_pixels_baseline_vs_flutter'], 'max_mean_abs_rgb_baseline_vs_flutter': r['max_mean_abs_rgb_baseline_vs_flutter']}, indent=2))
+          PY
+
+      - name: Build exact sampled review surface from retained Godot frames
+        run: |
+          set -euo pipefail
+          python tools/build_sapling_leaf_flutter_review.py evidence/sapling-leaf-flutter-candidate-001
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('evidence/sapling-leaf-flutter-candidate-001')
+          s = json.loads((root/'leaf-flutter-sampled-review-summary.json').read_text())
+          head = (root/'exact-head.txt').read_text().strip()
+          assert s['state'] == 'PASS_BOUNDED_LEAF_FLUTTER_SAMPLED_REVIEW_SURFACE', s
+          assert s['vfx_head'] == head, (s['vfx_head'], head)
+          assert s['capture_hashes_verified'] == 68, s
+          assert s['displayed_unique_phase_count_per_loop'] == 16, s
+          assert s['endpoint_witness_phase'] == 16, s
+          assert s['source_phase_step_s'] == 0.03125, s
+          assert s['neutral_endpoint_seam']['ground_oblique']['changed_pixels'] == 0, s
+          assert s['neutral_endpoint_seam']['crown_overhead']['changed_pixels'] == 0, s
+          assert s['interior_twist_direction_balance']['min_positive_twist_leaves'] >= 1, s
+          assert s['interior_twist_direction_balance']['min_negative_twist_leaves'] >= 1, s
+          truth = s['truth_boundary']
+          assert truth['effect_or_source_reauthored'] is False, truth
+          assert truth['real_godot_frames_reused_exactly'] is True, truth
+          assert truth['browser_playback_is_review_ui_only'] is True, truth
+          assert truth['wall_clock_frame_pacing_proven'] is False, truth
+          assert truth['continuous_interpolation_proven'] is False, truth
+          assert truth['perceptual_naturalness_or_aesthetic_acceptance'] is False, truth
+          assert truth['physical_wind_or_biomechanics'] is False, truth
+          assert truth['gameplay_or_collision'] is False, truth
+          assert truth['target_device_performance'] is False, truth
+          assert truth['current_world_map_receiving_equivalence'] is False, truth
+          assert truth['final_art_or_canon'] is False, truth
+          assert (root/'leaf-flutter-sampled-review.html').stat().st_size > 100000
+          print(json.dumps({'state': s['state'], 'capture_hashes_verified': s['capture_hashes_verified'], 'displayed_unique_phase_count_per_loop': s['displayed_unique_phase_count_per_loop'], 'twist_direction_balance': s['interior_twist_direction_balance']}, indent=2))
           PY
 
       - name: Retain exact bounded leaf flutter VFX evidence
