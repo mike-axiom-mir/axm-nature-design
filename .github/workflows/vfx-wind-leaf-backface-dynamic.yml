@@ -132,14 +132,14 @@ jobs:
           assert r['geometry_leaf_candidate_digest'] == 'e0b423bd4ff20251a960655441f97e36277da2f5b88a832ecfc5ccfe404bbbea', r
           assert r['migrated_neutral_mesh_digest'] == '47dd4d82651138299d05071df3e8a410f21f673ab8d42b936d7222eb5351b862', r
           assert r['sample_ids'] == ['0000','0125','0250','0375','0500'], r
-          assert set(r['contexts']) == {'ground_oblique','crown_underside'}, r
+          assert set(r['contexts']) == {'ground_oblique','crown_overhead'}, r
           assert len(r['captures']) == 40, len(r['captures'])
           assert len(r['no_cull_front_vs_candidate']) == 10, r
           assert all(v['changed_pixels'] == 0 for v in r['no_cull_front_vs_candidate'].values()), r
           assert all(v['changed_pixels'] == 0 for v in r['candidate_culling_stability'].values()), r
           assert all(v['changed_pixels'] == 0 for v in r['candidate_back_equals_front_no_cull'].values()), r
           assert r['total_baseline_culling_loss_changed_pixels'] > 0, r
-          assert r['single_sided_baseline_culling_loss']['crown_underside/0000']['changed_pixels'] > 0, r
+          assert r['single_sided_baseline_culling_loss']['crown_overhead/0000']['changed_pixels'] > 0, r
           assert all(v['changed_pixels'] == 0 for v in r['neutral_return'].values()), r
           assert all(v['changed_pixels'] > 0 for v in r['neutral_to_peak_visual_delta'].values()), r
           assert all(v['changed_pixels'] == 0 for v in r['mirrored_phase_visual_identity'].values()), r
