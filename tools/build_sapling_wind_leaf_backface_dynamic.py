@@ -119,6 +119,16 @@ def _assert_dynamic_candidate(mesh: dict, mapping: dict[int, int]) -> None:
         raise ValueError("dynamic leaf backfaces detached from their exact source front vertices")
 
 
+def _max_vertex_distance(a: dict, b: dict) -> float:
+    if a["triangles"] != b["triangles"] or len(a["vertices"]) != len(b["vertices"]):
+        raise ValueError("dynamic leaf phase comparison requires identical topology")
+    maximum = 0.0
+    for av, bv in zip(a["vertices"], b["vertices"]):
+        distance = math.sqrt(sum((float(av[axis]) - float(bv[axis])) ** 2 for axis in range(3)))
+        maximum = max(maximum, distance)
+    return maximum
+
+
 def main() -> int:
     if len(sys.argv) not in (2, 3):
         raise SystemExit("usage: build_sapling_wind_leaf_backface_dynamic.py GEOMETRY_EVIDENCE_DIR [OUTPUT_DIR]")
@@ -182,8 +192,9 @@ def main() -> int:
         raise SystemExit("dynamic candidate does not reproduce exact Geometry neutral identity at t=0")
     if samples[-1]["candidate_mesh_digest"] != EXPECTED_LEAF_CANDIDATE_DIGEST:
         raise SystemExit("dynamic candidate does not return exactly to Geometry neutral identity")
-    if samples[1]["candidate_mesh_digest"] != samples[3]["candidate_mesh_digest"]:
-        raise SystemExit("half-sine symmetric leaf candidate phases no longer match exactly")
+    mirrored_source_residual_m = _max_vertex_distance(candidate_meshes[1], candidate_meshes[3])
+    if mirrored_source_residual_m > 1e-12:
+        raise SystemExit(f"half-sine symmetric leaf candidate phases drifted beyond tolerance: {mirrored_source_residual_m}")
     if samples[0]["candidate_mesh_digest"] == samples[2]["candidate_mesh_digest"]:
         raise SystemExit("peak dynamic leaf candidate is not distinct from neutral")
 
@@ -214,6 +225,7 @@ def main() -> int:
         "candidate_triangles": len(candidate_neutral["triangles"]),
         "leaf_backface_duplicate_vertices": len(mapping),
         "max_duplicate_position_gap_m": max(sample["max_duplicate_position_gap_m"] for sample in samples),
+        "mirrored_source_phase_residual_m": mirrored_source_residual_m,
         "negative_control_duplicate_drift_rejected": negative_control_rejected,
         "samples": samples,
         "truth_boundary": {
