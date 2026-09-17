@@ -88,13 +88,17 @@ func storage_receipt(mesh: ArrayMesh) -> Dictionary:
         stored_vertex_count = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
     if arrays.size() > Mesh.ARRAY_INDEX and arrays[Mesh.ARRAY_INDEX] != null:
         stored_index_count = (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size()
-    return {
+    var result := {
         "stored_vertex_count": stored_vertex_count,
         "stored_index_count": stored_index_count,
         "surface_format": int(mesh.surface_get_format(0)),
         "blend_shape_count": mesh.get_blend_shape_count(),
         "blend_shape_mode": int(mesh.blend_shape_mode),
     }
+    if mesh.get_blend_shape_count() == 1:
+        result["peak_phase"] = PEAK_PHASE
+        result["representation"] = "ONE_RELATIVE_BLEND_SHAPE_NEUTRAL_TO_PEAK"
+    return result
 
 func fill_surface_control(mesh: ArrayMesh, payload: Dictionary) -> Dictionary:
     mesh.clear_surfaces()
@@ -135,10 +139,7 @@ func build_blend_shape_mesh(mesh: ArrayMesh) -> Dictionary:
     mesh.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_RELATIVE
     mesh.add_blend_shape("compact_east_peak")
     mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, neutral_arrays, [blend_arrays])
-    var result := storage_receipt(mesh)
-    result["peak_phase"] = PEAK_PHASE
-    result["representation"] = "ONE_RELATIVE_BLEND_SHAPE_NEUTRAL_TO_PEAK"
-    return result
+    return storage_receipt(mesh)
 
 func phase_weight(phase_index: int) -> float:
     return sin(PI * float(phase_index) / float(PHASE_COUNT - 1))
@@ -209,16 +210,16 @@ func compare_baked_to_source(payload: Dictionary) -> Dictionary:
     var max_normal_angle_deg := 0.0
     var max_normal_length_delta := 0.0
     for index in range(actual_vertices.size()):
-        var av := actual_vertices[index]
-        var ev := expected_vertices[index]
+        var av: Vector3 = actual_vertices[index]
+        var ev: Vector3 = expected_vertices[index]
         max_vertex_component_delta = max(max_vertex_component_delta, abs(av.x - ev.x), abs(av.y - ev.y), abs(av.z - ev.z))
         max_vertex_distance = max(max_vertex_distance, av.distance_to(ev))
-        var an := actual_normals[index]
-        var en := expected_normals[index]
+        var an: Vector3 = actual_normals[index]
+        var en: Vector3 = expected_normals[index]
         max_normal_component_delta = max(max_normal_component_delta, abs(an.x - en.x), abs(an.y - en.y), abs(an.z - en.z))
         max_normal_length_delta = max(max_normal_length_delta, abs(an.length() - 1.0))
         if an.length_squared() > 0.0 and en.length_squared() > 0.0:
-            var cosine := clamp(an.normalized().dot(en.normalized()), -1.0, 1.0)
+            var cosine: float = clampf(an.normalized().dot(en.normalized()), -1.0, 1.0)
             max_normal_angle_deg = max(max_normal_angle_deg, rad_to_deg(acos(cosine)))
     return {
         "baked_vertex_count": actual_vertices.size(),
