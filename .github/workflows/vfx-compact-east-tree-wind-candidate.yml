@@ -1,0 +1,156 @@
+name: Nature VFX compact east tree wind candidate evidence
+
+on:
+  push:
+    branches: [studio/vfx-sapling-wind-response-migrated-001]
+    paths:
+      - "examples/compact_east_tree_neutral_001.json"
+      - "examples/compact_east_tree_wind_candidate_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/source_topology_migration.py"
+      - "src/axm_nature_design/wind_response.py"
+      - "tools/build_compact_east_tree_wind_candidate.py"
+      - "target-proof-vfx/observe_compact_east_tree_wind_candidate.gd"
+      - "target-proof-vfx/project.godot"
+      - ".github/workflows/vfx-compact-east-tree-wind-candidate.yml"
+  pull_request:
+    paths:
+      - "examples/compact_east_tree_neutral_001.json"
+      - "examples/compact_east_tree_wind_candidate_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/source_topology_migration.py"
+      - "src/axm_nature_design/wind_response.py"
+      - "tools/build_compact_east_tree_wind_candidate.py"
+      - "target-proof-vfx/observe_compact_east_tree_wind_candidate.gd"
+      - "target-proof-vfx/project.godot"
+      - ".github/workflows/vfx-compact-east-tree-wind-candidate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compact-east-tree-response:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact VFX PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact VFX head and migration ancestry
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          OBSERVED="$(git rev-parse HEAD)"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > exact-head.txt
+          git merge-base --is-ancestor 4ddbe66e5c02d22407ef773d5346a2fe6f349a2d HEAD
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build exact compact east tree response evidence
+        run: |
+          set -euo pipefail
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -v
+          rm -rf evidence/compact-east-tree-wind-candidate-001
+          python tools/build_compact_east_tree_wind_candidate.py evidence/compact-east-tree-wind-candidate-001
+          cp exact-head.txt evidence/compact-east-tree-wind-candidate-001/exact-head.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('evidence/compact-east-tree-wind-candidate-001')
+          s = json.loads((root/'summary.json').read_text())
+          assert s['state'] == 'PASS_COMPACT_EAST_TREE_BOUNDED_VISUAL_RESPONSE_CANDIDATE', s
+          assert s['sample_count'] == 17, s
+          assert s['migrated_neutral_mesh_digest'] == '420135f6effbadb1b344675948b9ddc471dcb83177702888f0b32327c5121c18', s
+          assert s['peak_max_displacement_m'] <= 0.135000000001, s
+          assert s['peak_max_displacement_m'] >= 0.11475, s
+          assert s['max_anchor_displacement_m'] <= 1e-12, s
+          assert s['max_crosswind_residual_m'] <= 1e-12, s
+          assert s['max_phase_symmetry_residual_m'] <= 1e-12, s
+          assert s['peak_leaf_base_support_gap_m'] <= 1e-12, s
+          assert all(s['checks'].values()), s
+          PY
+          rm -rf target-proof-vfx/generated-compact-east
+          mkdir -p target-proof-vfx/generated-compact-east
+          cp evidence/compact-east-tree-wind-candidate-001/summary.json target-proof-vfx/generated-compact-east/
+          cp evidence/compact-east-tree-wind-candidate-001/phase_*_mesh.json target-proof-vfx/generated-compact-east/
+          cp exact-head.txt target-proof-vfx/generated-compact-east/
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Observe exact compact east tree response in pinned Godot
+        run: |
+          set -euo pipefail
+          rm -f target-proof-vfx/compact-east-tree-wind-target-receipt.json target-proof-vfx/compact-wind-*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof-vfx \
+            --script observe_compact_east_tree_wind_candidate.gd \
+            2>&1 | tee evidence/compact-east-tree-wind-candidate-001/godot-target-host.log
+          cp target-proof-vfx/compact-east-tree-wind-target-receipt.json evidence/compact-east-tree-wind-candidate-001/
+          cp target-proof-vfx/compact-wind-*.png evidence/compact-east-tree-wind-candidate-001/
+
+      - name: Validate bounded target-host response result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('evidence/compact-east-tree-wind-candidate-001')
+          r = json.loads((root/'compact-east-tree-wind-target-receipt.json').read_text())
+          head = (root/'exact-head.txt').read_text().strip()
+          assert r['state'] == 'PASS_COMPACT_EAST_TREE_17_PHASE_TARGET_VISUAL_RESPONSE', r
+          assert r['vfx_head'] == head, (r['vfx_head'], head)
+          assert r['migrated_neutral_mesh_digest'] == '420135f6effbadb1b344675948b9ddc471dcb83177702888f0b32327c5121c18', r
+          assert r['phase_count'] == 17, r
+          assert set(r['contexts']) == {'ground_oblique','crown_oblique'}, r
+          assert len(r['captures']) == 34, r
+          assert all(v['changed_pixels'] == 0 for v in r['neutral_return'].values()), r
+          assert all(v['changed_pixels'] > 0 for v in r['neutral_to_peak_visual_delta'].values()), r
+          assert all(v['changed_pixels'] == 0 for v in r['phase_symmetry'].values()), r
+          truth = r['truth_boundary']
+          assert truth['target_host_shape_motion_observed'] is True, truth
+          assert truth['culling_disabled_for_response_isolation'] is True, truth
+          assert truth['leaf_sidedness_or_final_materials_tested'] is False, truth
+          assert truth['continuous_playback_or_wall_clock_timing_tested'] is False, truth
+          assert truth['map_receiving_scene_tested'] is False, truth
+          assert truth['physical_wind_or_biomechanics'] is False, truth
+          assert truth['gameplay_or_collision'] is False, truth
+          assert truth['target_device_performance'] is False, truth
+          assert truth['art_direction_acceptance'] is False, truth
+          PY
+
+      - name: Retain exact compact east tree response evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compact-east-tree-wind-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/compact-east-tree-wind-candidate-001
+          if-no-files-found: warn
+          retention-days: 30
