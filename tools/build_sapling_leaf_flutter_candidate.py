@@ -204,9 +204,25 @@ def _apply_flutter(front_mesh: dict, leaves: list[dict], time_s: float, duration
     if duration_s <= 0.0:
         raise ValueError("duration must be positive")
     normalized = max(0.0, min(1.0, float(time_s) / duration_s))
+    result = copy.deepcopy(front_mesh)
+
+    # Endpoint identity is part of the proof contract, not a numerical
+    # approximation. Do not run even a zero-angle rotation here: float
+    # normalization/Rodrigues arithmetic can rewrite bytes while leaving the
+    # shape visually unchanged. Exact neutral source state must stay exact.
+    if normalized == 0.0 or normalized == 1.0:
+        return result, [
+            {
+                "region_id": leaf["region_id"],
+                "order": int(leaf["order"]),
+                "twist_deg": 0.0,
+                "max_side_vertex_delta_m": 0.0,
+            }
+            for leaf in leaves
+        ]
+
     envelope = math.sin(math.pi * normalized)
     max_twist_rad = math.radians(MAX_TWIST_DEG)
-    result = copy.deepcopy(front_mesh)
     leaf_records = []
 
     for leaf in leaves:
