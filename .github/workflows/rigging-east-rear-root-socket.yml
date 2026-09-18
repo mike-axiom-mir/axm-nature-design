@@ -8,13 +8,18 @@ on:
       - "src/axm_nature_design/source_topology_migration.py"
       - "src/axm_nature_design/rear_tree_rigging.py"
       - "src/axm_nature_design/rear_tree_rigging_geometry_rebind.py"
+      - "src/axm_nature_design/rear_tree_rigging_primary_branch_family.py"
       - "contracts/east-rear-root-socket-rigging-001.json"
       - "contracts/east-rear-root-socket-rigging-geometry-rebind-002.json"
+      - "contracts/east-rear-primary-branch-root-socket-rigging-family-003.json"
       - "tools/verify_rear_tree_root_socket_rig_geometry_rebind.py"
+      - "tools/verify_rear_tree_primary_branch_rigging_family.py"
       - "tests/test_rear_tree_root_socket_rigging.py"
       - "tests/test_rear_tree_root_socket_rigging_geometry_rebind.py"
+      - "tests/test_rear_tree_primary_branch_rigging_family.py"
       - "docs/RIGGING_EAST_REAR_ROOT_SOCKET_001.md"
       - "docs/RIGGING_EAST_REAR_ROOT_SOCKET_GEOMETRY_REBIND_002.md"
+      - "docs/RIGGING_EAST_REAR_PRIMARY_BRANCH_FAMILY_003.md"
       - ".github/workflows/rigging-east-rear-root-socket.yml"
   workflow_dispatch:
 
@@ -39,18 +44,25 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Pin Organic, Geometry and historical Rigging lineage
+      - name: Pin Organic Geometry Rigging and Procedural lineage
         shell: bash
         run: |
           set -euo pipefail
           git merge-base --is-ancestor fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a HEAD
           git merge-base --is-ancestor 87ce8b2ff10937abec4432e1c6d5a7114a076cdb HEAD
           git merge-base --is-ancestor 9b451ba1f65281f550a6754e18574f7ab2951e28 HEAD
+          git merge-base --is-ancestor f792d2369675d532be478e17c7a07f441d817c7c HEAD
           test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
           test "$(git rev-parse HEAD:src/axm_nature_design/organic_form.py)" = "82753ccd91e0ed377dc4649381cd61cb80a56bec"
           test "$(git rev-parse HEAD:src/axm_nature_design/source_topology_migration.py)" = "b89154cb55a85fcd37e7641a80ee38bbfd2d0de0"
           test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging.py)" = "0d41101c3f321f6ca1ccd0b7308f302f4358535d"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_geometry_rebind.py)" = "39797adac5ceb07831c082e94170acee1ff664d7"
           test "$(git rev-parse HEAD:contracts/east-rear-root-socket-rigging-001.json)" = "5e057d8801b4ceb3054383389b71203aff0c5bec"
+          git fetch --no-tags origin studio/procedural-sapling-family-001
+          git cat-file -e 342385c867050dc8e8f7312c63235a68bdd92d3d^{commit}
+          test "$(git rev-parse 342385c867050dc8e8f7312c63235a68bdd92d3d:examples/rear_tree_branch_child_partition_geometry_rebind_002.json)" = "73e38d08f426efb742e1d66b992ede04737ed576"
+          test "$(git rev-parse 342385c867050dc8e8f7312c63235a68bdd92d3d:src/axm_nature_design/branch_partition_geometry_rebind.py)" = "7b522f6c379d8cae1d1e9d95e941ac108cfc003b"
+          test "$(git rev-parse 342385c867050dc8e8f7312c63235a68bdd92d3d:src/axm_nature_design/branch_partition_family.py)" = "3c502029900916bb62cda8c501144e0a5ea5c076"
 
       - name: Compile
         run: python -m compileall -q src tools tests
@@ -60,7 +72,7 @@ jobs:
           PYTHONPATH: src
         run: python -m unittest discover -s tests -p "test_*.py"
 
-      - name: Build exact Rigging receiver-rebind evidence
+      - name: Build exact Rigging family evidence
         if: matrix.python-version == '3.11'
         env:
           PYTHONPATH: src
@@ -70,26 +82,38 @@ jobs:
           git rev-parse HEAD > evidence/exact-head.txt
           printf '%s\n' 'fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a' > evidence/exact-organic-source-owner-head.txt
           printf '%s\n' '9b451ba1f65281f550a6754e18574f7ab2951e28' > evidence/exact-geometry-receiver-head.txt
-          printf '%s\n' '87ce8b2ff10937abec4432e1c6d5a7114a076cdb' > evidence/exact-rigging-predecessor-head.txt
+          printf '%s\n' 'f792d2369675d532be478e17c7a07f441d817c7c' > evidence/exact-rigging-predecessor-head.txt
+          printf '%s\n' '342385c867050dc8e8f7312c63235a68bdd92d3d' > evidence/exact-procedural-selection-donor-head.txt
           python tools/verify_rear_tree_root_socket_rig_geometry_rebind.py \
             --output evidence/east-rear-root-socket-rigging-geometry-rebind-evidence-002.json
+          python tools/verify_rear_tree_primary_branch_rigging_family.py \
+            --output evidence/east-rear-primary-branch-rigging-family-evidence-003.json
           cp contracts/east-rear-root-socket-rigging-001.json \
             evidence/east-rear-root-socket-rigging-historical-contract-001.json
           cp contracts/east-rear-root-socket-rigging-geometry-rebind-002.json \
             evidence/east-rear-root-socket-rigging-geometry-rebind-contract-002.json
+          cp contracts/east-rear-primary-branch-root-socket-rigging-family-003.json \
+            evidence/east-rear-primary-branch-root-socket-rigging-family-contract-003.json
           cp docs/RIGGING_EAST_REAR_ROOT_SOCKET_GEOMETRY_REBIND_002.md evidence/
+          if [ -f docs/RIGGING_EAST_REAR_PRIMARY_BRANCH_FAMILY_003.md ]; then
+            cp docs/RIGGING_EAST_REAR_PRIMARY_BRANCH_FAMILY_003.md evidence/
+          fi
           python - <<'PY'
           import json
           from pathlib import Path
-          payload = json.loads(Path('evidence/east-rear-root-socket-rigging-geometry-rebind-evidence-002.json').read_text())
-          assert payload['result'] == 'PASS_NORTH_TOP_ROOT_SOCKET_GEOMETRY_MIGRATED_RECEIVER_REBIND_DIAGNOSTIC_MINUS5_TO_PLUS5'
+          previous = json.loads(Path('evidence/east-rear-root-socket-rigging-geometry-rebind-evidence-002.json').read_text())
+          payload = json.loads(Path('evidence/east-rear-primary-branch-rigging-family-evidence-003.json').read_text())
+          assert previous['result'] == 'PASS_NORTH_TOP_ROOT_SOCKET_GEOMETRY_MIGRATED_RECEIVER_REBIND_DIAGNOSTIC_MINUS5_TO_PLUS5'
+          assert payload['result'] == 'PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_RIGID_CHILD_FAMILY_GEOMETRY_RECEIVER_DIAGNOSTIC_MINUS5_TO_PLUS5'
           assert payload['lineage']['geometry_receiver_head'] == '9b451ba1f65281f550a6754e18574f7ab2951e28'
-          assert payload['lineage']['rigging_predecessor_head'] == '87ce8b2ff10937abec4432e1c6d5a7114a076cdb'
-          assert payload['lineage']['historical_organic_mesh_digest'] == 'd7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48'
-          assert payload['lineage']['geometry_migrated_mesh_digest'] == 'aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31'
-          assert payload['geometry_receiver']['shared_edge_orientation_conflicts'] == 0
-          assert payload['truth_boundary']['historical_rigging_pass_transferred_without_retest'] is False
-          assert payload['truth_boundary']['animation_timing_or_playback_claimed'] is False
+          assert payload['lineage']['rigging_predecessor_head'] == 'f792d2369675d532be478e17c7a07f441d817c7c'
+          assert payload['lineage']['procedural_donor_head'] == '342385c867050dc8e8f7312c63235a68bdd92d3d'
+          assert payload['lineage']['procedural_rebind_contract_blob'] == '73e38d08f426efb742e1d66b992ede04737ed576'
+          assert payload['rigging_family']['branch_count'] == 5
+          assert payload['rigging_family']['total_representative_pose_evaluations'] == 25
+          assert payload['rigging_family']['pairwise_child_vertex_disjoint'] is True
+          assert payload['all_failure_controls_rejected'] is True
+          assert payload['truth_boundary']['animation_timing_interpolation_or_playback_claimed'] is False
           assert payload['truth_boundary']['runtime_controller_or_device_claimed'] is False
           PY
 
@@ -97,6 +121,6 @@ jobs:
         if: matrix.python-version == '3.11'
         uses: actions/upload-artifact@v4
         with:
-          name: nature-east-rear-root-socket-geometry-rebind-${{ github.event.pull_request.head.sha || github.sha }}
+          name: nature-east-rear-primary-branch-rigging-family-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/
           if-no-files-found: error
