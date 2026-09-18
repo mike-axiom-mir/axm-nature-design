@@ -10,21 +10,26 @@ on:
       - "src/axm_nature_design/rear_tree_rigging_geometry_rebind.py"
       - "src/axm_nature_design/rear_tree_rigging_primary_branch_family.py"
       - "src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py"
+      - "src/axm_nature_design/rear_tree_rigging_shared_driver_composition.py"
       - "contracts/east-rear-root-socket-rigging-001.json"
       - "contracts/east-rear-root-socket-rigging-geometry-rebind-002.json"
       - "contracts/east-rear-primary-branch-root-socket-rigging-family-003.json"
       - "contracts/east-rear-primary-branch-shared-driver-polarity-rigging-004.json"
+      - "contracts/east-rear-primary-branch-shared-driver-rigging-composition-005.json"
       - "tools/verify_rear_tree_root_socket_rig_geometry_rebind.py"
       - "tools/verify_rear_tree_primary_branch_rigging_family.py"
       - "tools/verify_rear_tree_rigging_shared_driver_polarity.py"
+      - "tools/verify_rear_tree_rigging_shared_driver_composition.py"
       - "tests/test_rear_tree_root_socket_rigging.py"
       - "tests/test_rear_tree_root_socket_rigging_geometry_rebind.py"
       - "tests/test_rear_tree_primary_branch_rigging_family.py"
       - "tests/test_rear_tree_rigging_shared_driver_polarity.py"
+      - "tests/test_rear_tree_rigging_shared_driver_composition.py"
       - "docs/RIGGING_EAST_REAR_ROOT_SOCKET_001.md"
       - "docs/RIGGING_EAST_REAR_ROOT_SOCKET_GEOMETRY_REBIND_002.md"
       - "docs/RIGGING_EAST_REAR_PRIMARY_BRANCH_FAMILY_003.md"
       - "docs/RIGGING_EAST_REAR_SHARED_DRIVER_POLARITY_004.md"
+      - "docs/RIGGING_EAST_REAR_SHARED_DRIVER_COMPOSITION_005.md"
       - ".github/workflows/rigging-east-rear-root-socket.yml"
   workflow_dispatch:
 
@@ -49,7 +54,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Pin Organic Geometry Rigging Procedural and VFX lineage
+      - name: Pin Organic Geometry Rigging Procedural VFX and shared-driver receiver lineage
         shell: bash
         run: |
           set -euo pipefail
@@ -58,6 +63,7 @@ jobs:
           git merge-base --is-ancestor 9b451ba1f65281f550a6754e18574f7ab2951e28 HEAD
           git merge-base --is-ancestor f792d2369675d532be478e17c7a07f441d817c7c HEAD
           git merge-base --is-ancestor 898529f602893c8f6be179bd3e9b6821fc099904 HEAD
+          git merge-base --is-ancestor 754797a815266a643c6b08f1606eb76ba95dd8c6 HEAD
           test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
           test "$(git rev-parse HEAD:src/axm_nature_design/organic_form.py)" = "82753ccd91e0ed377dc4649381cd61cb80a56bec"
           test "$(git rev-parse HEAD:src/axm_nature_design/source_topology_migration.py)" = "b89154cb55a85fcd37e7641a80ee38bbfd2d0de0"
@@ -75,6 +81,15 @@ jobs:
           git cat-file -e ef7b35af27d5ca98a6447c1e33be07863e387305^{commit}
           test "$(git rev-parse ef7b35af27d5ca98a6447c1e33be07863e387305:contracts/east-rear-primary-branch-weather-direction-vfx-sign-family-002.json)" = "b06b5f6862c6c88ec5642e3bdbccfe0d3e65655f"
           test "$(git rev-parse ef7b35af27d5ca98a6447c1e33be07863e387305:src/axm_nature_design/rear_tree_vfx_weather_sign_family.py)" = "ae674ee8f6109d478446fbcd5348bcbee04b01e7"
+
+          git fetch --no-tags origin studio/geometry-east-rear-simultaneous-socket-001
+          git cat-file -e 75b7556b4dae7137411f4948e2e673a39de5467c^{commit}
+          test "$(git rev-parse 75b7556b4dae7137411f4948e2e673a39de5467c:contracts/east-rear-shared-driver-static-geometry-rebind-002.json)" = "7056bb9b2160f536b88bf4827a81dec27af3f137"
+          test "$(git rev-parse 75b7556b4dae7137411f4948e2e673a39de5467c:src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py)" = "33934c6352f56baa3690f8fdaffde775d85f8f4c"
+
+          git fetch --no-tags origin studio/vfx-shared-driver-response-envelope-003
+          git cat-file -e ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475^{commit}
+          test -f <(git show ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475:contracts/east-rear-shared-driver-vfx-response-envelope-003.json)
 
       - name: Compile
         run: python -m compileall -q src tools tests
@@ -96,9 +111,14 @@ jobs:
           printf '%s\n' '9b451ba1f65281f550a6754e18574f7ab2951e28' > evidence/exact-geometry-receiver-head.txt
           printf '%s\n' 'f792d2369675d532be478e17c7a07f441d817c7c' > evidence/exact-rigging-geometry-rebind-head.txt
           printf '%s\n' '898529f602893c8f6be179bd3e9b6821fc099904' > evidence/exact-rigging-five-socket-predecessor-head.txt
+          printf '%s\n' '754797a815266a643c6b08f1606eb76ba95dd8c6' > evidence/exact-rigging-shared-driver-predecessor-head.txt
           printf '%s\n' '342385c867050dc8e8f7312c63235a68bdd92d3d' > evidence/exact-procedural-selection-donor-head.txt
           printf '%s\n' 'ef7b35af27d5ca98a6447c1e33be07863e387305' > evidence/exact-vfx-sign-map-donor-head.txt
+          printf '%s\n' '75b7556b4dae7137411f4948e2e673a39de5467c' > evidence/exact-geometry-shared-driver-donor-head.txt
+          printf '%s\n' 'ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475' > evidence/exact-vfx-static-response-donor-head.txt
           git show ef7b35af27d5ca98a6447c1e33be07863e387305:contracts/east-rear-primary-branch-weather-direction-vfx-sign-family-002.json > evidence/exact-vfx-sign-map-donor-contract.json
+          git show 75b7556b4dae7137411f4948e2e673a39de5467c:contracts/east-rear-shared-driver-static-geometry-rebind-002.json > evidence/exact-geometry-shared-driver-static-contract.json
+          git show ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475:contracts/east-rear-shared-driver-vfx-response-envelope-003.json > evidence/exact-vfx-static-response-contract.json
 
           python tools/verify_rear_tree_root_socket_rig_geometry_rebind.py \
             --output evidence/east-rear-root-socket-rigging-geometry-rebind-evidence-002.json
@@ -106,6 +126,8 @@ jobs:
             --output evidence/east-rear-primary-branch-rigging-family-evidence-003.json
           python tools/verify_rear_tree_rigging_shared_driver_polarity.py \
             --output evidence/east-rear-primary-branch-shared-driver-polarity-rigging-evidence-004.json
+          python tools/verify_rear_tree_rigging_shared_driver_composition.py \
+            --output evidence/east-rear-primary-branch-shared-driver-rigging-composition-evidence-005.json
 
           cp contracts/east-rear-root-socket-rigging-001.json \
             evidence/east-rear-root-socket-rigging-historical-contract-001.json
@@ -115,42 +137,41 @@ jobs:
             evidence/east-rear-primary-branch-root-socket-rigging-family-contract-003.json
           cp contracts/east-rear-primary-branch-shared-driver-polarity-rigging-004.json \
             evidence/east-rear-primary-branch-shared-driver-polarity-rigging-contract-004.json
+          cp contracts/east-rear-primary-branch-shared-driver-rigging-composition-005.json \
+            evidence/east-rear-primary-branch-shared-driver-rigging-composition-contract-005.json
           cp docs/RIGGING_EAST_REAR_ROOT_SOCKET_GEOMETRY_REBIND_002.md evidence/
           cp docs/RIGGING_EAST_REAR_PRIMARY_BRANCH_FAMILY_003.md evidence/
           cp docs/RIGGING_EAST_REAR_SHARED_DRIVER_POLARITY_004.md evidence/
+          cp docs/RIGGING_EAST_REAR_SHARED_DRIVER_COMPOSITION_005.md evidence/
 
           python - <<'PY'
           import json
           from pathlib import Path
-          previous = json.loads(Path('evidence/east-rear-primary-branch-rigging-family-evidence-003.json').read_text())
-          payload = json.loads(Path('evidence/east-rear-primary-branch-shared-driver-polarity-rigging-evidence-004.json').read_text())
-          donor = json.loads(Path('evidence/exact-vfx-sign-map-donor-contract.json').read_text())
-          assert previous['result'] == 'PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_RIGID_CHILD_FAMILY_GEOMETRY_RECEIVER_DIAGNOSTIC_MINUS5_TO_PLUS5'
-          assert payload['result'] == 'PASS_FIVE_SOCKET_SHARED_DRIVER_POLARITY_BINDING_DIAGNOSTIC_MINUS5_TO_PLUS5'
-          assert payload['lineage']['rigging_predecessor_head'] == '898529f602893c8f6be179bd3e9b6821fc099904'
-          assert payload['lineage']['vfx_donor_head'] == 'ef7b35af27d5ca98a6447c1e33be07863e387305'
-          assert donor['nature_rigging_owner']['head'] == '898529f602893c8f6be179bd3e9b6821fc099904'
-          assert payload['binding']['command_sign_multiplier_by_branch'] == {
-              'south-low': 1.0,
-              'north-low': -1.0,
-              'east-mid': 1.0,
-              'west-high': -1.0,
-              'north-top': 1.0,
-          }
-          assert payload['binding']['representative_shared_driver_deg'] == [-5.0, -2.5, 0.0, 2.5, 5.0]
-          assert payload['continuous_mapping']['absolute_angle_isometry'] is True
-          assert payload['continuous_mapping']['bijective_per_socket_on_closed_interval'] is True
-          assert payload['continuous_mapping']['rigging_axis_or_pivot_changed'] is False
+          previous = json.loads(Path('evidence/east-rear-primary-branch-shared-driver-polarity-rigging-evidence-004.json').read_text())
+          payload = json.loads(Path('evidence/east-rear-primary-branch-shared-driver-rigging-composition-evidence-005.json').read_text())
+          geometry = json.loads(Path('evidence/exact-geometry-shared-driver-static-contract.json').read_text())
+          assert previous['result'] == 'PASS_FIVE_SOCKET_SHARED_DRIVER_POLARITY_BINDING_DIAGNOSTIC_MINUS5_TO_PLUS5'
+          assert payload['result'] == 'PASS_FIVE_SOCKET_SHARED_DRIVER_RIG_COMPOSITION_CONTINUOUS_PARAMETER_MINUS5_TO_PLUS5'
+          assert payload['lineage']['rigging_predecessor_head'] == '754797a815266a643c6b08f1606eb76ba95dd8c6'
+          assert payload['lineage']['geometry_donor_head'] == '75b7556b4dae7137411f4948e2e673a39de5467c'
+          assert payload['lineage']['vfx_static_response_head'] == 'ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475'
+          assert geometry['rigging_donor']['head'] == '754797a815266a643c6b08f1606eb76ba95dd8c6'
+          assert payload['composition']['selected_vertex_union'] == 260
+          assert payload['composition']['globally_fixed_vertices'] == 130
+          assert payload['composition']['representative_shared_driver_deg'] == [-5.0, -2.5, 0.0, 2.5, 5.0]
+          assert payload['continuous_parameter_certificate']['continuous_for_every_real_parameter_in_closed_interval'] is True
+          assert payload['continuous_parameter_certificate']['composition_order_independent_for_every_real_parameter'] is True
+          assert payload['continuous_parameter_certificate']['continuous_collision_clearance_proven'] is False
           assert payload['all_failure_controls_rejected'] is True
           assert payload['truth_boundary']['animation_timing_interpolation_or_playback_claimed'] is False
           assert payload['truth_boundary']['runtime_controller_or_device_claimed'] is False
-          assert payload['truth_boundary']['simultaneous_multi_branch_motion_claimed'] is False
+          assert payload['truth_boundary']['continuous_collision_or_self_intersection_claimed'] is False
           PY
 
       - name: Upload retained evidence
         if: matrix.python-version == '3.11'
         uses: actions/upload-artifact@v4
         with:
-          name: nature-east-rear-rigging-shared-driver-polarity-${{ github.event.pull_request.head.sha || github.sha }}
+          name: nature-east-rear-rigging-shared-driver-composition-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/
           if-no-files-found: error
