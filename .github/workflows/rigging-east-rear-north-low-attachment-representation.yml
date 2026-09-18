@@ -11,6 +11,18 @@ on:
       - "tests/test_rear_tree_rigging_north_low_attachment_representation_gate.py"
       - "docs/RIGGING_EAST_REAR_NORTH_LOW_ATTACHMENT_REPRESENTATION_GATE_008.md"
       - ".github/workflows/rigging-east-rear-north-low-attachment-representation.yml"
+  push:
+    branches:
+      - "studio/rigging-east-rear-root-socket-001"
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py"
+      - "contracts/east-rear-north-low-attachment-representation-rigging-008.json"
+      - "tools/verify_rear_tree_rigging_north_low_attachment_representation_gate.py"
+      - "tests/test_rear_tree_rigging_north_low_attachment_representation_gate.py"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_ATTACHMENT_REPRESENTATION_GATE_008.md"
+      - ".github/workflows/rigging-east-rear-north-low-attachment-representation.yml"
   workflow_dispatch:
 
 permissions:
