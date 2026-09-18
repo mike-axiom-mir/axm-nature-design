@@ -5,6 +5,7 @@ on:
     branches: [studio/runtime-east-rear-dynamic-prefix-001]
     paths:
       - "contracts/east-rear-runtime-target-host-window-001.json"
+      - "tools/build_rear_tree_runtime_target_host_window.py"
       - "target-proof/project.godot"
       - "target-proof/observe_runtime_dynamic_window.gd"
       - "docs/RUNTIME_EAST_REAR_TARGET_HOST_WINDOW_001.md"
@@ -12,6 +13,7 @@ on:
   pull_request:
     paths:
       - "contracts/east-rear-runtime-target-host-window-001.json"
+      - "tools/build_rear_tree_runtime_target_host_window.py"
       - "target-proof/project.godot"
       - "target-proof/observe_runtime_dynamic_window.gd"
       - "docs/RUNTIME_EAST_REAR_TARGET_HOST_WINDOW_001.md"
@@ -71,8 +73,8 @@ jobs:
       - name: Compile Runtime target observer support
         run: |
           python -m compileall -q \
-            .technical-art/src/axm_nature_design/uc_dynamic_window_receiver.py \
-            .technical-art/tools/build_uc_dynamic_window_target_evidence.py
+            tools/build_rear_tree_runtime_target_host_window.py \
+            .technical-art/src/axm_nature_design/uc_dynamic_window_receiver.py
 
       - name: Build exact current-UC receiver and Runtime oracle
         shell: bash
@@ -82,10 +84,12 @@ jobs:
           rm -rf "$root"
           mkdir -p "$root"
           PYTHONPATH=.technical-art/src:.uc/src \
-            python .technical-art/tools/build_uc_dynamic_window_target_evidence.py \
+            python tools/build_rear_tree_runtime_target_host_window.py \
               --runtime-root .runtime-owner \
+              --technical-art-root .technical-art \
               --uc-root .uc \
-              --out "$root" | tee "$root/pretarget-build.log"
+              --out "$root" \
+            2>&1 | tee "$root/pretarget-build.log"
           cp /tmp/exact-runtime-candidate-head.txt "$root/exact-runtime-candidate-head.txt"
           printf '%s\n' 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f > "$root/exact-runtime-predecessor-head.txt"
           printf '%s\n' b96f794325f825188b6fd9a920e3fb575e43e467 > "$root/exact-technical-art-donor-head.txt"
@@ -97,14 +101,16 @@ jobs:
           import json
           from pathlib import Path
           root=Path('evidence/east-rear-runtime-target-host-window-001')
-          r=json.loads((root/'nature-east-rear-dynamic-window-uc-target-receipt.json').read_text())
-          assert r['result']=='PASS_NATURE_EAST_REAR_RUNTIME_WINDOW_CURRENT_UC_TARGET_RECEIVER_READY',r
+          r=json.loads((root/'runtime-target-preflight-receipt.json').read_text())
+          assert r['result']=='PASS_RUNTIME_CONSUMED_TECHNICAL_ART_CURRENT_UC_DYNAMIC_WINDOW_RECEIVER_READY',r
           assert r['heads']=={
-              'runtime':'6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f',
+              'runtime_owner':'6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f',
+              'technical_art':'b96f794325f825188b6fd9a920e3fb575e43e467',
               'vfx':'ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475',
               'rigging':'754797a815266a643c6b08f1606eb76ba95dd8c6',
               'uc':'5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4',
           },r
+          assert r['technical_art_receiver_blob']=='a18d568d45324488f52f2a05159e927450ae2b84',r
           receiver=r['receiver']
           assert receiver['source_vertex_count']==390,receiver
           assert receiver['source_vertex_to_uc_vertex_identity'] is True,receiver
@@ -113,7 +119,10 @@ jobs:
           assert receiver['target_dynamic_byte_offset']==1320,receiver
           assert receiver['target_dynamic_byte_length']==3120,receiver
           assert receiver['target_full_position_bytes']==4680,receiver
+          assert r['uc']['glb_position_accessor_count']==390,r
+          assert r['uc']['triangles']==570,r
           assert r['pose_count']==5,r
+          assert r['maximum_pass52_full_candidate_source_component_delta_m']==0.0,r
           assert r['truth_boundary']['real_target_host_partial_vertex_update_proven'] is False,r
           assert r['truth_boundary']['target_host_shaded_control_candidate_identity_proven'] is False,r
           PY
@@ -123,8 +132,9 @@ jobs:
         run: |
           set -euo pipefail
           if PYTHONPATH=.technical-art/src:.uc/src \
-            python .technical-art/tools/build_uc_dynamic_window_target_evidence.py \
+            python tools/build_rear_tree_runtime_target_host_window.py \
               --runtime-root .runtime-owner \
+              --technical-art-root .technical-art \
               --uc-root .uc \
               --out /tmp/negative-window \
               --mutate-window-end 369 > /tmp/pretarget-window-negative.log 2>&1; then
@@ -294,6 +304,7 @@ jobs:
           git -C .uc rev-parse HEAD > "$root/exact-uc-head.txt"
           cp contracts/east-rear-runtime-target-host-window-001.json "$root/" || true
           cp docs/RUNTIME_EAST_REAR_TARGET_HOST_WINDOW_001.md "$root/" || true
+          cp tools/build_rear_tree_runtime_target_host_window.py "$root/" || true
           cp target-proof/observe_runtime_dynamic_window.gd "$root/" || true
           cp .github/workflows/runtime-east-rear-target-host-window.yml "$root/" || true
 
