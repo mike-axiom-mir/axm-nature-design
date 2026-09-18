@@ -1,0 +1,38 @@
+{
+  "schema": "axm.nature-vfx-north-low-parent-gate-weather-direction-contract/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "rigging_owner": {
+    "pull_request": 14,
+    "head": "975931b11555d156e04e2ab12e9756fc6c9598a3",
+    "result": "PASS_NORTH_LOW_UPPER_TRUNK_PARENT_INFLUENCE_EXCLUSION_GATE_DIAGNOSTIC"
+  },
+  "vfx_sign_predecessor": {
+    "pull_request": 17,
+    "head": "ef7b35af27d5ca98a6447c1e33be07863e387305",
+    "north_low_review_only_downwind_alignment_angle_deg": -5.0
+  },
+  "weather_donor": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pull_request": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "source_blob_sha": "11298d447f262da8a78e43e2df68bc0346c99a2c",
+    "wind_xy": [1.0, 0.35],
+    "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "scope": {
+    "branch_id": "north-low",
+    "parent_representative_angles_deg": [-2.5, 0.0, 2.5],
+    "child_representative_angles_deg": [-5.0, 0.0, 5.0],
+    "question": "Does the prior north-low Weather visual-direction polarity remain stable when the exact current Rigging receiver gates upper-trunk parent influence to zero?"
+  },
+  "authority": {
+    "visual_coordinate_compatibility_only": true,
+    "physical_wind": false,
+    "animation_adoption": false,
+    "runtime_acceptance": false,
+    "gameplay_or_physics": false,
+    "biological_motion": false,
+    "art_direction_or_visual_qa_acceptance": false,
+    "canon_or_production_readiness": false
+  }
+}

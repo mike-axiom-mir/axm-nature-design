@@ -1,0 +1,82 @@
+name: VFX east rear north-low parent-gate Weather continuity
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_vfx_north_low_parent_gate_weather.py"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "contracts/east-rear-north-low-parent-gate-weather-vfx-008.json"
+      - "tests/test_rear_tree_vfx_north_low_parent_gate_weather.py"
+      - "tools/verify_rear_tree_vfx_north_low_parent_gate_weather.py"
+      - ".github/workflows/vfx-east-rear-north-low-parent-gate-weather.yml"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin exact Rigging owner ancestry
+        shell: bash
+        run: |
+          git merge-base --is-ancestor 975931b11555d156e04e2ab12e9756fc6c9598a3 HEAD
+          git fetch origin ef7b35af27d5ca98a6447c1e33be07863e387305 --depth=1
+          git cat-file -e ef7b35af27d5ca98a6447c1e33be07863e387305^{commit}
+
+      - name: Compile and run complete Nature suite
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m compileall -q src tests tools
+          python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Checkout exact Weather donor
+        if: matrix.python-version == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-weather-design
+          ref: ca2eaba519e8449835b0ea6ef944b7080c3caa6a
+          path: _weather_donor
+
+      - name: Verify Weather donor identity
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          test "$(git -C _weather_donor rev-parse HEAD)" = "ca2eaba519e8449835b0ea6ef944b7080c3caa6a"
+          test "$(git -C _weather_donor hash-object examples/wind_atmosphere_baseline_001.json)" = "11298d447f262da8a78e43e2df68bc0346c99a2c"
+
+      - name: Build exact VFX evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        run: |
+          mkdir -p evidence/north-low-parent-gate-weather
+          python tools/verify_rear_tree_vfx_north_low_parent_gate_weather.py \
+            --output evidence/north-low-parent-gate-weather/evidence.json \
+            --svg evidence/north-low-parent-gate-weather/review.svg \
+            | tee evidence/north-low-parent-gate-weather/verifier.log
+          git rev-parse HEAD > evidence/north-low-parent-gate-weather/exact-head.txt
+          git rev-parse 975931b11555d156e04e2ab12e9756fc6c9598a3 > evidence/north-low-parent-gate-weather/rigging-owner-head.txt
+          git rev-parse ef7b35af27d5ca98a6447c1e33be07863e387305 > evidence/north-low-parent-gate-weather/vfx-predecessor-head.txt
+          git -C _weather_donor rev-parse HEAD > evidence/north-low-parent-gate-weather/weather-head.txt
+          sha256sum contracts/east-rear-north-low-parent-gate-weather-vfx-008.json > evidence/north-low-parent-gate-weather/contract.sha256
+
+      - name: Upload retained VFX evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-vfx-north-low-parent-gate-weather-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-parent-gate-weather
