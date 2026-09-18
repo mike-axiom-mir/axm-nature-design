@@ -1,0 +1,142 @@
+name: VFX east rear north-low parent-stress Weather response
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_vfx_north_low_parent_stress_weather.py"
+      - "src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py"
+      - "contracts/east-rear-north-low-parent-stress-weather-vfx-009.json"
+      - "tests/test_rear_tree_vfx_north_low_parent_stress_weather.py"
+      - "tools/verify_rear_tree_vfx_north_low_parent_stress_weather.py"
+      - "docs/VFX_EAST_REAR_NORTH_LOW_PARENT_STRESS_WEATHER_009.md"
+      - ".github/workflows/vfx-east-rear-north-low-parent-stress-weather.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact VFX head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin exact Animation owner and VFX predecessor
+        shell: bash
+        run: |
+          set -euo pipefail
+          ANIM=5cacd61e22433b0c33f29111827283b81cc0ba0d
+          RIG=69640e558f0c1ac59d4d0e3155676e0967a03d04
+          PREV_VFX=687a81590db35b1b06fa3d436a726cc272a8ea77
+          GEO=d32a41558910d78595042fb638a785714f825806
+          git merge-base --is-ancestor "$ANIM" HEAD
+          git merge-base --is-ancestor "$RIG" "$ANIM"
+          for COMMIT in "$PREV_VFX" "$GEO"; do
+            if ! git cat-file -e "$COMMIT^{commit}" 2>/dev/null; then
+              git fetch --no-tags origin "$COMMIT"
+            fi
+          done
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py)" = "$(git rev-parse "$ANIM:src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py")"
+          test "$(git rev-parse "$PREV_VFX:src/axm_nature_design/rear_tree_vfx_north_low_parent_gate_weather.py")" != ""
+          test "$(git rev-parse "$GEO:contracts/east-rear-north-low-attachment-topology-geometry-005.json")" != ""
+
+      - name: Compile and run complete Nature suite
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m compileall -q src tests tools
+          python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Checkout exact Weather donor
+        if: matrix.python-version == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-weather-design
+          ref: ca2eaba519e8449835b0ea6ef944b7080c3caa6a
+          path: _weather_donor
+
+      - name: Verify Weather donor identity
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          test "$(git -C _weather_donor rev-parse HEAD)" = "ca2eaba519e8449835b0ea6ef944b7080c3caa6a"
+          test "$(git -C _weather_donor hash-object examples/wind_atmosphere_baseline_001.json)" = "11298d447f262da8a78e43e2df68bc0346c99a2c"
+
+      - name: Build exact VFX evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          ANIM=5cacd61e22433b0c33f29111827283b81cc0ba0d
+          RIG=69640e558f0c1ac59d4d0e3155676e0967a03d04
+          PREV_VFX=687a81590db35b1b06fa3d436a726cc272a8ea77
+          GEO=d32a41558910d78595042fb638a785714f825806
+          OUT=evidence/north-low-parent-stress-weather-009
+          mkdir -p "$OUT"
+          git show "$GEO:contracts/east-rear-north-low-attachment-topology-geometry-005.json" > "$OUT/geometry-donor-contract.json"
+          python tools/verify_rear_tree_vfx_north_low_parent_stress_weather.py \
+            --geometry-contract "$OUT/geometry-donor-contract.json" \
+            --output "$OUT/evidence.json" \
+            --svg "$OUT/review.svg" \
+            | tee "$OUT/verifier.log"
+          cp contracts/east-rear-north-low-parent-stress-weather-vfx-009.json "$OUT/contract.json"
+          cp docs/VFX_EAST_REAR_NORTH_LOW_PARENT_STRESS_WEATHER_009.md "$OUT/README.md"
+          cp src/axm_nature_design/rear_tree_vfx_north_low_parent_stress_weather.py "$OUT/vfx-receiver.py"
+          cp tools/verify_rear_tree_vfx_north_low_parent_stress_weather.py "$OUT/verifier.py"
+          git show "$ANIM:src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py" > "$OUT/animation-owner.py"
+          git rev-parse HEAD > "$OUT/exact-head.txt"
+          printf '%s\n' "$ANIM" > "$OUT/animation-owner-head.txt"
+          printf '%s\n' "$RIG" > "$OUT/rigging-owner-head.txt"
+          printf '%s\n' "$PREV_VFX" > "$OUT/vfx-static-predecessor-head.txt"
+          printf '%s\n' "$GEO" > "$OUT/geometry-donor-head.txt"
+          git -C _weather_donor rev-parse HEAD > "$OUT/weather-head.txt"
+
+      - name: Assert bounded VFX truth boundary
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('evidence/north-low-parent-stress-weather-009/evidence.json').read_text())
+          assert report['result'] == 'PASS_NORTH_LOW_DETACHED_TEMPORAL_WEATHER_RESPONSE_PARENT_STRESS_DISCRIMINATION', report
+          m = report['measurements']
+          assert m['sample_count'] == 41, m
+          assert m['owner_pose_digest_mismatches'] == 0, m
+          assert m['weather_polarity_sign_violations'] == 0, m
+          assert m['neutral_weather_parallel_error_m'] <= 1e-12, m
+          assert m['endpoint_weather_parallel_error_m'] <= 1e-12, m
+          assert m['minus5_peak_downwind_parallel_m'] > 0.0, m
+          assert m['plus5_peak_upwind_parallel_m'] < 0.0, m
+          assert m['maximum_accepted_vs_wrong_parent_weather_parallel_delta_m'] > 1e-6, m
+          assert m['maximum_accepted_vs_wrong_parent_vertex_delta_m'] > 1e-6, m
+          assert report['all_failure_controls_rejected'] is True, report
+          truth = report['truth_boundary']
+          assert truth['physical_wind_claimed'] is False, truth
+          assert truth['target_engine_playback_claimed'] is False, truth
+          assert truth['runtime_controller_or_device_claimed'] is False, truth
+          assert truth['gameplay_or_physics_claimed'] is False, truth
+          assert truth['canon_or_production_readiness_claimed'] is False, truth
+          PY
+
+      - name: Upload exact VFX evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-vfx-north-low-parent-stress-weather-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-parent-stress-weather-009
+          if-no-files-found: error
