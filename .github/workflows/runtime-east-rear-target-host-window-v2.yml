@@ -1,0 +1,302 @@
+name: Runtime east rear target-host dynamic window v2
+
+on:
+  push:
+    branches: [studio/runtime-east-rear-dynamic-prefix-001]
+    paths:
+      - "contracts/east-rear-runtime-target-host-window-001.json"
+      - "tools/build_rear_tree_runtime_target_host_window.py"
+      - "target-proof/project.godot"
+      - "target-proof/observe_runtime_dynamic_window.gd"
+      - "docs/RUNTIME_EAST_REAR_TARGET_HOST_WINDOW_001.md"
+      - ".github/workflows/runtime-east-rear-target-host-window-v2.yml"
+  pull_request:
+    paths:
+      - "contracts/east-rear-runtime-target-host-window-001.json"
+      - "tools/build_rear_tree_runtime_target_host_window.py"
+      - "target-proof/project.godot"
+      - "target-proof/observe_runtime_dynamic_window.gd"
+      - "docs/RUNTIME_EAST_REAR_TARGET_HOST_WINDOW_001.md"
+      - ".github/workflows/runtime-east-rear-target-host-window-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-target-host-window:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Runtime candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Runtime candidate head
+        shell: bash
+        run: |
+          set -euo pipefail
+          OBSERVED="$(git rev-parse HEAD)"
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > /tmp/exact-runtime-candidate-head.txt
+
+      - name: Checkout exact pass-52 Runtime predecessor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          path: .runtime-owner
+
+      - name: Checkout exact Technical Art receiver donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: b96f794325f825188b6fd9a920e3fb575e43e467
+          path: .technical-art
+
+      - name: Checkout exact Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4
+          path: .uc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build exact current-UC receiver and Runtime oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-target-host-window-002
+          rm -rf "$root"
+          mkdir -p "$root"
+          python -m compileall -q tools/build_rear_tree_runtime_target_host_window.py .technical-art/src/axm_nature_design/uc_dynamic_window_receiver.py
+          PYTHONPATH=.technical-art/src:.uc/src \
+            python tools/build_rear_tree_runtime_target_host_window.py \
+              --runtime-root .runtime-owner \
+              --technical-art-root .technical-art \
+              --uc-root .uc \
+              --out "$root" 2>&1 | tee "$root/pretarget-build.log"
+          cp /tmp/exact-runtime-candidate-head.txt "$root/exact-runtime-candidate-head.txt"
+
+      - name: Validate exact pre-target receiver and fail closed on window drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/east-rear-runtime-target-host-window-002')
+          r=json.loads((root/'runtime-target-preflight-receipt.json').read_text())
+          assert r['result']=='PASS_RUNTIME_CONSUMED_TECHNICAL_ART_CURRENT_UC_DYNAMIC_WINDOW_RECEIVER_READY',r
+          assert r['heads']=={
+              'runtime_owner':'6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f',
+              'technical_art':'b96f794325f825188b6fd9a920e3fb575e43e467',
+              'vfx':'ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475',
+              'rigging':'754797a815266a643c6b08f1606eb76ba95dd8c6',
+              'uc':'5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4',
+          },r
+          assert r['technical_art_receiver_blob']=='a18d568d45324488f52f2a05159e927450ae2b84',r
+          receiver=r['receiver']
+          assert receiver['source_vertex_count']==390,receiver
+          assert receiver['source_triangle_count']==570,receiver
+          assert receiver['source_vertex_to_uc_vertex_identity'] is True,receiver
+          assert receiver['dynamic_window_target_vertex_indices']==[110,370],receiver
+          assert receiver['target_vertex_stride_bytes']==12,receiver
+          assert receiver['target_dynamic_byte_offset']==1320,receiver
+          assert receiver['target_dynamic_byte_length']==3120,receiver
+          assert receiver['target_full_position_bytes']==4680,receiver
+          assert r['uc']['glb_position_accessor_count']==390,r
+          assert r['uc']['triangles']==570,r
+          assert r['pose_count']==5,r
+          assert r['maximum_pass52_full_candidate_source_component_delta_m']==0.0,r
+          PY
+          if PYTHONPATH=.technical-art/src:.uc/src \
+            python tools/build_rear_tree_runtime_target_host_window.py \
+              --runtime-root .runtime-owner \
+              --technical-art-root .technical-art \
+              --uc-root .uc \
+              --out /tmp/negative-window \
+              --mutate-window-end 369 > "$root/pretarget-window-negative.log" 2>&1; then
+            echo "mutated Technical Art target window unexpectedly passed" >&2
+            exit 1
+          fi
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display and pixel comparator
+        run: |
+          set -euo pipefail
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+          python -m pip install --disable-pip-version-check --quiet Pillow
+
+      - name: Exercise measured mutable partial position window in real Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-target-host-window-002
+          rm -rf target-proof/generated target-proof/renders
+          mkdir -p target-proof/generated
+          cp "$root/nature-east-rear-dynamic-window.glb" target-proof/generated/
+          cp "$root/nature-east-rear-dynamic-window-target-oracle.json" target-proof/generated/
+          rm -f target-proof/runtime-east-rear-target-host-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+              --display-driver x11 --rendering-method gl_compatibility \
+              --path target-proof --script observe_runtime_dynamic_window.gd \
+            2>&1 | tee "$root/godot-positive.log"
+          cp target-proof/runtime-east-rear-target-host-receipt.json "$root/"
+          cp -R target-proof/renders/runtime-east-rear-target-host "$root/renders"
+
+      - name: Validate target-host readback and measured import tradeoff
+        run: |
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          root=Path('evidence/east-rear-runtime-target-host-window-002')
+          r=json.loads((root/'runtime-east-rear-target-host-receipt.json').read_text())
+          assert r['state']=='PASS_NATURE_EAST_REAR_RUNTIME_WINDOW_GODOT_PARTIAL_VERTEX_UPDATE',r
+          receiver=r['receiver']
+          assert receiver['vertex_count']==390,receiver
+          assert receiver['surface_count']==1,receiver
+          assert receiver['imported_vertex_stride_bytes']==8,receiver
+          assert receiver['imported_vertex_position_offset_bytes']==0,receiver
+          assert receiver['imported_positions_compressed'] is True,receiver
+          assert receiver['imported_position_buffer_bytes']==3120,receiver
+          assert receiver['mutable_vertex_stride_bytes']==12,receiver
+          assert receiver['mutable_vertex_position_offset_bytes']==0,receiver
+          assert receiver['mutable_positions_compressed'] is False,receiver
+          assert receiver['mutable_dynamic_update_flag'] is True,receiver
+          assert receiver['mutable_position_buffer_bytes']==4680,receiver
+          assert receiver['mutable_vs_imported_position_storage_delta_bytes']==1560,receiver
+          assert math.isclose(receiver['mutable_vs_imported_position_storage_delta_percent'],50.0,abs_tol=1e-9),receiver
+          assert receiver['dynamic_window_vertices']==[110,370],receiver
+          assert receiver['control_full_update_bytes']==4680,receiver
+          assert receiver['candidate_update_offset_bytes']==1320,receiver
+          assert receiver['candidate_update_bytes']==3120,receiver
+          assert receiver['candidate_update_bytes_saved']==1560,receiver
+          assert math.isclose(receiver['candidate_update_percent_saved'],100.0/3.0,abs_tol=1e-9),receiver
+          assert receiver['api']=='ArrayMesh.surface_update_vertex_region',receiver
+          m=r['measurements']
+          assert m['pose_count']==5,m
+          assert m['maximum_owner_window_packet_component_delta_m'] <= 5e-6,m
+          assert m['maximum_control_readback_vs_runtime_expected_component_delta_m'] <= 5e-6,m
+          assert m['maximum_candidate_readback_vs_runtime_expected_component_delta_m'] <= 5e-6,m
+          assert m['maximum_control_candidate_readback_component_delta_m'] <= 5e-6,m
+          assert m['maximum_static_control_candidate_component_delta_m'] <= 5e-6,m
+          assert m['maximum_candidate_readback_distance_from_neutral_m'] > 0.05,m
+          assert r['truth_boundary']['godot_import_compression_observed_not_assumed'] is True,r
+          assert r['truth_boundary']['runtime_mutable_surface_conversion_required_for_float32_update_path'] is True,r
+          assert r['truth_boundary']['compressed_position_direct_update_proven'] is False,r
+          assert r['truth_boundary']['target_device_cpu_gpu_fps_vram_thermal_battery_proven'] is False,r
+          PY
+
+      - name: Compare five fixed-view shaded control candidate pairs
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image, ImageChops
+          root=Path('evidence/east-rear-runtime-target-host-window-002')
+          render_root=root/'renders'
+          tokens=['m5p0','m2p5','0p0','2p5','5p0']
+          rows=[]; total_changed=0; total_gt1=0; maximum=0
+          for token in tokens:
+              control=Image.open(render_root/f'control_{token}.png').convert('RGBA')
+              candidate=Image.open(render_root/f'candidate_{token}.png').convert('RGBA')
+              assert control.size==candidate.size
+              c=control.tobytes(); d=candidate.tobytes()
+              changed=0; gt1=0; frame_max=0
+              for i in range(0,len(c),4):
+                  delta=max(abs(c[i+j]-d[i+j]) for j in range(4))
+                  changed += int(delta>0); gt1 += int(delta>1); frame_max=max(frame_max,delta)
+              total_changed+=changed; total_gt1+=gt1; maximum=max(maximum,frame_max)
+              rows.append({'token':token,'changed_pixels':changed,'pixels_gt_1_lsb':gt1,'maximum_channel_delta_lsb':frame_max})
+          neutral=Image.open(render_root/'control_0p0.png').convert('RGBA')
+          moved=Image.open(render_root/'control_5p0.png').convert('RGBA')
+          witness_changed=sum(1 for px in ImageChops.difference(neutral,moved).getdata() if max(px)>1)
+          assert total_gt1==0,(rows,total_gt1)
+          assert maximum<=1,(rows,maximum)
+          assert witness_changed>50,witness_changed
+          payload={
+              'schema':'axm.nature-runtime-target-host-shaded-a-b/v0.2',
+              'pair_count':len(rows),'pairs':rows,
+              'total_changed_pixels':total_changed,
+              'total_pixels_gt_1_lsb':total_gt1,
+              'maximum_channel_delta_lsb':maximum,
+              'observer_discriminating_control_0_vs_plus5_pixels_gt_1_lsb':witness_changed,
+              'result':'PASS_FIXED_VIEW_SHADED_CONTROL_CANDIDATE_EQUIVALENCE',
+              'truth_boundary':{
+                  'proof_material_only':True,
+                  'final_nature_lookdev_proven':False,
+                  'deformed_normal_or_tangent_correctness_proven':False,
+                  'art_direction_or_visual_qa_acceptance_proven':False,
+                  'target_device_performance_proven':False,
+              },
+          }
+          (root/'visual-comparison.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(payload,indent=2,sort_keys=True))
+          PY
+
+      - name: Fail closed when mutable target byte window shifts by one vertex
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-target-host-window-002
+          rm -f target-proof/runtime-east-rear-target-host-receipt.json
+          if AXM_RUNTIME_OFFSET_DELTA_BYTES=12 \
+            xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+              .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+                --display-driver x11 --rendering-method gl_compatibility \
+                --path target-proof --script observe_runtime_dynamic_window.gd \
+              > "$root/godot-offset-negative.log" 2>&1; then
+            echo "one-vertex-shifted mutable update window unexpectedly passed" >&2
+            exit 1
+          fi
+          grep -q "FAIL_NATURE_EAST_REAR_RUNTIME_WINDOW_GODOT_PARTIAL_VERTEX_UPDATE" "$root/godot-offset-negative.log"
+
+      - name: Retain exact pass provenance and implementation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-target-host-window-002
+          mkdir -p "$root"
+          git rev-parse HEAD > "$root/exact-runtime-candidate-head.txt"
+          git -C .runtime-owner rev-parse HEAD > "$root/exact-runtime-predecessor-head.txt"
+          git -C .technical-art rev-parse HEAD > "$root/exact-technical-art-donor-head.txt"
+          git -C .uc rev-parse HEAD > "$root/exact-uc-head.txt"
+          cp contracts/east-rear-runtime-target-host-window-001.json "$root/" || true
+          cp docs/RUNTIME_EAST_REAR_TARGET_HOST_WINDOW_001.md "$root/" || true
+          cp tools/build_rear_tree_runtime_target_host_window.py "$root/" || true
+          cp target-proof/observe_runtime_dynamic_window.gd "$root/" || true
+          cp .github/workflows/runtime-east-rear-target-host-window-v2.yml "$root/" || true
+
+      - name: Upload retained target-host Runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-runtime-target-host-v2-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/east-rear-runtime-target-host-window-002
+          if-no-files-found: warn
+          retention-days: 30

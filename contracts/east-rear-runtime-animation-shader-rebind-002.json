@@ -1,0 +1,43 @@
+{
+  "schema": "axm.nature-runtime-current-animation-shader-rebind/v0.1",
+  "owner": "Runtime / Optimization",
+  "scope": "Rebind the exact current five-socket Animation authored sample family to the existing compressed Runtime shader-driver representation without inheriting predecessor Technical-Art pose semantics.",
+  "runtime_predecessor_head": "520068e1167f369b24e749831954f9bda1cd7aec",
+  "animation_owner_head": "d9899fc42afab432d0da6f9ecc3568dc90b7acbf",
+  "animation_rigging_owner_head": "b4b480b415047fea90b4740f7702ced0dba9142d",
+  "technical_art_receiver_donor_head": "da60cd491ac7f9ac04f918dd000f464a627b3316",
+  "runtime_window_owner_head": "6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f",
+  "uc_receiver_donor_head": "5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4",
+  "receiver": {
+    "vertex_count": 390,
+    "dynamic_window_source_indices": [110, 370],
+    "dynamic_vertices": 260,
+    "fixed_vertices": 130,
+    "imported_compressed_position_stride_bytes": 8,
+    "mutable_control_position_stride_bytes": 12,
+    "dynamic_packet_bytes_per_visible_sample": 3120,
+    "shader_semantic_driver_bytes_per_visible_sample": 4
+  },
+  "animation": {
+    "duration_s": 1.0,
+    "sample_rate_hz": 40,
+    "endpoint_inclusive_samples": 41,
+    "visible_repeat_samples": 40,
+    "curve": "5*sin(2*pi*t)^3"
+  },
+  "acceptance": {
+    "all_40_visible_authored_samples_control_readback_max_component_delta_m": 0.000005,
+    "fresh_capture_indices": [0, 5, 10, 15, 20, 25, 30, 35, 39],
+    "maximum_fraction_pixels_gt_1_lsb": 0.0025,
+    "minimum_observer_motion_pixels_gt_1_lsb": 50
+  },
+  "truth_boundary": {
+    "semantic_driver_bytes_are_measured_gpu_transport": false,
+    "animationplayer_natural_playback_claimed": false,
+    "newer_rigging_hierarchy_6cf64925_adopted": false,
+    "target_device_performance_claimed": false,
+    "normal_tangent_correctness_claimed": false,
+    "art_visual_qa_acceptance_claimed": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}

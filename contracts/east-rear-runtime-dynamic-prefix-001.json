@@ -1,0 +1,33 @@
+{
+  "schema": "axm.nature-runtime-east-rear-existing-dynamic-window/v0.2",
+  "owner": "Runtime / Optimization",
+  "purpose": "Use the exact existing contiguous source-index window for the east-rear five-socket moving vertices without reindexing geometry.",
+  "exact_vfx_owner_head": "ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475",
+  "branch_ids": ["south-low", "north-low", "east-mid", "west-high", "north-top"],
+  "expected_total_vertices": 390,
+  "expected_dynamic_vertices": 260,
+  "expected_fixed_vertices": 130,
+  "expected_dynamic_window_original_indices": [110, 370],
+  "position_packet": {
+    "control_full_frame_float32_bytes": 4680,
+    "candidate_dynamic_window_float32_bytes": 3120,
+    "expected_saved_bytes": 1560,
+    "expected_reduction_percent": 33.33333333333333,
+    "candidate_window_regions": 1
+  },
+  "required_truths": [
+    "the 260 exact Rigging moving vertices already equal original source indices 110 through 369",
+    "no vertex permutation or index-buffer rewrite is needed",
+    "all five retained shared-driver static witnesses reconstruct the full control positions exactly",
+    "proof-host timing is observational and not an acceptance gate"
+  ],
+  "nonclaims": [
+    "generic vegetation update policy",
+    "target-host partial-buffer upload acceptance",
+    "target-device CPU or GPU performance",
+    "draw-call reduction",
+    "Animation timing or physical wind semantics",
+    "Art Direction or Visual QA acceptance",
+    "CANON or production readiness"
+  ]
+}

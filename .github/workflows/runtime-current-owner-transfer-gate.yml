@@ -1,0 +1,241 @@
+name: Runtime current Nature owner transfer gate
+
+on:
+  push:
+    branches: [studio/runtime-east-rear-dynamic-prefix-001]
+    paths:
+      - "contracts/east-rear-runtime-current-owner-transfer-003.json"
+      - "target-proof/observe_runtime_current_owner_transfer.gd"
+      - "target-proof/runtime_current_owner_node_vs_shader.gdshader"
+      - ".github/workflows/runtime-current-owner-transfer-gate.yml"
+  pull_request:
+    paths:
+      - "contracts/east-rear-runtime-current-owner-transfer-003.json"
+      - "target-proof/observe_runtime_current_owner_transfer.gd"
+      - "target-proof/runtime_current_owner_node_vs_shader.gdshader"
+      - ".github/workflows/runtime-current-owner-transfer-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  current-owner-transfer-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Runtime candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Bind current owner identities and decision boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/runtime-current-owner-transfer-003
+          mkdir -p "$root"
+          git rev-parse HEAD > "$root/exact-runtime-head.txt"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          c=json.loads(Path('contracts/east-rear-runtime-current-owner-transfer-003.json').read_text())
+          assert c['runtime_predecessor_head']=='b9ad7622d5b9f3f0a1434dbe534da5397d83226c',c
+          assert c['technical_art_head']=='02c5223dd9288c12607f0553e2f1103be38ae71f',c
+          assert c['technical_art_artifact_id']==10542513318,c
+          assert c['technical_art_artifact_sha256']=='7b991dfd749ac758ece3c2c6ea320d10cfed5ff38c822c7ed88342461226a932',c
+          assert c['animation_head']=='5cacd61e22433b0c33f29111827283b81cc0ba0d',c
+          assert c['rigging_head']=='69640e558f0c1ac59d4d0e3155676e0967a03d04',c
+          assert c['uc_head']=='7ddefca57b153fab02c1f54f38de22148cb52c1b',c
+          assert c['control']['semantic_driver_bytes_per_visible_sample']==4,c
+          assert c['candidate']['semantic_driver_bytes_per_visible_sample']==4,c
+          assert c['truth_boundary']['predecessor_3120_byte_dynamic_packet_is_current_baseline'] is False,c
+          PY
+
+      - name: Download exact current Technical Art target artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          root=evidence/runtime-current-owner-transfer-003
+          curl --fail --location --retry 3 --retry-delay 2 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/mike-axiom-mir/axm-nature-design/actions/artifacts/10542513318/zip \
+            -o /tmp/current-ta.zip
+          echo "7b991dfd749ac758ece3c2c6ea320d10cfed5ff38c822c7ed88342461226a932  /tmp/current-ta.zip" | sha256sum --check --strict
+          rm -rf /tmp/current-ta
+          mkdir -p /tmp/current-ta
+          unzip -q /tmp/current-ta.zip -d /tmp/current-ta
+          sha256sum /tmp/current-ta.zip > "$root/current-ta-artifact-sha256.txt"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/current-ta')
+          pre=json.loads((root/'nature-north-low-parent-exclusion-uc-target-receipt.json').read_text())
+          godot=json.loads((root/'nature-north-low-parent-exclusion-godot-target-receipt.json').read_text())
+          assert pre['result']=='PASS_NATURE_NORTH_LOW_PARENT_EXCLUSION_CURRENT_UC_TARGET_RECEIVER_READY',pre
+          assert pre['heads']=={
+            'animation':'5cacd61e22433b0c33f29111827283b81cc0ba0d',
+            'rigging':'69640e558f0c1ac59d4d0e3155676e0967a03d04',
+            'uc':'7ddefca57b153fab02c1f54f38de22148cb52c1b'},pre
+          assert pre['receiver']['nodes_rebound']==12 and pre['receiver']['emitted_triangles']==620,pre
+          assert godot['state']=='PASS_NATURE_NORTH_LOW_PARENT_EXCLUSION_CURRENT_UC_GODOT_TARGET',godot
+          assert godot['samples_verified']==41 and godot['visible_repeat_samples']==40,godot
+          assert godot['truth_boundary']['runtime_controller_or_target_device_proven'] is False,godot
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" -o .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display and comparator
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then sudo apt-get update && sudo apt-get install -y xvfb; fi
+          python -m pip install --disable-pip-version-check --quiet Pillow
+
+      - name: Run current-owner control and diagnostic shader candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/runtime-current-owner-transfer-003
+          generated=target-proof/generated-current-owner
+          rm -rf "$generated" target-proof/renders/runtime-current-owner-transfer
+          mkdir -p "$generated"
+          cp /tmp/current-ta/nature-north-low-parent-exclusion-uc-target-receipt.json "$generated/"
+          cp /tmp/current-ta/nature-north-low-parent-exclusion-target-oracle.json "$generated/"
+          cp /tmp/current-ta/nature-north-low-parent-exclusion-receiver-rigid.glb "$generated/"
+          cp target-proof/runtime_current_owner_node_vs_shader.gdshader "$generated/"
+          rm -f target-proof/runtime-current-owner-transfer-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof \
+            --script observe_runtime_current_owner_transfer.gd \
+            2>&1 | tee "$root/godot-current-owner-transfer.log"
+          cp target-proof/runtime-current-owner-transfer-receipt.json "$root/"
+          cp -R target-proof/renders/runtime-current-owner-transfer "$root/renders"
+
+      - name: Validate measure-before budget and fresh raster tradeoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          from PIL import Image, ImageChops
+          root=Path('evidence/runtime-current-owner-transfer-003')
+          p=json.loads((root/'runtime-current-owner-transfer-receipt.json').read_text())
+          assert p['state']=='PASS_CURRENT_OWNER_RUNTIME_REBIND_MEASURED__HOLD_PREDECESSOR_SHADER_TRANSFER_NO_INCREMENTAL_BUDGET_WIN',p
+          m=p['measurements']
+          assert m['all_endpoint_inclusive_samples_checked']==41 and m['visible_repeat_samples']==40,m
+          assert m['maximum_current_rigid_node_control_position_residual_m'] <= 5e-6,m
+          assert m['maximum_parent_stress_command_abs_deg'] >= 2.49,m
+          assert m['control_semantic_driver_bytes_per_visible_sample']==4,m
+          assert m['candidate_semantic_driver_bytes_per_visible_sample']==4,m
+          assert m['semantic_payload_saving_bytes_per_visible_sample']==0,m
+          assert m['control_cpu_position_buffer_mutated_per_sample'] is False,m
+          assert m['candidate_cpu_position_buffer_mutated_per_sample'] is False,m
+          assert p['runtime_decision']['decision']=='KEEP_CURRENT_TA_RIGID_NODE_CONTROL__HOLD_PREDECESSOR_SHADER_TRANSFER',p
+          c=m['control_peak_counters']; q=m['candidate_peak_counters']
+          for field in ('draw_calls','objects','primitives'):
+              assert c[field]==q[field],(field,c,q)
+          indices=[0,5,10,15,20,25,30,35,39]
+          rows=[]; total_pixels=total_changed=total_gt1=maximum=0
+          rr=root/'renders'
+          for index in indices:
+              token=f'{index:02d}'
+              a=Image.open(rr/f'control_{token}.png').convert('RGBA')
+              b=Image.open(rr/f'candidate_{token}.png').convert('RGBA')
+              assert a.size==b.size
+              left=a.tobytes(); right=b.tobytes(); changed=gt1=frame_max=0; pixels=len(left)//4
+              for i in range(0,len(left),4):
+                  delta=max(abs(left[i+j]-right[i+j]) for j in range(4))
+                  changed += delta>0; gt1 += delta>1; frame_max=max(frame_max,delta)
+              rows.append({'sample_index':index,'pixels':pixels,'changed_pixels':int(changed),'pixels_gt_1_lsb':int(gt1),'maximum_channel_delta_lsb':frame_max})
+              total_pixels+=pixels; total_changed+=changed; total_gt1+=gt1; maximum=max(maximum,frame_max)
+          neutral=Image.open(rr/'candidate_00.png').convert('RGBA')
+          peak=Image.open(rr/'candidate_10.png').convert('RGBA')
+          witness=sum(1 for px in ImageChops.difference(neutral,peak).getdata() if max(px)>1)
+          fraction=total_gt1/total_pixels if total_pixels else 1.0
+          assert fraction <= 0.0025,(fraction,rows)
+          assert witness > 50,witness
+          visual={
+            'schema':'axm.nature-runtime-current-owner-transfer-visual/v0.1',
+            'pair_count':len(rows),'pairs':rows,'total_pixels':total_pixels,
+            'total_changed_pixels':int(total_changed),'total_pixels_gt_1_lsb':int(total_gt1),
+            'fraction_pixels_gt_1_lsb':fraction,'maximum_channel_delta_lsb':maximum,
+            'observer_discriminating_sample0_vs_sample10_pixels_gt_1_lsb':witness,
+            'result':'PASS_CURRENT_OWNER_RIGID_NODE_VS_SHADER_FIXED_VIEW__RUNTIME_TRANSFER_STILL_HELD_NO_BUDGET_WIN',
+            'runtime_decision':'KEEP_CURRENT_TA_RIGID_NODE_CONTROL__HOLD_PREDECESSOR_SHADER_TRANSFER',
+            'truth_boundary':{
+              'visual_equivalence_does_not_create_performance_win':True,
+              'art_direction_or_visual_qa_acceptance_proven':False,
+              'target_device_performance_proven':False,
+              'tangent_correctness_proven':False
+            }
+          }
+          (root/'visual-comparison.json').write_text(json.dumps(visual,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(visual,indent=2,sort_keys=True))
+          PY
+
+      - name: Fail closed on stale predecessor budget transfer
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/runtime-current-owner-transfer-003
+          if python - <<'PY' > "$root/stale-predecessor-budget-negative.log" 2>&1
+          import json
+          from pathlib import Path
+          p=json.loads(Path('evidence/runtime-current-owner-transfer-003/runtime-current-owner-transfer-receipt.json').read_text())
+          # Deliberately falsify the current rigid-node baseline as the predecessor 3,120-byte packet.
+          p['measurements']['control_semantic_driver_bytes_per_visible_sample']=3120
+          if p['measurements']['control_semantic_driver_bytes_per_visible_sample'] != 4:
+              raise SystemExit('PASS_REJECTED_STALE_PREDECESSOR_3120B_BASELINE_TRANSFER')
+          PY
+          then
+            echo "stale predecessor baseline mutation unexpectedly passed" >&2
+            exit 1
+          fi
+          grep -q PASS_REJECTED_STALE_PREDECESSOR_3120B_BASELINE_TRANSFER "$root/stale-predecessor-budget-negative.log"
+          printf '%s\n' PASS_REJECTED_STALE_PREDECESSOR_3120B_BASELINE_TRANSFER > "$root/negative-controls.txt"
+
+      - name: Retain exact implementation and current-owner provenance
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/runtime-current-owner-transfer-003
+          cp contracts/east-rear-runtime-current-owner-transfer-003.json "$root/"
+          cp target-proof/observe_runtime_current_owner_transfer.gd "$root/"
+          cp target-proof/runtime_current_owner_node_vs_shader.gdshader "$root/"
+          cp .github/workflows/runtime-current-owner-transfer-gate.yml "$root/"
+          cp /tmp/current-ta/nature-north-low-parent-exclusion-godot-target-receipt.json "$root/technical-art-godot-target-receipt.json" || true
+          cp /tmp/current-ta/nature-north-low-parent-exclusion-target-oracle.json "$root/technical-art-target-oracle.json" || true
+
+      - name: Upload current-owner transfer evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-runtime-current-owner-transfer-gate-${{ github.sha }}
+          path: evidence/runtime-current-owner-transfer-003
+          if-no-files-found: error
+          retention-days: 30

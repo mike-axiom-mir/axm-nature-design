@@ -1,0 +1,62 @@
+{
+  "schema": "axm.nature-runtime-current-owner-rigid-node-vs-shader/v0.1",
+  "owner": "Runtime / Optimization",
+  "scope": "Measure the exact current Technical-Art rigid north-low receiver before transferring the predecessor compressed shader driver. Keep the current rigid-node control when the shader candidate has no fresh budget win.",
+  "runtime_predecessor_head": "b9ad7622d5b9f3f0a1434dbe534da5397d83226c",
+  "technical_art_pr": 3,
+  "technical_art_head": "02c5223dd9288c12607f0553e2f1103be38ae71f",
+  "technical_art_artifact_id": 10542513318,
+  "technical_art_artifact_sha256": "7b991dfd749ac758ece3c2c6ea320d10cfed5ff38c822c7ed88342461226a932",
+  "animation_pr": 26,
+  "animation_head": "5cacd61e22433b0c33f29111827283b81cc0ba0d",
+  "rigging_pr": 14,
+  "rigging_head": "69640e558f0c1ac59d4d0e3155676e0967a03d04",
+  "uc_head": "7ddefca57b153fab02c1f54f38de22148cb52c1b",
+  "receiver": {
+    "branch_id": "north-low",
+    "attachment_mode": "DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY",
+    "nodes": 12,
+    "triangles": 620,
+    "visible_repeat_samples": 40,
+    "endpoint_inclusive_samples": 41,
+    "target_angle_rule": "target_angle_deg = -north_low_child_angle_deg",
+    "parent_stress_command_is_receiver_motion": false
+  },
+  "control": {
+    "representation": "CURRENT_TA_RIGID_PARENT_NODE_TRANSFORM",
+    "semantic_driver_bytes_per_visible_sample": 4,
+    "cpu_position_buffer_mutated_per_sample": false,
+    "north_low_woody_node_transforms_per_sample": 1,
+    "north_low_foliage_inherits_parent_transform": true
+  },
+  "candidate": {
+    "representation": "CURRENT_OWNER_SHADER_REBIND_DIAGNOSTIC_ONLY",
+    "semantic_driver_bytes_per_visible_sample": 4,
+    "cpu_position_buffer_mutated_per_sample": false,
+    "keeps_rigid_glb_geometry": true,
+    "custom_vertex_shader_added": true,
+    "adoption_requires_fresh_budget_win": true
+  },
+  "acceptance": {
+    "target_engine": "Godot 4.7.2 GL Compatibility",
+    "target_position_tolerance_m": 0.000005,
+    "capture_indices": [0, 5, 10, 15, 20, 25, 30, 35, 39],
+    "maximum_fraction_pixels_gt_1_lsb": 0.0025,
+    "minimum_observer_motion_pixels_gt_1_lsb": 50,
+    "minimum_semantic_payload_saving_bytes_per_visible_sample_for_transfer": 1,
+    "require_equal_draw_calls_objects_primitives_if_no_win": true,
+    "decision_if_semantic_payload_saving_bytes_is_zero": "KEEP_CURRENT_TA_RIGID_NODE_CONTROL__HOLD_PREDECESSOR_SHADER_TRANSFER"
+  },
+  "truth_boundary": {
+    "predecessor_3120_byte_dynamic_packet_is_current_baseline": false,
+    "semantic_driver_bytes_are_measured_gpu_command_transport": false,
+    "custom_shader_is_target_device_gpu_win": false,
+    "natural_animationplayer_playback_claimed": false,
+    "parent_stress_command_applied_as_receiver_motion": false,
+    "connected_attachment_or_production_skinning_claimed": false,
+    "normal_tangent_final_correctness_claimed": false,
+    "art_direction_or_visual_qa_acceptance_claimed": false,
+    "target_device_cpu_gpu_fps_vram_thermal_battery_proven": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}

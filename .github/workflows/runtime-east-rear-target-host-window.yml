@@ -1,0 +1,31 @@
+name: Runtime east rear target-host dynamic window v1 (superseded)
+
+# Historical v1 target-host experiment.
+#
+# The original automatic workflow is preserved in Git history at Runtime head
+# f1d3c478c729ff36adaf7cb9296d4164019954dc and in its failed workflow/artifact
+# evidence. Godot 4.7.2 showed that the imported current-UC receiver uses an
+# 8-byte compressed position stride, so the v1 assumption that source-side
+# 12-byte float32 offsets could be applied directly to the imported buffer was
+# false. The active evidence lane is runtime-east-rear-target-host-window-v2.yml,
+# which first measures the imported layout and then builds the mutable 12-byte
+# dynamic-update receiver explicitly.
+#
+# Keep this file manual-only so known-invalid v1 assumptions do not make every
+# new Runtime commit red while preserving the exact failed predecessor in Git.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-v1-pointer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preserve failed predecessor identity
+        run: |
+          echo "Historical v1 only."
+          echo "Exact predecessor head: f1d3c478c729ff36adaf7cb9296d4164019954dc"
+          echo "Use runtime-east-rear-target-host-window-v2.yml for active verification."

@@ -1,0 +1,13 @@
+[application]
+config/name="AXM Nature Runtime Dynamic Window Target Proof"
+
+[display]
+window/size/viewport_width=900
+window/size/viewport_height=700
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+[environment]
+defaults/default_clear_color=Color(0.045, 0.05, 0.06, 1)

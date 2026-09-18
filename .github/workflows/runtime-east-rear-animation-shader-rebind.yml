@@ -1,0 +1,292 @@
+name: Runtime east rear current Animation shader rebind
+
+on:
+  push:
+    branches: [studio/runtime-east-rear-dynamic-prefix-001]
+    paths:
+      - "target-proof/observe_runtime_animation_shader_rebind.gd"
+      - "contracts/east-rear-runtime-animation-shader-rebind-002.json"
+      - "docs/RUNTIME_EAST_REAR_ANIMATION_SHADER_REBIND_002.md"
+      - ".github/workflows/runtime-east-rear-animation-shader-rebind.yml"
+  pull_request:
+    paths:
+      - "target-proof/observe_runtime_animation_shader_rebind.gd"
+      - "contracts/east-rear-runtime-animation-shader-rebind-002.json"
+      - "docs/RUNTIME_EAST_REAR_ANIMATION_SHADER_REBIND_002.md"
+      - ".github/workflows/runtime-east-rear-animation-shader-rebind.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-current-animation-shader-rebind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Runtime candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Runtime predecessor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base 520068e1167f369b24e749831954f9bda1cd7aec HEAD)" = 520068e1167f369b24e749831954f9bda1cd7aec
+          mkdir -p evidence/east-rear-runtime-animation-shader-rebind-002
+          git rev-parse HEAD > evidence/east-rear-runtime-animation-shader-rebind-002/exact-runtime-head.txt
+
+      - name: Checkout exact current Animation owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: d9899fc42afab432d0da6f9ecc3568dc90b7acbf
+          path: .animation
+
+      - name: Checkout exact Runtime window owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          path: .runtime-owner
+
+      - name: Checkout exact Technical Art receiver donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da60cd491ac7f9ac04f918dd000f464a627b3316
+          path: .ta
+
+      - name: Checkout exact Universal Creation receiver donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4
+          path: .uc
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Bind exact owner and transport identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .animation rev-parse HEAD)" = d9899fc42afab432d0da6f9ecc3568dc90b7acbf
+          test "$(git -C .runtime-owner rev-parse HEAD)" = 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          test "$(git -C .ta rev-parse HEAD)" = da60cd491ac7f9ac04f918dd000f464a627b3316
+          test "$(git -C .uc rev-parse HEAD)" = 5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          c=json.loads(Path('contracts/east-rear-runtime-animation-shader-rebind-002.json').read_text())
+          assert c['runtime_predecessor_head']=='520068e1167f369b24e749831954f9bda1cd7aec',c
+          assert c['animation_owner_head']=='d9899fc42afab432d0da6f9ecc3568dc90b7acbf',c
+          assert c['animation_rigging_owner_head']=='b4b480b415047fea90b4740f7702ced0dba9142d',c
+          assert c['technical_art_receiver_donor_head']=='da60cd491ac7f9ac04f918dd000f464a627b3316',c
+          assert c['runtime_window_owner_head']=='6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f',c
+          assert c['uc_receiver_donor_head']=='5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4',c
+          PY
+
+      - name: Rebuild exact Technical Art transport receiver
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/ta-window-receiver
+          mkdir -p /tmp/ta-window-receiver
+          PYTHONPATH=.ta/src:.uc/src \
+            python .ta/tools/build_uc_dynamic_window_target_evidence.py \
+              --runtime-root .runtime-owner \
+              --uc-root .uc \
+              --out /tmp/ta-window-receiver \
+              > evidence/east-rear-runtime-animation-shader-rebind-002/ta-receiver-build.log 2>&1
+
+      - name: Build current Animation semantic oracle and Runtime shader oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-animation-shader-rebind-002
+          PYTHONPATH=.animation/src \
+            python .animation/tools/build_animation_shared_driver_target_replay.py \
+              --ta-receipt /tmp/ta-window-receiver/nature-east-rear-dynamic-window-uc-target-receipt.json \
+              --ta-oracle /tmp/ta-window-receiver/nature-east-rear-dynamic-window-target-oracle.json \
+              --ta-glb /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb \
+              --output "$root/animation-shared-driver-target-oracle.json" \
+              2>&1 | tee "$root/animation-oracle-build.log"
+          PYTHONPATH=.runtime-owner/src \
+            python tools/build_rear_tree_runtime_shader_driver.py \
+              --runtime-root .runtime-owner \
+              --out "$root" \
+              2>&1 | tee "$root/runtime-shader-oracle-build.log"
+          cp /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb "$root/"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/east-rear-runtime-animation-shader-rebind-002')
+          a=json.loads((root/'animation-shared-driver-target-oracle.json').read_text())
+          r=json.loads((root/'runtime-shader-driver-oracle.json').read_text())
+          assert a['result']=='PASS_CURRENT_ANIMATION_SHARED_DRIVER_PACKETS_MATCH_TA_DYNAMIC_WINDOW',a
+          assert a['lineage']['rigging_owner_head']=='b4b480b415047fea90b4740f7702ced0dba9142d',a
+          assert a['receiver']['dynamic_window_vertices']==[110,370],a
+          assert len(a['samples'])==41 and a['samples'][0]['dynamic_target_positions_m']==a['samples'][40]['dynamic_target_positions_m'],a
+          assert r['result']=='PASS_FRAGMENTED_VERTEX_ID_RUNS_TILE_EXACT_DYNAMIC_WINDOW',r
+          assert r['moving_window']==[110,370] and r['vertex_id_run_count']==10,r
+          signs={g['branch_id']:int(g['command_sign_multiplier']) for g in r['groups']}
+          assert list(signs.values())==[1,-1,1,-1,1],signs
+          assert a['truth_boundary']['predecessor_ta_pose_semantics_reused_as_current_authority'] is False,a
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" -o .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display and pixel comparator
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then sudo apt-get update && sudo apt-get install -y xvfb; fi
+          python -m pip install --disable-pip-version-check --quiet Pillow
+
+      - name: Exercise all current authored samples through exact Runtime representation
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-animation-shader-rebind-002
+          rm -rf target-proof/generated target-proof/renders/runtime-animation-shader-rebind
+          mkdir -p target-proof/generated
+          cp "$root/animation-shared-driver-target-oracle.json" target-proof/generated/
+          cp "$root/runtime-shader-driver-oracle.json" target-proof/generated/
+          cp "$root/runtime-shader-driver.gdshader" target-proof/generated/
+          cp "$root/nature-east-rear-dynamic-window.glb" target-proof/generated/
+          rm -f target-proof/runtime-animation-shader-rebind-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof \
+            --script observe_runtime_animation_shader_rebind.gd \
+            2>&1 | tee "$root/godot-current-animation-shader-rebind.log"
+          cp target-proof/runtime-animation-shader-rebind-receipt.json "$root/"
+          cp -R target-proof/renders/runtime-animation-shader-rebind "$root/renders"
+
+      - name: Validate measured loop budget and fresh visual tradeoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          from PIL import Image, ImageChops
+          root=Path('evidence/east-rear-runtime-animation-shader-rebind-002')
+          p=json.loads((root/'runtime-animation-shader-rebind-receipt.json').read_text())
+          assert p['state']=='PASS_RUNTIME_CURRENT_ANIMATION_LOOP_OVER_COMPRESSED_SHADER_DRIVER',p
+          r=p['receiver']
+          assert r['candidate_imported_position_stride_bytes']==8 and r['candidate_imported_positions_compressed'] is True,r
+          assert r['candidate_position_storage_bytes']==3120 and r['control_mutable_position_storage_bytes']==4680,r
+          assert r['position_storage_bytes_avoided']==1560,r
+          assert r['dynamic_packet_bytes_per_visible_sample']==3120 and r['shader_semantic_driver_bytes_per_visible_sample']==4,r
+          assert r['visible_authored_samples']==40,r
+          assert r['control_loop_semantic_payload_bytes']==124800,r
+          assert r['shader_loop_semantic_payload_bytes']==160,r
+          assert r['loop_semantic_payload_bytes_avoided']==124640,r
+          assert math.isclose(r['loop_semantic_payload_reduction_percent'],99.87179487179488,abs_tol=1e-9),r
+          assert r['candidate_cpu_position_buffer_mutated_per_sample'] is False,r
+          assert p['measurements']['all_visible_authored_samples_checked']==40,p
+          assert p['measurements']['maximum_control_dynamic_readback_component_delta_m'] <= 5e-6,p
+          assert p['truth_boundary']['animationplayer_natural_playback_claimed'] is False,p
+          assert p['truth_boundary']['newer_rigging_hierarchy_6cf64925_adopted'] is False,p
+          indices=[0,5,10,15,20,25,30,35,39]
+          rows=[]; total_pixels=total_changed=total_gt1=maximum=0
+          rr=root/'renders'
+          for index in indices:
+              token=f'{index:02d}'
+              a=Image.open(rr/f'control_{token}.png').convert('RGBA')
+              b=Image.open(rr/f'candidate_{token}.png').convert('RGBA')
+              assert a.size==b.size
+              left=a.tobytes(); right=b.tobytes(); changed=gt1=frame_max=0; pixels=len(left)//4
+              for i in range(0,len(left),4):
+                  delta=max(abs(left[i+j]-right[i+j]) for j in range(4))
+                  changed += delta>0; gt1 += delta>1; frame_max=max(frame_max,delta)
+              rows.append({'sample_index':index,'pixels':pixels,'changed_pixels':int(changed),'pixels_gt_1_lsb':int(gt1),'maximum_channel_delta_lsb':frame_max})
+              total_pixels+=pixels; total_changed+=changed; total_gt1+=gt1; maximum=max(maximum,frame_max)
+          neutral=Image.open(rr/'candidate_00.png').convert('RGBA')
+          peak=Image.open(rr/'candidate_10.png').convert('RGBA')
+          witness=sum(1 for px in ImageChops.difference(neutral,peak).getdata() if max(px)>1)
+          fraction=total_gt1/total_pixels if total_pixels else 1.0
+          assert fraction <= 0.0025,(fraction,rows)
+          assert witness > 50,witness
+          visual={
+            'schema':'axm.nature-runtime-current-animation-shader-rebind-visual/v0.1',
+            'pair_count':len(rows),'pairs':rows,'total_pixels':total_pixels,
+            'total_changed_pixels':int(total_changed),'total_pixels_gt_1_lsb':int(total_gt1),
+            'fraction_pixels_gt_1_lsb':fraction,'maximum_channel_delta_lsb':maximum,
+            'observer_discriminating_sample0_vs_sample10_pixels_gt_1_lsb':witness,
+            'result':'PASS_BOUNDED_CURRENT_ANIMATION_CONTROL_VS_COMPRESSED_SHADER_FIXED_VIEW',
+            'truth_boundary':{
+              'proof_material_only':True,
+              'normal_or_tangent_deformation_correctness_proven':False,
+              'art_direction_or_visual_qa_acceptance_proven':False,
+              'target_device_performance_proven':False
+            }
+          }
+          (root/'visual-comparison.json').write_text(json.dumps(visual,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(visual,indent=2,sort_keys=True))
+          PY
+
+      - name: Fail closed on dynamic-window drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp target-proof/generated/animation-shared-driver-target-oracle.json /tmp/animation-oracle-good.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('target-proof/generated/animation-shared-driver-target-oracle.json')
+          d=json.loads(p.read_text()); d['receiver']['dynamic_window_vertices']=[110,371]
+          p.write_text(json.dumps(d,sort_keys=True)+'\n')
+          PY
+          if xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 --rendering-method gl_compatibility \
+            --path target-proof --script observe_runtime_animation_shader_rebind.gd \
+            > evidence/east-rear-runtime-animation-shader-rebind-002/window-drift-negative.log 2>&1; then
+            echo "mutated current Animation window unexpectedly passed" >&2
+            exit 1
+          fi
+          cp /tmp/animation-oracle-good.json target-proof/generated/animation-shared-driver-target-oracle.json
+          printf '%s\n' PASS_REJECTED_CURRENT_ANIMATION_WINDOW_DRIFT \
+            > evidence/east-rear-runtime-animation-shader-rebind-002/negative-controls.txt
+
+      - name: Retain exact provenance and implementation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-animation-shader-rebind-002; mkdir -p "$root"
+          git rev-parse HEAD > "$root/exact-runtime-head.txt"
+          git -C .animation rev-parse HEAD > "$root/exact-animation-owner-head.txt" || true
+          git -C .runtime-owner rev-parse HEAD > "$root/exact-runtime-window-owner-head.txt" || true
+          git -C .ta rev-parse HEAD > "$root/exact-technical-art-donor-head.txt" || true
+          git -C .uc rev-parse HEAD > "$root/exact-uc-donor-head.txt" || true
+          cp contracts/east-rear-runtime-animation-shader-rebind-002.json "$root/" || true
+          cp docs/RUNTIME_EAST_REAR_ANIMATION_SHADER_REBIND_002.md "$root/" || true
+          cp target-proof/observe_runtime_animation_shader_rebind.gd "$root/" || true
+          cp .github/workflows/runtime-east-rear-animation-shader-rebind.yml "$root/" || true
+
+      - name: Upload retained current Animation shader-rebind evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-runtime-current-animation-shader-rebind-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/east-rear-runtime-animation-shader-rebind-002
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,122 @@
+name: Runtime east rear existing dynamic window
+
+on:
+  pull_request:
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/source_topology_migration.py"
+      - "src/axm_nature_design/rear_tree_rigging.py"
+      - "src/axm_nature_design/rear_tree_rigging_geometry_rebind.py"
+      - "src/axm_nature_design/rear_tree_rigging_primary_branch_family.py"
+      - "src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py"
+      - "src/axm_nature_design/rear_tree_vfx_shared_driver_response.py"
+      - "src/axm_nature_design/rear_tree_runtime_dynamic_prefix.py"
+      - "contracts/east-rear-runtime-dynamic-prefix-001.json"
+      - "tools/verify_rear_tree_runtime_dynamic_prefix.py"
+      - "tests/test_rear_tree_runtime_dynamic_prefix.py"
+      - "docs/RUNTIME_EAST_REAR_DYNAMIC_PREFIX_001.md"
+      - ".github/workflows/runtime-east-rear-dynamic-prefix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin exact VFX owner bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          VFX_HEAD=ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475
+          git merge-base --is-ancestor "$VFX_HEAD" HEAD
+          git diff --exit-code "$VFX_HEAD" HEAD -- \
+            examples/east_rear_tree_neutral_001.json \
+            src/axm_nature_design/organic_form.py \
+            src/axm_nature_design/source_topology_migration.py \
+            src/axm_nature_design/rear_tree_rigging.py \
+            src/axm_nature_design/rear_tree_rigging_geometry_rebind.py \
+            src/axm_nature_design/rear_tree_rigging_primary_branch_family.py \
+            src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py \
+            src/axm_nature_design/rear_tree_vfx_shared_driver_response.py \
+            contracts/east-rear-primary-branch-root-socket-rigging-family-003.json \
+            contracts/east-rear-primary-branch-shared-driver-polarity-rigging-004.json \
+            contracts/east-rear-shared-driver-vfx-response-envelope-003.json
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full receiving repository tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Runtime existing-window evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/east-rear-runtime-dynamic-window-001
+          git rev-parse HEAD > evidence/east-rear-runtime-dynamic-window-001/exact-head.txt
+          printf '%s\n' ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475 > evidence/east-rear-runtime-dynamic-window-001/exact-vfx-owner-head.txt
+          python tools/verify_rear_tree_runtime_dynamic_prefix.py \
+            --benchmark-iterations 1200 \
+            --output evidence/east-rear-runtime-dynamic-window-001/evidence.json
+          cp contracts/east-rear-runtime-dynamic-prefix-001.json evidence/east-rear-runtime-dynamic-window-001/
+          cp docs/RUNTIME_EAST_REAR_DYNAMIC_PREFIX_001.md evidence/east-rear-runtime-dynamic-window-001/
+
+      - name: Assert retained Runtime truth boundary
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("evidence/east-rear-runtime-dynamic-window-001")
+          payload = json.loads((root / "evidence.json").read_text())
+          assert payload["result"] == "PASS_EAST_REAR_EXISTING_DYNAMIC_WINDOW_POSITION_PACKET_REDUCTION", payload
+          assert all(payload["checks"].values()), payload
+          assert not any(payload["truth_boundary"].values()), payload
+          measured = payload["measurements"]
+          assert measured["total_vertices"] == 390, measured
+          assert measured["dynamic_vertices"] == 260, measured
+          assert measured["fixed_vertices"] == 130, measured
+          assert [measured["dynamic_window_start_vertex"], measured["dynamic_window_end_vertex_exclusive"]] == [110, 370], measured
+          assert measured["geometry_reindexed"] is False, measured
+          assert measured["index_buffer_changed"] is False, measured
+          assert measured["control_full_position_packet_bytes"] == 4680, measured
+          assert measured["candidate_dynamic_window_position_packet_bytes"] == 3120, measured
+          assert measured["position_packet_bytes_saved"] == 1560, measured
+          assert abs(measured["position_packet_reduction_percent"] - 33.33333333333333) < 1e-12, measured
+          assert measured["maximum_control_candidate_vertex_component_delta_m"] == 0.0, measured
+          assert payload["visual_tradeoff"]["target_host_shaded_a_b_measured"] is False, payload
+          assert payload["proof_host_cpu_observation"]["timing_used_as_acceptance_gate"] is False, payload
+          assert payload["all_failure_controls_rejected"] is True, payload
+          PY
+
+      - name: Upload retained Runtime existing-window evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-runtime-dynamic-window-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/east-rear-runtime-dynamic-window-001/
+          if-no-files-found: error
