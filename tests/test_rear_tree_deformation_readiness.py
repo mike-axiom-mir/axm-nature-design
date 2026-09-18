@@ -1,0 +1,262 @@
+import copy
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from axm_nature_design.organic_form import load_source
+from axm_nature_design.rear_tree_deformation_readiness import evaluate
+
+SOURCE = ROOT / "examples" / "east_rear_tree_neutral_001.json"
+
+
+class RearTreeDeformationReadinessTests(unittest.TestCase):
+    def setUp(self):
+        self.source = load_source(SOURCE)
+
+    def test_current_source_has_complete_unproven_branch_root_flex_metadata(self):
+        report = evaluate(self.source)
+        self.assertEqual(report["state"], "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED")
+        self.assertTrue(report["checks"]["all_branch_roots_have_neutral_trunk_support"])
+        self.assertTrue(report["checks"]["all_declared_flex_zones_remain_unproven"])
+        self.assertTrue(report["checks"]["all_primary_branch_roots_have_exact_declared_flex_zone"])
+        self.assertEqual(report["branch_count"], 5)
+        self.assertEqual(report["branch_roots_with_exact_flex_zone"], 5)
+        self.assertEqual(report["branch_roots_missing_exact_flex_zone"], [])
+        self.assertGreater(report["minimum_neutral_support_margin_after_branch_radius_m"], 0.0)
+
+    def test_current_declared_trunk_flex_envelopes_bind_exact_neutral_trunk_points(self):
+        report = evaluate(self.source)
+        self.assertEqual(
+            report["trunk_flex_state"],
+            "PASS_DECLARED_TRUNK_FLEX_ENVELOPES_BOUND__DEFORMATION_UNTESTED",
+        )
+        self.assertEqual(report["trunk_flex_zone_count"], 2)
+        self.assertTrue(report["checks"]["declared_trunk_flex_zones_present"])
+        self.assertTrue(
+            report["checks"]["all_declared_trunk_flex_zones_match_exact_trunk_point"]
+        )
+        self.assertTrue(
+            report["checks"]["all_declared_trunk_flex_zones_cover_authored_trunk_cross_section"]
+        )
+        self.assertAlmostEqual(report["minimum_trunk_flex_envelope_margin_m"], 0.13, places=12)
+
+        rows = {row["flex_zone_id"]: row for row in report["trunk_flex_zones"]}
+        lower = rows["trunk-lower-flex"]
+        self.assertEqual(lower["trunk_point_id"], "lower")
+        self.assertAlmostEqual(lower["flex_zone_radius_m"], 0.28, places=12)
+        self.assertAlmostEqual(lower["trunk_point_radius_m"], 0.15, places=12)
+        self.assertAlmostEqual(lower["neutral_cross_section_envelope_margin_m"], 0.13, places=12)
+        self.assertTrue(lower["exact_trunk_point_anchor"])
+        self.assertTrue(lower["covers_authored_trunk_cross_section"])
+        self.assertEqual(lower["flex_zone_status"], "DECLARED_NOT_DEFORMATION_TESTED")
+
+        upper = rows["trunk-upper-flex"]
+        self.assertEqual(upper["trunk_point_id"], "upper")
+        self.assertAlmostEqual(upper["flex_zone_radius_m"], 0.22, places=12)
+        self.assertAlmostEqual(upper["trunk_point_radius_m"], 0.09, places=12)
+        self.assertAlmostEqual(upper["neutral_cross_section_envelope_margin_m"], 0.13, places=12)
+        self.assertTrue(upper["exact_trunk_point_anchor"])
+        self.assertTrue(upper["covers_authored_trunk_cross_section"])
+        self.assertEqual(upper["flex_zone_status"], "DECLARED_NOT_DEFORMATION_TESTED")
+
+    def test_current_trunk_branch_flex_interaction_map_is_exact_and_non_promotional(self):
+        report = evaluate(self.source)
+        interactions = report["trunk_branch_flex_interactions"]
+        self.assertEqual(
+            report["trunk_branch_flex_interaction_state"],
+            "PASS_DECLARED_TRUNK_BRANCH_FLEX_INTERACTION_MAP__DEFORMATION_UNTESTED",
+        )
+        self.assertEqual(interactions["pair_count"], 10)
+        self.assertEqual(interactions["branch_roots_missing_exact_flex_zone"], [])
+        self.assertEqual(interactions["branch_root_centers_inside_trunk_flex_zone_count"], 1)
+        self.assertEqual(
+            interactions["branch_root_center_containment_pairs"],
+            [
+                {
+                    "trunk_flex_zone_id": "trunk-upper-flex",
+                    "branch_id": "east-mid",
+                    "branch_flex_zone_id": "east-mid-branch-flex",
+                }
+            ],
+        )
+        self.assertEqual(interactions["declared_flex_envelope_overlap_pair_count"], 2)
+        self.assertEqual(
+            interactions["declared_flex_envelope_overlap_pairs"],
+            [
+                {
+                    "trunk_flex_zone_id": "trunk-upper-flex",
+                    "branch_id": "north-low",
+                    "branch_flex_zone_id": "north-low-branch-flex",
+                },
+                {
+                    "trunk_flex_zone_id": "trunk-upper-flex",
+                    "branch_id": "east-mid",
+                    "branch_flex_zone_id": "east-mid-branch-flex",
+                },
+            ],
+        )
+
+        pairs = {
+            (row["trunk_flex_zone_id"], row["branch_id"]): row
+            for row in interactions["pairs"]
+        }
+        north_low = pairs[("trunk-upper-flex", "north-low")]
+        self.assertAlmostEqual(north_low["center_distance_m"], 0.3315116890850156, places=12)
+        self.assertFalse(north_low["branch_root_center_inside_trunk_flex_zone"])
+        self.assertTrue(north_low["declared_flex_envelopes_overlap"])
+        self.assertAlmostEqual(
+            north_low["declared_flex_envelope_overlap_margin_m"],
+            0.028488310914984383,
+            places=12,
+        )
+
+        east_mid = pairs[("trunk-upper-flex", "east-mid")]
+        self.assertAlmostEqual(east_mid["center_distance_m"], 0.10630145812734658, places=12)
+        self.assertTrue(east_mid["branch_root_center_inside_trunk_flex_zone"])
+        self.assertAlmostEqual(
+            east_mid["branch_root_center_containment_margin_m"],
+            0.11369854187265342,
+            places=12,
+        )
+        self.assertTrue(east_mid["declared_flex_envelopes_overlap"])
+        self.assertAlmostEqual(
+            east_mid["declared_flex_envelope_overlap_margin_m"],
+            0.23369854187265338,
+            places=12,
+        )
+
+        lower_pairs = [
+            row for row in interactions["pairs"] if row["trunk_flex_zone_id"] == "trunk-lower-flex"
+        ]
+        self.assertEqual(len(lower_pairs), 5)
+        self.assertFalse(any(row["declared_flex_envelopes_overlap"] for row in lower_pairs))
+        self.assertFalse(interactions["truth_boundary"]["overlap_is_deformation_failure"])
+        self.assertFalse(interactions["truth_boundary"]["hierarchy_or_weighting_inferred"])
+        self.assertFalse(interactions["truth_boundary"]["trunk_branch_composition_tested"])
+
+    def test_interaction_map_is_sensitive_without_relabelling_overlap_as_failure(self):
+        candidate = copy.deepcopy(self.source)
+        upper = next(zone for zone in candidate["flex_zones"] if zone["id"] == "trunk-upper-flex")
+        upper["radius"] = 0.10
+        report = evaluate(candidate)
+        self.assertEqual(report["state"], "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED")
+        self.assertEqual(
+            report["trunk_flex_state"],
+            "PASS_DECLARED_TRUNK_FLEX_ENVELOPES_BOUND__DEFORMATION_UNTESTED",
+        )
+        interactions = report["trunk_branch_flex_interactions"]
+        self.assertEqual(interactions["branch_root_centers_inside_trunk_flex_zone_count"], 0)
+        self.assertEqual(interactions["declared_flex_envelope_overlap_pair_count"], 1)
+        self.assertEqual(
+            interactions["declared_flex_envelope_overlap_pairs"][0]["branch_id"],
+            "east-mid",
+        )
+
+    def test_exact_current_minimum_support_is_north_top_and_positive(self):
+        report = evaluate(self.source)
+        north_top = next(item for item in report["branch_roots"] if item["branch_id"] == "north-top")
+        self.assertEqual(north_top["nearest_trunk_segment"], "crown->tip")
+        self.assertAlmostEqual(
+            north_top["neutral_support_margin_after_branch_radius_m"],
+            0.0010125868542811625,
+            places=12,
+        )
+        self.assertTrue(north_top["root_center_inside_local_trunk_radius"])
+        self.assertTrue(north_top["full_branch_root_radius_supported_in_neutral_form"])
+        self.assertEqual(north_top["exact_root_flex_zone_id"], "north-top-branch-flex")
+        self.assertAlmostEqual(north_top["exact_root_flex_zone_radius_m"], 0.12, places=12)
+        self.assertEqual(north_top["exact_root_flex_zone_status"], "DECLARED_NOT_DEFORMATION_TESTED")
+
+    def test_removing_north_top_declaration_restores_coverage_hold(self):
+        candidate = copy.deepcopy(self.source)
+        candidate["flex_zones"] = [
+            zone for zone in candidate["flex_zones"] if zone["id"] != "north-top-branch-flex"
+        ]
+        report = evaluate(candidate)
+        self.assertEqual(report["state"], "HOLD_BRANCH_ROOT_FLEX_ZONE_COVERAGE")
+        self.assertEqual(report["branch_roots_with_exact_flex_zone"], 4)
+        self.assertEqual(report["branch_roots_missing_exact_flex_zone"], ["north-top"])
+        self.assertEqual(
+            report["trunk_branch_flex_interaction_state"],
+            "HOLD_BRANCH_ROOT_FLEX_ZONE_COVERAGE",
+        )
+        self.assertFalse(report["truth_boundary"]["deformation_simulated"])
+        self.assertFalse(report["truth_boundary"]["rigging_tested"])
+
+    def test_removing_declared_trunk_flex_zones_holds_source_readiness(self):
+        candidate = copy.deepcopy(self.source)
+        candidate["flex_zones"] = [
+            zone for zone in candidate["flex_zones"] if not zone["id"].startswith("trunk-")
+        ]
+        report = evaluate(candidate)
+        self.assertEqual(report["state"], "HOLD_TRUNK_FLEX_ZONE_COVERAGE")
+        self.assertEqual(report["trunk_flex_state"], "HOLD_TRUNK_FLEX_ZONE_COVERAGE")
+        self.assertEqual(report["trunk_flex_zone_count"], 0)
+        self.assertEqual(
+            report["trunk_branch_flex_interaction_state"],
+            "HOLD_TRUNK_FLEX_ZONE_COVERAGE",
+        )
+        self.assertFalse(report["checks"]["declared_trunk_flex_zones_present"])
+
+    def test_shifted_trunk_flex_center_fails_closed(self):
+        bad = copy.deepcopy(self.source)
+        lower = next(zone for zone in bad["flex_zones"] if zone["id"] == "trunk-lower-flex")
+        lower["center"][0] += 0.01
+        report = evaluate(bad)
+        self.assertEqual(report["state"], "FAIL")
+        self.assertEqual(report["trunk_flex_state"], "FAIL_TRUNK_FLEX_ENVELOPE_BINDING")
+        self.assertFalse(
+            report["checks"]["all_declared_trunk_flex_zones_match_exact_trunk_point"]
+        )
+
+    def test_undersized_trunk_flex_envelope_fails_closed(self):
+        bad = copy.deepcopy(self.source)
+        lower = next(zone for zone in bad["flex_zones"] if zone["id"] == "trunk-lower-flex")
+        lower["radius"] = 0.14
+        report = evaluate(bad)
+        self.assertEqual(report["state"], "FAIL")
+        self.assertEqual(report["trunk_flex_state"], "FAIL_TRUNK_FLEX_ENVELOPE_BINDING")
+        self.assertFalse(
+            report["checks"]["all_declared_trunk_flex_zones_cover_authored_trunk_cross_section"]
+        )
+
+    def test_detached_branch_root_fails_closed(self):
+        bad = copy.deepcopy(self.source)
+        bad["branches"][0]["points"][0][0] += 0.40
+        report = evaluate(bad)
+        self.assertEqual(report["state"], "FAIL")
+        self.assertFalse(report["checks"]["all_branch_roots_have_neutral_trunk_support"])
+
+    def test_promoted_flex_status_fails_closed(self):
+        bad = copy.deepcopy(self.source)
+        bad["flex_zones"][0]["status"] = "DEFORMATION_PROVEN"
+        report = evaluate(bad)
+        self.assertEqual(report["state"], "FAIL")
+        self.assertFalse(report["checks"]["all_declared_flex_zones_remain_unproven"])
+
+    def test_report_is_deterministic(self):
+        self.assertEqual(evaluate(self.source), evaluate(copy.deepcopy(self.source)))
+
+    def test_truth_boundary_remains_non_promotional(self):
+        boundary = evaluate(self.source)["truth_boundary"]
+        self.assertTrue(boundary["neutral_form_relationships_measured"])
+        self.assertTrue(boundary["trunk_flex_envelopes_measured"])
+        self.assertTrue(boundary["trunk_branch_flex_interactions_measured"])
+        self.assertFalse(boundary["source_geometry_changed"])
+        self.assertFalse(boundary["flex_zone_metadata_changed"])
+        self.assertFalse(boundary["deformation_simulated"])
+        self.assertFalse(boundary["rigging_tested"])
+        self.assertFalse(boundary["trunk_deformation_tested"])
+        self.assertFalse(boundary["trunk_branch_composition_tested"])
+        self.assertFalse(boundary["hierarchy_or_weighting_inferred"])
+        self.assertFalse(boundary["wind_physics_tested"])
+        self.assertFalse(boundary["botanical_correctness_claimed"])
+        self.assertFalse(boundary["runtime_tested"])
+        self.assertFalse(boundary["art_direction_accepted"])
+
+
+if __name__ == "__main__":
+    unittest.main()

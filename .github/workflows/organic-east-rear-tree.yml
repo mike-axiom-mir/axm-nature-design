@@ -1,0 +1,171 @@
+name: Organic east rear tree evidence
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile
+        run: python -m compileall -q src tools tests
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+      - name: Build exact rear-tree evidence
+        if: matrix.python == '3.11'
+        run: python tools/build_rear_tree.py evidence/east-rear-tree-neutral-001
+      - name: Validate exact retained contract
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("evidence/east-rear-tree-neutral-001")
+          report = json.loads((root / "evidence.json").read_text())
+          readiness = json.loads((root / "deformation-readiness.json").read_text())
+          transitions = json.loads((root / "root-transition-readiness.json").read_text())
+          assert report["status"] == "PASS_REAR_SOURCE_ENVELOPE", report
+          assert all(report["checks"].values()), report
+          assert report["source_digest"] == "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61", report
+          assert report["mesh_digest"] == "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48", report
+          assert report["vertices"] == 390, report
+          assert report["triangles"] == 570, report
+          assert report["receiving_context"]["replacement_target"] == "proxy:nature-tree-east-a", report
+          assert report["receiving_context"]["seed"] == 29, report
+          assert readiness["state"] == "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED", readiness
+          assert readiness["checks"]["all_branch_roots_have_neutral_trunk_support"], readiness
+          assert readiness["checks"]["all_declared_flex_zones_remain_unproven"], readiness
+          assert readiness["checks"]["all_primary_branch_roots_have_exact_declared_flex_zone"], readiness
+          assert readiness["branch_count"] == 5, readiness
+          assert readiness["branch_roots_with_exact_flex_zone"] == 5, readiness
+          assert readiness["branch_roots_missing_exact_flex_zone"] == [], readiness
+          assert readiness["minimum_neutral_support_margin_after_branch_radius_m"] > 0.0, readiness
+          north_top = next(row for row in readiness["branch_roots"] if row["branch_id"] == "north-top")
+          assert north_top["exact_root_flex_zone_id"] == "north-top-branch-flex", north_top
+          assert abs(north_top["exact_root_flex_zone_radius_m"] - 0.12) <= 1e-12, north_top
+          assert north_top["exact_root_flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", north_top
+
+          assert readiness["trunk_flex_state"] == "PASS_DECLARED_TRUNK_FLEX_ENVELOPES_BOUND__DEFORMATION_UNTESTED", readiness
+          assert readiness["trunk_flex_zone_count"] == 2, readiness
+          assert readiness["checks"]["declared_trunk_flex_zones_present"], readiness
+          assert readiness["checks"]["all_declared_trunk_flex_zones_match_exact_trunk_point"], readiness
+          assert readiness["checks"]["all_declared_trunk_flex_zones_cover_authored_trunk_cross_section"], readiness
+          assert abs(readiness["minimum_trunk_flex_envelope_margin_m"] - 0.13) <= 1e-12, readiness
+          trunk_rows = {row["flex_zone_id"]: row for row in readiness["trunk_flex_zones"]}
+          lower = trunk_rows["trunk-lower-flex"]
+          upper = trunk_rows["trunk-upper-flex"]
+          assert lower["trunk_point_id"] == "lower", lower
+          assert abs(lower["flex_zone_radius_m"] - 0.28) <= 1e-12, lower
+          assert abs(lower["trunk_point_radius_m"] - 0.15) <= 1e-12, lower
+          assert abs(lower["neutral_cross_section_envelope_margin_m"] - 0.13) <= 1e-12, lower
+          assert upper["trunk_point_id"] == "upper", upper
+          assert abs(upper["flex_zone_radius_m"] - 0.22) <= 1e-12, upper
+          assert abs(upper["trunk_point_radius_m"] - 0.09) <= 1e-12, upper
+          assert abs(upper["neutral_cross_section_envelope_margin_m"] - 0.13) <= 1e-12, upper
+          assert lower["flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", lower
+          assert upper["flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", upper
+
+          interactions = readiness["trunk_branch_flex_interactions"]
+          assert readiness["trunk_branch_flex_interaction_state"] == "PASS_DECLARED_TRUNK_BRANCH_FLEX_INTERACTION_MAP__DEFORMATION_UNTESTED", readiness
+          assert interactions["pair_count"] == 10, interactions
+          assert interactions["branch_roots_missing_exact_flex_zone"] == [], interactions
+          assert interactions["branch_root_centers_inside_trunk_flex_zone_count"] == 1, interactions
+          assert interactions["branch_root_center_containment_pairs"] == [
+              {
+                  "trunk_flex_zone_id": "trunk-upper-flex",
+                  "branch_id": "east-mid",
+                  "branch_flex_zone_id": "east-mid-branch-flex",
+              }
+          ], interactions
+          assert interactions["declared_flex_envelope_overlap_pair_count"] == 2, interactions
+          assert interactions["declared_flex_envelope_overlap_pairs"] == [
+              {
+                  "trunk_flex_zone_id": "trunk-upper-flex",
+                  "branch_id": "north-low",
+                  "branch_flex_zone_id": "north-low-branch-flex",
+              },
+              {
+                  "trunk_flex_zone_id": "trunk-upper-flex",
+                  "branch_id": "east-mid",
+                  "branch_flex_zone_id": "east-mid-branch-flex",
+              },
+          ], interactions
+          pairs = {
+              (row["trunk_flex_zone_id"], row["branch_id"]): row
+              for row in interactions["pairs"]
+          }
+          north_low = pairs[("trunk-upper-flex", "north-low")]
+          east_mid = pairs[("trunk-upper-flex", "east-mid")]
+          assert abs(north_low["center_distance_m"] - 0.3315116890850156) <= 1e-12, north_low
+          assert not north_low["branch_root_center_inside_trunk_flex_zone"], north_low
+          assert north_low["declared_flex_envelopes_overlap"], north_low
+          assert abs(north_low["declared_flex_envelope_overlap_margin_m"] - 0.028488310914984383) <= 1e-12, north_low
+          assert abs(east_mid["center_distance_m"] - 0.10630145812734658) <= 1e-12, east_mid
+          assert east_mid["branch_root_center_inside_trunk_flex_zone"], east_mid
+          assert abs(east_mid["branch_root_center_containment_margin_m"] - 0.11369854187265342) <= 1e-12, east_mid
+          assert east_mid["declared_flex_envelopes_overlap"], east_mid
+          assert abs(east_mid["declared_flex_envelope_overlap_margin_m"] - 0.23369854187265338) <= 1e-12, east_mid
+          lower_pairs = [
+              row for row in interactions["pairs"]
+              if row["trunk_flex_zone_id"] == "trunk-lower-flex"
+          ]
+          assert len(lower_pairs) == 5, lower_pairs
+          assert not any(row["declared_flex_envelopes_overlap"] for row in lower_pairs), lower_pairs
+          assert not interactions["truth_boundary"]["overlap_is_deformation_failure"], interactions
+          assert not interactions["truth_boundary"]["hierarchy_or_weighting_inferred"], interactions
+          assert not interactions["truth_boundary"]["trunk_branch_composition_tested"], interactions
+
+          assert transitions["state"] == "PASS_EXACT_NEUTRAL_BRANCH_TRANSITION_ENVELOPES__CONNECTED_TOPOLOGY_HELD", transitions
+          assert transitions["branch_count"] == 5, transitions
+          assert all(transitions["checks"].values()), transitions
+          transition_rows = {row["branch_id"]: row for row in transitions["branches"]}
+          expected_lengths = {
+              "south-low": 0.060865238939307745,
+              "north-low": 0.0645372173379806,
+              "east-mid": 0.021620222932618765,
+              "west-high": 0.036156960642309076,
+              "north-top": 0.021221011737572286,
+          }
+          for branch_id, length in expected_lengths.items():
+              row = transition_rows[branch_id]
+              assert abs(row["embedded_length_along_first_segment_m"] - length) <= 1e-12, row
+              assert row["transition_state"] == "FULL_BRANCH_RADIUS_EXITS_TRUNK_RADIAL_ENVELOPE_WITHIN_FIRST_SEGMENT", row
+              assert row["root_full_radius_support_margin_m"] > 0.0, row
+              assert row["first_segment_end_support_margin_m"] < 0.0, row
+              assert abs(row["first_full_radius_exit_boundary"]["boundary_residual_m"]) <= 1e-12, row
+          north_low_transition = transition_rows["north-low"]
+          assert north_low_transition["root_nearest_trunk_segment"] == "mid->upper", north_low_transition
+          assert abs(north_low_transition["root_full_radius_support_margin_m"] - 0.040773804595473605) <= 1e-12, north_low_transition
+          assert abs(north_low_transition["embedded_fraction_of_first_segment"] - 0.14801958337760968) <= 1e-12, north_low_transition
+          assert transitions["handoff"]["connected_topology_state"] == "HELD_FOR_GEOMETRY", transitions
+          assert not transitions["handoff"]["junction_strategy_selected"], transitions
+          assert not transitions["handoff"]["source_compensation_authorized"], transitions
+          assert not transitions["truth_boundary"]["generated_mesh_connectivity_inspected"], transitions
+          assert not transitions["truth_boundary"]["connected_branch_trunk_topology_proven"], transitions
+          assert not transitions["truth_boundary"]["deformation_simulated"], transitions
+          assert not transitions["truth_boundary"]["rigging_hierarchy_or_weights_inferred"], transitions
+          assert not transitions["truth_boundary"]["biological_attachment_claimed"], transitions
+          assert not transitions["truth_boundary"]["runtime_readiness_claimed"], transitions
+
+          assert not readiness["truth_boundary"]["deformation_simulated"], readiness
+          assert not readiness["truth_boundary"]["rigging_tested"], readiness
+          assert not readiness["truth_boundary"]["trunk_deformation_tested"], readiness
+          assert not readiness["truth_boundary"]["trunk_branch_composition_tested"], readiness
+          assert not readiness["truth_boundary"]["hierarchy_or_weighting_inferred"], readiness
+          print(json.dumps({"envelope": report, "deformation_readiness": readiness, "root_transitions": transitions}, indent=2))
+          PY
+      - name: Upload exact rear-tree evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: east-rear-tree-neutral-001-evidence
+          path: evidence/east-rear-tree-neutral-001
+          if-no-files-found: error
