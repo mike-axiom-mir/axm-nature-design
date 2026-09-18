@@ -1,0 +1,118 @@
+name: Rigging east rear north-low analytic bridge endpoint
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py"
+      - "tests/test_rear_tree_rigging_north_low_bridge_endpoint_gate.py"
+      - "tools/verify_rear_tree_rigging_north_low_bridge_endpoint_gate.py"
+      - "contracts/east-rear-north-low-analytic-bridge-endpoint-rigging-009.json"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_ENDPOINT_009.md"
+      - ".github/workflows/rigging-east-rear-north-low-analytic-bridge-endpoint.yml"
+  push:
+    branches:
+      - "studio/rigging-east-rear-root-socket-001"
+    paths:
+      - "src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py"
+      - "tests/test_rear_tree_rigging_north_low_bridge_endpoint_gate.py"
+      - "tools/verify_rear_tree_rigging_north_low_bridge_endpoint_gate.py"
+      - "contracts/east-rear-north-low-analytic-bridge-endpoint-rigging-009.json"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_ENDPOINT_009.md"
+      - ".github/workflows/rigging-east-rear-north-low-analytic-bridge-endpoint.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Rigging head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Rigging and Geometry identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          rigging_predecessor=69640e558f0c1ac59d4d0e3155676e0967a03d04
+          geometry_bridge_donor=14d05fdabc943376c231308001d00eb87dc23430
+          git merge-base --is-ancestor "$rigging_predecessor" HEAD
+          git merge-base --is-ancestor "$geometry_bridge_donor" HEAD
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py)" = "de00694e103b975f9a25a72a50054821b469b528"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py)" = "47ba57110f43b0f3f1f29582b46a90505fa4515c"
+          test "$(git rev-parse HEAD:contracts/east-rear-north-low-analytic-trunk-bridge-geometry-007.json)" = "047daa7d5764f53cb42aa14b8bec82f3150bd809"
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Rigging endpoint evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/north-low-analytic-bridge-endpoint-rigging-009
+          mkdir -p "$root"
+          python tools/verify_rear_tree_rigging_north_low_bridge_endpoint_gate.py \
+            --output "$root/evidence.json" | tee "$root/verifier.log"
+          cp contracts/east-rear-north-low-analytic-bridge-endpoint-rigging-009.json "$root/contract.json"
+          cp contracts/east-rear-north-low-analytic-trunk-bridge-geometry-007.json "$root/geometry-contract.json"
+          cp docs/RIGGING_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_ENDPOINT_009.md "$root/README.md"
+          cp src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py "$root/observer.py"
+          cp src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py "$root/geometry-donor.py"
+          cp tests/test_rear_tree_rigging_north_low_bridge_endpoint_gate.py "$root/test_observer.py"
+          cp tools/verify_rear_tree_rigging_north_low_bridge_endpoint_gate.py "$root/verifier.py"
+          cp .github/workflows/rigging-east-rear-north-low-analytic-bridge-endpoint.yml "$root/workflow.yml"
+          git rev-parse HEAD > "$root/exact-rigging-head.txt"
+          printf '%s\n' 69640e558f0c1ac59d4d0e3155676e0967a03d04 > "$root/rigging-predecessor-head.txt"
+          printf '%s\n' 14d05fdabc943376c231308001d00eb87dc23430 > "$root/geometry-bridge-donor-head.txt"
+
+      - name: Assert bounded truth gate
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('evidence/north-low-analytic-bridge-endpoint-rigging-009/evidence.json').read_text())
+          assert p['result'] == 'PASS_NORTH_LOW_ANALYTIC_BRIDGE_ENDPOINT_PIN_DIAGNOSTIC__HOLD_CONNECTED_TOPOLOGY_PRODUCTION_SKINNING'
+          c = p['endpoint_constraint']
+          assert (c['branch_boundary_vertices'], c['trunk_boundary_vertices'], c['interior_vertices']) == (8, 8, 0)
+          assert c['branch_endpoint_diagnostic_weight'] == 1.0
+          assert c['trunk_endpoint_diagnostic_weight'] == 0.0
+          e = p['representative_pose_evidence']
+          assert e['witness_count'] == 5
+          assert e['minimum_bridge_triangle_area_m2'] > 0.0
+          assert e['minimum_paired_bridge_span_m'] > 0.0
+          assert p['continuous_endpoint_mapping_certificate']['continuous_for_every_real_child_command_in_domain'] is True
+          assert p['continuous_endpoint_mapping_certificate']['continuous_bridge_triangle_nondegeneracy_or_collision_proven'] is False
+          assert all(p['checks'].values())
+          assert not any(p['truth_boundary'].values())
+          PY
+
+      - name: Upload retained Rigging evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-analytic-bridge-endpoint-rigging-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-analytic-bridge-endpoint-rigging-009/
+          if-no-files-found: error
+          retention-days: 90
