@@ -464,6 +464,16 @@
       ],
       "radius": 0.12,
       "status": "DECLARED_NOT_DEFORMATION_TESTED"
+    },
+    {
+      "id": "north-top-branch-flex",
+      "center": [
+        0.01,
+        0.0,
+        3.16
+      ],
+      "radius": 0.12,
+      "status": "DECLARED_NOT_DEFORMATION_TESTED"
     }
   ],
   "design_checks": {
