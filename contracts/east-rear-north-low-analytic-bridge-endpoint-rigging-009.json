@@ -1,0 +1,33 @@
+{
+  "schema": "axm.nature-north-low-analytic-bridge-endpoint-rigging-contract/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "branch_id": "north-low",
+  "result": "PASS_NORTH_LOW_ANALYTIC_BRIDGE_ENDPOINT_PIN_DIAGNOSTIC__HOLD_CONNECTED_TOPOLOGY_PRODUCTION_SKINNING",
+  "rigging_predecessor_head": "69640e558f0c1ac59d4d0e3155676e0967a03d04",
+  "rigging_predecessor_module_blob": "de00694e103b975f9a25a72a50054821b469b528",
+  "geometry_bridge_donor_head": "14d05fdabc943376c231308001d00eb87dc23430",
+  "geometry_bridge_module_blob": "47ba57110f43b0f3f1f29582b46a90505fa4515c",
+  "geometry_bridge_contract_blob": "047daa7d5764f53cb42aa14b8bec82f3150bd809",
+  "constraint": {
+    "mode": "ANALYTIC_BRIDGE_TWO_BOUNDARY_DIAGNOSTIC_PIN",
+    "branch_boundary_vertices": 8,
+    "trunk_boundary_vertices": 8,
+    "interior_vertices": 0,
+    "branch_endpoint_diagnostic_weight": 1.0,
+    "trunk_endpoint_diagnostic_weight": 0.0,
+    "child_domain_deg": [-5.0, 5.0],
+    "representative_angles_deg": [-5.0, -2.5, 0.0, 2.5, 5.0]
+  },
+  "reusable_rule": "ANALYTIC_BRIDGE_BOUNDARIES_REQUIRE_EXPLICIT_RIGGING_ENDPOINT_OWNERSHIP_BEFORE_DEFORMATION_PASS_TRANSFER",
+  "truth_boundary": {
+    "source_geometry_mutated": false,
+    "geometry_bridge_topology_mutated": false,
+    "indexed_trunk_cut_or_connected_junction_claimed": false,
+    "production_skinning_or_blending_claimed": false,
+    "continuous_bridge_foldover_collision_or_self_intersection_claimed": false,
+    "animation_acceptance_claimed": false,
+    "technical_art_acceptance_claimed": false,
+    "runtime_acceptance_claimed": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}
