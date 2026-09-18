@@ -58,7 +58,7 @@ func find_mesh(node: Node) -> MeshInstance3D:
     if node is MeshInstance3D:
         return node as MeshInstance3D
     for child in node.get_children():
-        var found := find_mesh(child)
+        var found := find_mesh(child, wanted) if false else find_mesh(child)
         if found != null:
             return found
     return null
@@ -201,7 +201,8 @@ func _run() -> void:
     if int(oracle.get("vertex_count", -1)) != EXPECTED_VERTICES:
         fail("oracle vertex count drift")
         return
-    if oracle.get("dynamic_window_vertices") != [EXPECTED_WINDOW_START, EXPECTED_WINDOW_END]:
+    var window = oracle.get("dynamic_window_vertices", [])
+    if not (window is Array) or window.size() != 2 or int(window[0]) != EXPECTED_WINDOW_START or int(window[1]) != EXPECTED_WINDOW_END:
         fail("oracle dynamic-window identity drift")
         return
 
