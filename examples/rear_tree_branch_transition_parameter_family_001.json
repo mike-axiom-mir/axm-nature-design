@@ -1,0 +1,57 @@
+{
+  "authorized_branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "automatic_animation_adoption": false,
+  "automatic_geometry_adoption": false,
+  "automatic_rigging_adoption": false,
+  "automatic_runtime_adoption": false,
+  "automatic_vfx_adoption": false,
+  "connected_topology_claim_authorized": false,
+  "expected_transitions": {
+    "east-mid": {
+      "embedded_fraction_of_first_segment": 0.04877293495372904,
+      "embedded_length_along_first_segment_m": 0.021620222932618765
+    },
+    "north-low": {
+      "embedded_fraction_of_first_segment": 0.14801958337760968,
+      "embedded_length_along_first_segment_m": 0.0645372173379806
+    },
+    "north-top": {
+      "embedded_fraction_of_first_segment": 0.05131780006304828,
+      "embedded_length_along_first_segment_m": 0.021221011737572286
+    },
+    "south-low": {
+      "embedded_fraction_of_first_segment": 0.13755075785472692,
+      "embedded_length_along_first_segment_m": 0.060865238939307745
+    },
+    "west-high": {
+      "embedded_fraction_of_first_segment": 0.08456756400847554,
+      "embedded_length_along_first_segment_m": 0.036156960642309076
+    }
+  },
+  "failure_policy": "FAIL_CLOSED_ON_OWNER_HEAD_OBSERVER_SOURCE_REPORT_TRANSITION_OR_AUTHORITY_DRIFT",
+  "family_id": "east-rear-tree-primary-branch-transition-parameter-family-001",
+  "junction_strategy_authorized": false,
+  "organic_owner": {
+    "head": "4b5c291d6b044dafeadd6eeaf4849a6f3d4f4148",
+    "observer_blob": "1e8323b9bf6495a9f19704c217808300f3b46757",
+    "observer_path": "src/axm_nature_design/rear_tree_root_transition_readiness.py",
+    "pr": 8,
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "source_head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "source_path": "examples/east_rear_tree_neutral_001.json"
+  },
+  "owner_report_schema": "axm.nature-neutral-branch-transition-envelope/v0.1",
+  "production_weight_authorized": false,
+  "relation": "DERIVED_OWNER_TRANSITION_PARAMETER_WINDOWS_ONLY_NOT_JUNCTION_RIGGING_WEIGHT_OR_DOWNSTREAM_AUTHORITY",
+  "schema": "axm.nature-branch-transition-parameter-family/v0.1",
+  "source_mutation_authorized": false,
+  "truth_boundary": "This family canonicalizes the exact Organic-authored neutral first-segment radial-support transition intervals into reusable normalized-u/metre parameter windows. It does not recompute Organic form, choose or generate a connected junction, assign weights/hierarchy, simulate deformation, authorize Geometry/Rigging/Animation/VFX/Runtime/Map adoption, prove biological attachment, establish CANON, production readiness, or Procedural mastery."
+}
