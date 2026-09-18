@@ -1,0 +1,53 @@
+{
+  "schema": "axm.nature-branch-transition-indexed-trunk-envelope-projection-family/v0.1",
+  "family_id": "east-rear-tree-primary-branch-transition-indexed-trunk-envelope-projection-family-001",
+  "relation": "DERIVED_TOPOLOGY_FREE_REGULAR_INDEXED_TRUNK_ENVELOPE_PROJECTION_ONLY__NO_TRIANGLE_MEMBERSHIP_RING_TOPOLOGY_TRUNK_CUT_WELD_RIGGING_OR_DOWNSTREAM_AUTHORITY",
+  "predecessor_projection_family_schema": "axm.nature-branch-transition-trunk-envelope-projection-family/v0.1",
+  "predecessor_projection_family_digest": "628e93e2164a7fd4f8d5dabf63fde6f680a3dd46f4c0241fa9ebb92ff90ef339",
+  "organic_source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+  "authorized_branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "receiver_side_count": 10,
+  "receiver_phase_rad": 0.0,
+  "predecessor_projection": {
+    "module_path": "src/axm_nature_design/trunk_envelope_projection_family.py",
+    "module_blob": "06dc8649f3710b651e1c7906c9d62f5c30272996",
+    "contract_path": "examples/rear_tree_branch_transition_trunk_envelope_projection_family_001.json",
+    "contract_blob": "48a34b72dd1851b17d9e871ef5c7326c541244f4",
+    "frame_contract_path": "examples/rear_tree_branch_transition_frame_family_001.json",
+    "frame_contract_blob": "53f9137a582b3c3bb2f156406e908c6fbe822849"
+  },
+  "geometry_reference": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 30,
+    "head": "8ab552710df21567cfd601af99181918e2cfadb3",
+    "module_path": "src/axm_nature_design/rear_tree_geometry_north_low_indexed_surface_rebind.py",
+    "module_blob": "af43e49bf6f14c050a3930d3258bc4ee50c0a9f3",
+    "branch_id": "north-low",
+    "side_count": 10,
+    "phase_rad": 0.0,
+    "relation": "READ_ONLY_EXACT_INDEXED_SURFACE_CONSUMER_REFERENCE__PROCEDURAL_OWNS_NUMERIC_RADIAL_SHELL_INTERSECTION_NOT_GEOMETRY_TRIANGLE_MEMBERSHIP_OR_TOPOLOGY"
+  },
+  "source_mutation_authorized": false,
+  "triangle_membership_authorized": false,
+  "ring_topology_authorized": false,
+  "bridge_topology_authorized": false,
+  "indexed_trunk_cut_authorized": false,
+  "connected_junction_authorized": false,
+  "weld_or_remesh_authorized": false,
+  "surface_normal_authorized": false,
+  "automatic_geometry_adoption": false,
+  "automatic_rigging_adoption": false,
+  "automatic_animation_adoption": false,
+  "automatic_vfx_adoption": false,
+  "automatic_technical_art_adoption": false,
+  "automatic_runtime_adoption": false,
+  "production_weight_authorized": false,
+  "failure_policy": "FAIL_CLOSED_ON_SOURCE_PREDECESSOR_RECEIVER_SIDE_COUNT_PHASE_GEOMETRY_REFERENCE_INDEXED_SIDE_AXIAL_OR_AUTHORITY_DRIFT",
+  "truth_boundary": "This family centralizes only the deterministic topology-free math for preserving axial position and intersecting a source-space radial ray with an exact regular N-sided tapered shell cross-section. The exact ten-sided zero-phase Nature trunk receiver is pinned because Geometry PR #30 independently repeats this calculation for eight north-low boundary samples. The family derives three diagnostic indexed-shell projections for each of the five already owner-backed Procedural transition outputs and preserves the smooth predecessor family unchanged. It does not resolve source-triangle membership, author an opening loop, bridge faces, trunk cut, weld/remesh or connected junction, mutate Organic form, transfer Geometry acceptance, define Rigging weights/deformation, adopt Animation/VFX/Technical-Art/Runtime/Map behavior, promote to UC/PF, establish CANON or claim production readiness or Procedural mastery."
+}

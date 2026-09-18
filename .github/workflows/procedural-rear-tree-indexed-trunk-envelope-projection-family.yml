@@ -1,0 +1,88 @@
+name: Procedural Nature indexed trunk envelope projection family
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact Organic transition-frame owner
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 7f3b937b440e9870d07f7c356c5a3cbb779d0cd7
+          path: .studio-deps/organic-transition-frame-owner
+
+      - name: Checkout exact Geometry indexed-surface reference
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 8ab552710df21567cfd601af99181918e2cfadb3
+          path: .studio-deps/geometry-indexed-surface-reference
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact topology-free indexed trunk envelope projection evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_branch_transition_indexed_trunk_envelope_projection_family_evidence.py
+          evidence/nature-rear-tree-branch-transition-indexed-trunk-envelope-projection-family-001
+          --owner-organic-root .studio-deps/organic-transition-frame-owner
+          --geometry-reference-root .studio-deps/geometry-indexed-surface-reference
+
+      - name: Verify bounded indexed trunk envelope projection truth gate
+        if: matrix.python == '3.11'
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads(Path("evidence/nature-rear-tree-branch-transition-indexed-trunk-envelope-projection-family-001/summary.json").read_text())
+          assert data["state"] == "PASS_BOUNDED_INDEXED_TRUNK_ENVELOPE_PROJECTION_FAMILY"
+          assert data["decision"] == "PASS_TOPOLOGY_FREE_REGULAR_INDEXED_TRUNK_ENVELOPE_PROJECTOR__FIVE_PREDECESSOR_BACKED_OUTPUTS__NORTH_LOW_GEOMETRY_INDEXED_REFERENCE_MATCHES__NO_TRIANGLE_MEMBERSHIP_RING_TOPOLOGY_TRUNK_CUT_WELD_RIGGING_OR_DOWNSTREAM_ADOPTION"
+          assert data["procedural_head"] == os.environ["EXPECTED_HEAD"]
+          assert data["organic_owner_head"] == "7f3b937b440e9870d07f7c356c5a3cbb779d0cd7"
+          assert data["geometry_reference_head"] == "8ab552710df21567cfd601af99181918e2cfadb3"
+          assert data["predecessor_projection_family_digest"] == "628e93e2164a7fd4f8d5dabf63fde6f680a3dd46f4c0241fa9ebb92ff90ef339"
+          assert data["output_count"] == 5
+          assert data["distinct_projection_digest_count"] == 5
+          assert data["family_digest"] == data["reverse_order_family_digest"]
+          assert data["maximum_analytic_to_indexed_surface_delta_m"] > 1e-10
+          assert data["geometry_reference_segment_id"] == "mid->upper"
+          assert data["geometry_reference_sample_count"] == 8
+          assert data["geometry_reference_compatibility"]["match_within_tolerance"] is True
+          assert data["geometry_reference_compatibility"]["maximum_numeric_delta"] <= 1e-10
+          assert data["geometry_reference_compatibility"]["side_cells"] == [0, 1, 2, 9]
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 16
+          print("PASS_NATURE_TOPOLOGY_FREE_INDEXED_TRUNK_ENVELOPE_PROJECTOR_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained indexed trunk envelope projection evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-rear-tree-indexed-trunk-envelope-projection-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-branch-transition-indexed-trunk-envelope-projection-family-001
+          if-no-files-found: error
