@@ -109,7 +109,8 @@ func _run() -> void:
         _fail("Runtime shader oracle is not green")
         return
     var receiver: Dictionary = animation_oracle.get("receiver", {})
-    if receiver.get("dynamic_window_vertices", []) != [EXPECTED_WINDOW_START, EXPECTED_WINDOW_END]:
+    var dynamic_window: Array = receiver.get("dynamic_window_vertices", [])
+    if dynamic_window.size() != 2 or int(dynamic_window[0]) != EXPECTED_WINDOW_START or int(dynamic_window[1]) != EXPECTED_WINDOW_END:
         _fail("Animation dynamic window drift")
         return
     if int(receiver.get("dynamic_vertex_count", -1)) != EXPECTED_WINDOW_COUNT:
