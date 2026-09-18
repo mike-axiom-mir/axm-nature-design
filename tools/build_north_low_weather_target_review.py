@@ -8,6 +8,7 @@ from pathlib import Path
 RESULT = "PASS_NORTH_LOW_WEATHER_POLARITY_CURRENT_GODOT_TARGET_REVIEW"
 SOURCE_RESULT = "PASS_NORTH_LOW_DETACHED_TEMPORAL_WEATHER_RESPONSE_PARENT_STRESS_DISCRIMINATION"
 WEATHER = [1.0, 0.35]
+WEATHER_SERIALIZATION_TOL = 1e-6
 
 
 def load(path: Path) -> dict:
@@ -90,7 +91,8 @@ def main() -> int:
         raise ValueError("real Godot target receipt is not green")
     if source.get("result") != SOURCE_RESULT:
         raise ValueError("exact source-space VFX predecessor is not green")
-    if [float(v) for v in target.get("weather_source_xy", [])] != WEATHER:
+    target_weather = [float(v) for v in target.get("weather_source_xy", [])]
+    if len(target_weather) != 2 or any(abs(a - b) > WEATHER_SERIALIZATION_TOL for a, b in zip(target_weather, WEATHER)):
         raise ValueError("target receipt Weather vector drift")
 
     target_rows = target.get("rows") or []
