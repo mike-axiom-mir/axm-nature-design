@@ -1,0 +1,152 @@
+name: Rigging east rear north-low indexed surface rebind
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_rigging_north_low_indexed_surface_rebind.py"
+      - "tests/test_rear_tree_rigging_north_low_indexed_surface_rebind.py"
+      - "tools/verify_rear_tree_rigging_north_low_indexed_surface_rebind.py"
+      - "contracts/east-rear-north-low-indexed-surface-rebind-rigging-011.json"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_INDEXED_SURFACE_REBIND_011.md"
+      - ".github/workflows/rigging-east-rear-north-low-indexed-surface-rebind.yml"
+  push:
+    branches:
+      - "studio/rigging-east-rear-root-socket-001"
+    paths:
+      - "src/axm_nature_design/rear_tree_rigging_north_low_indexed_surface_rebind.py"
+      - "tests/test_rear_tree_rigging_north_low_indexed_surface_rebind.py"
+      - "tools/verify_rear_tree_rigging_north_low_indexed_surface_rebind.py"
+      - "contracts/east-rear-north-low-indexed-surface-rebind-rigging-011.json"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_INDEXED_SURFACE_REBIND_011.md"
+      - ".github/workflows/rigging-east-rear-north-low-indexed-surface-rebind.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Rigging head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Checkout exact Geometry donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 8ab552710df21567cfd601af99181918e2cfadb3
+          path: .geometry-donor
+          fetch-depth: 0
+
+      - name: Bind exact Rigging predecessor, Geometry donor and source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          predecessor=efe99261459858636dbe65b16cbe1d5ad2b93a56
+          geometry=8ab552710df21567cfd601af99181918e2cfadb3
+          git merge-base --is-ancestor "$predecessor" HEAD
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_bridge_continuous_span.py)" = "96e9078afc9925dd9261ca9b3c03939fbd0e7aa2"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py)" = "352e7c83e57779aef327390f5250875e26a7b610"
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_flex_interaction_classification.py)" = "be31e22283d43dcb4e6e8bda870760fa67ab1628"
+          test "$(git -C .geometry-donor rev-parse HEAD)" = "$geometry"
+          test "$(git -C .geometry-donor rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_north_low_indexed_surface_rebind.py)" = "af43e49bf6f14c050a3930d3258bc4ee50c0a9f3"
+          test "$(git -C .geometry-donor rev-parse HEAD:contracts/east-rear-north-low-indexed-surface-rebind-geometry-008.json)" = "081e2a610a6938cb12c501b7f8a907e590a7214c"
+          test "$(git -C .geometry-donor rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_bridge_continuous_span.py)" = "96e9078afc9925dd9261ca9b3c03939fbd0e7aa2"
+          test "$(git -C .geometry-donor rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Geometry donor and Rigging rebind evidence
+        if: matrix.python-version == '3.11'
+        shell: bash
+        env:
+          PYTHONPATH: src
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-rigging-head.txt
+          printf '%s\n' 'efe99261459858636dbe65b16cbe1d5ad2b93a56' > evidence/exact-rigging-predecessor-head.txt
+          printf '%s\n' '96e9078afc9925dd9261ca9b3c03939fbd0e7aa2' > evidence/exact-rigging-predecessor-module-blob.txt
+          printf '%s\n' '8ab552710df21567cfd601af99181918e2cfadb3' > evidence/exact-geometry-indexed-surface-donor-head.txt
+          printf '%s\n' 'af43e49bf6f14c050a3930d3258bc4ee50c0a9f3' > evidence/exact-geometry-indexed-surface-module-blob.txt
+          printf '%s\n' '081e2a610a6938cb12c501b7f8a907e590a7214c' > evidence/exact-geometry-indexed-surface-contract-blob.txt
+          printf '%s\n' 'fb12b759e1abfd0455bf46fd39a0eba27095796b' > evidence/exact-source-blob.txt
+
+          PYTHONPATH=.geometry-donor/src python .geometry-donor/tools/verify_rear_tree_geometry_north_low_indexed_surface_rebind.py \
+            --source .geometry-donor/examples/east_rear_tree_neutral_001.json \
+            --output evidence/exact-geometry-indexed-surface-donor-report.json \
+            | tee evidence/geometry-donor-verifier.log
+
+          PYTHONPATH=src python tools/verify_rear_tree_rigging_north_low_indexed_surface_rebind.py \
+            --geometry-module .geometry-donor/src/axm_nature_design/rear_tree_geometry_north_low_indexed_surface_rebind.py \
+            --output evidence/east-rear-north-low-indexed-surface-rebind-rigging-011.json \
+            | tee evidence/rigging-verifier.log
+
+          cp contracts/east-rear-north-low-indexed-surface-rebind-rigging-011.json \
+            evidence/contract-east-rear-north-low-indexed-surface-rebind-rigging-011.json
+          cp docs/RIGGING_EAST_REAR_NORTH_LOW_INDEXED_SURFACE_REBIND_011.md evidence/
+          cp src/axm_nature_design/rear_tree_rigging_north_low_indexed_surface_rebind.py evidence/
+          cp tests/test_rear_tree_rigging_north_low_indexed_surface_rebind.py evidence/
+          cp tools/verify_rear_tree_rigging_north_low_indexed_surface_rebind.py evidence/
+          cp .github/workflows/rigging-east-rear-north-low-indexed-surface-rebind.yml evidence/
+          cp .geometry-donor/src/axm_nature_design/rear_tree_geometry_north_low_indexed_surface_rebind.py \
+            evidence/exact-geometry-donor-rear_tree_geometry_north_low_indexed_surface_rebind.py
+          cp .geometry-donor/contracts/east-rear-north-low-indexed-surface-rebind-geometry-008.json \
+            evidence/exact-geometry-donor-contract-008.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          rig = json.loads(Path("evidence/east-rear-north-low-indexed-surface-rebind-rigging-011.json").read_text())
+          geo = json.loads(Path("evidence/exact-geometry-indexed-surface-donor-report.json").read_text())
+          assert rig["result"] == "PASS_NORTH_LOW_INDEXED_SURFACE_RECEIVER_RIGGING_REBIND_AND_CONTINUOUS_PAIRED_SPAN_NONCOLLAPSE_MINUS5_TO_PLUS5__HOLD_INDEXED_CUT_CONNECTED_JUNCTION_TRIANGLE_FOLDOVER_COLLISION"
+          assert geo["result"] == "PASS_NORTH_LOW_EXACT_INDEXED_TRUNK_SURFACE_REBIND__HOLD_INDEXED_CUT_CONNECTED_JUNCTION"
+          assert rig["provenance"]["geometry_indexed_surface_donor_head"] == "8ab552710df21567cfd601af99181918e2cfadb3"
+          assert rig["receiver_rebind"]["branch_endpoint_delta_from_analytic_m"] <= 1e-10
+          assert rig["receiver_rebind"]["minimum_fixed_receiver_delta_from_analytic_m"] > 1e-6
+          assert abs(rig["receiver_rebind"]["maximum_fixed_receiver_delta_from_analytic_m"] - geo["analytic_to_indexed_surface_rebind"]["maximum_surface_delta_m"]) <= 1e-12
+          assert rig["representative_pose_evidence"]["minimum_bridge_triangle_area_m2"] > 1e-10
+          cert = rig["continuous_paired_span_certificate"]
+          assert cert["child_domain_deg"] == [-5.0, 5.0]
+          assert cert["paired_span_count"] == 8
+          assert cert["global_minimum_span_m"] > 1e-10
+          assert cert["continuous_for_every_real_child_command_in_domain"] is True
+          assert cert["maximum_closed_form_vs_direct_residual_m"] <= 1e-10
+          assert all(rig["checks"].values())
+          truth = rig["truth_boundary"]
+          assert truth["indexed_trunk_cut_or_connected_junction_claimed"] is False
+          assert truth["production_skinning_or_blending_claimed"] is False
+          assert truth["continuous_triangle_nondegeneracy_claimed"] is False
+          assert truth["continuous_triangle_orientation_foldover_collision_or_self_intersection_claimed"] is False
+          assert truth["animation_timing_interpolation_or_playback_claimed"] is False
+          assert truth["technical_art_target_host_claimed"] is False
+          assert truth["runtime_controller_device_or_performance_claimed"] is False
+          PY
+
+      - name: Retain exact Rigging evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-indexed-surface-rigging-rebind-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence
+          if-no-files-found: error
+          retention-days: 90
