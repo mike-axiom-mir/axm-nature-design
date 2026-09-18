@@ -100,7 +100,7 @@ jobs:
           assert packet['heads']['runtime_shader_candidate']=='520068e1167f369b24e749831954f9bda1cd7aec',packet
           assert packet['heads']['uc']=='520584c87071837e8dc1ff9a39da140f5efa229d',packet
           assert packet['uc']['procedural_3d_blob']=='cdb654d4d0f68a4ca7539d98a985d7a70cf7ee36',packet
-          assert packet['uc']['vertices']==390 and packet['uc']['normals']==390 and packet['uc']['triangles']==570,packet
+          assert packet['uc']['vertices']==390 and packet['uc']['normal_count']==390 and packet['uc']['triangles']==570,packet
           assert packet['runtime_carrier']['vertex_id_run_count']==10,packet
           assert packet['technical_art_adapter']['normal_direction_rotated_by_same_source_axis_angle'] is True,packet
           assert packet['truth_boundary']['tangent_transport_proven'] is False,packet
