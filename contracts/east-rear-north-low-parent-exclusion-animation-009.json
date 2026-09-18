@@ -1,0 +1,40 @@
+{
+  "schema": "axm.nature-animation-north-low-parent-exclusion-temporal-rebind-contract/v0.1",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "study_id": "east-rear-tree-neutral-001",
+  "current_rigging_owner_head": "69640e558f0c1ac59d4d0e3155676e0967a03d04",
+  "current_rigging_semantic_head": "061cf3235f177a2998bd5925d4e631d4d66cdf85",
+  "current_rigging_parent_exclusion_head": "975931b11555d156e04e2ab12e9756fc6c9598a3",
+  "previous_animation_head": "e89db4cd53387a477fc98353caa1cdbd47b82ac6",
+  "previous_animation_contract": "axm.nature-animation-five-socket-shared-driver-loop/v0.1",
+  "geometry_attachment_donor_head": "d32a41558910d78595042fb638a785714f825806",
+  "source_owner_head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+  "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+  "geometry_receiver_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
+  "motion": {
+    "duration_s": 1.0,
+    "sample_rate_hz": 40,
+    "endpoint_inclusive_samples": 41,
+    "visible_repeat_samples": 40,
+    "normalized_curve": "sin(2*pi*t)^3",
+    "north_low_child_amplitude_deg": 5.0,
+    "north_low_child_polarity": -1,
+    "upper_trunk_parent_stress_amplitude_deg": 2.5,
+    "parent_stress_is_command_only_not_trunk_deformation": true
+  },
+  "required_attachment_mode": "DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY",
+  "required_diagnostic_parent_weight": 0.0,
+  "reusable_rule": "WHEN_RIGGING_EXCLUDES_PARENT_INFLUENCE_BY_EXACT_ATTACHMENT_IDENTITY_ANIMATION_MUST_REPLAY_THE_EXISTING_CHILD_TIMING_WITH_A_BOUNDED_PARENT_COMMAND_STRESS_TRACK_AND_FAIL_ON_ANY_TEMPORAL_PARENT_LEAK",
+  "truth_boundary": {
+    "mutates_source_or_geometry": false,
+    "mutates_rigging_socket_or_gate": false,
+    "retimes_previous_child_track": false,
+    "claims_connected_attachment_or_production_skinning": false,
+    "claims_wind_or_biological_motion": false,
+    "claims_target_engine_or_wall_clock_delivery": false,
+    "claims_runtime_controller_state_machine_input_or_device": false,
+    "claims_physics_or_gameplay": false,
+    "claims_art_or_visual_qa": false,
+    "claims_canon_or_production_readiness": false
+  }
+}

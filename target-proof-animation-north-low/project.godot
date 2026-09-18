@@ -1,0 +1,12 @@
+[application]
+config/name="AXM Nature Animation Loop Verification"
+
+[display]
+window/size/viewport_width=900
+window/size/viewport_height=700
+window/size/window_width_override=900
+window/size/window_height_override=700
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

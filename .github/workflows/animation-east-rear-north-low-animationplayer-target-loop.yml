@@ -1,0 +1,321 @@
+name: Animation east rear north-low AnimationPlayer target loop
+
+on:
+  push:
+    branches: [studio/animation-north-low-parent-exclusion-temporal-rebind-005]
+    paths:
+      - "contracts/east-rear-north-low-parent-exclusion-animationplayer-target-loop-010.json"
+      - "target-proof-animation-north-low/project.godot"
+      - "target-proof-animation-north-low/observe_north_low_animationplayer_loop.gd"
+      - ".github/workflows/animation-east-rear-north-low-animationplayer-target-loop.yml"
+  pull_request:
+    paths:
+      - "contracts/east-rear-north-low-parent-exclusion-animationplayer-target-loop-010.json"
+      - "target-proof-animation-north-low/project.godot"
+      - "target-proof-animation-north-low/observe_north_low_animationplayer_loop.gd"
+      - ".github/workflows/animation-east-rear-north-low-animationplayer-target-loop.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Full Nature regression suite
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v
+
+  exact-animationplayer-target-loop:
+    runs-on: ubuntu-latest
+    needs: regression
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Animation proof head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bind exact proof head
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD | tee /tmp/exact-animation-proof-head.txt
+
+      - name: Checkout frozen Animation semantic owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 5cacd61e22433b0c33f29111827283b81cc0ba0d
+          path: .animation-owner
+          fetch-depth: 0
+
+      - name: Checkout exact current Rigging owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 69640e558f0c1ac59d4d0e3155676e0967a03d04
+          path: .rigging
+          fetch-depth: 0
+
+      - name: Checkout exact current Technical Art owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 02c5223dd9288c12607f0553e2f1103be38ae71f
+          path: .ta
+          fetch-depth: 0
+
+      - name: Checkout exact current Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 7ddefca57b153fab02c1f54f38de22148cb52c1b
+          path: .uc
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Prove frozen Animation motion identity was not rewritten
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+              .animation-owner/src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py
+          cmp contracts/east-rear-north-low-parent-exclusion-animation-009.json \
+              .animation-owner/contracts/east-rear-north-low-parent-exclusion-animation-009.json
+          cmp tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+              .animation-owner/tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py
+
+      - name: Re-run exact frozen Animation owner evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          GEO=d32a41558910d78595042fb638a785714f825806
+          if ! git -C .animation-owner cat-file -e "$GEO^{commit}" 2>/dev/null; then
+            git -C .animation-owner fetch --no-tags origin "$GEO"
+          fi
+          git -C .animation-owner show "$GEO:contracts/east-rear-north-low-attachment-topology-geometry-005.json" \
+            > /tmp/exact-geometry-attachment-contract.json
+          PYTHONPATH=.animation-owner/src \
+            python .animation-owner/tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+              --source .animation-owner/examples/east_rear_tree_neutral_001.json \
+              --geometry-contract /tmp/exact-geometry-attachment-contract.json \
+              --output /tmp/exact-animation-owner-evidence.json \
+              | tee /tmp/exact-animation-owner.log
+
+      - name: Re-run exact Rigging prerequisite
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=.rigging/src \
+            python .rigging/tools/verify_rear_tree_primary_branch_rigging_family.py \
+              --output /tmp/exact-rigging-family-evidence.json \
+              | tee /tmp/exact-rigging-family.log
+
+      - name: Build exact Technical Art current-UC receiver and oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animationplayer-target-loop-010
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          PYTHONPATH=.ta/src:.uc/src \
+            python .ta/tools/build_uc_north_low_parent_exclusion_target_evidence.py \
+              --animation-root .animation-owner \
+              --rigging-root .rigging \
+              --uc-root .uc \
+              --animation-evidence /tmp/exact-animation-owner-evidence.json \
+              --rigging-evidence /tmp/exact-rigging-family-evidence.json \
+              --out "$ROOT" \
+              | tee "$ROOT/technical-art-pre-target-builder.log"
+          cp /tmp/exact-animation-owner-evidence.json "$ROOT/"
+          cp /tmp/exact-animation-owner.log "$ROOT/"
+          cp /tmp/exact-rigging-family-evidence.json "$ROOT/"
+          cp /tmp/exact-rigging-family.log "$ROOT/"
+          cp /tmp/exact-geometry-attachment-contract.json "$ROOT/"
+
+      - name: Validate exact Technical Art receiver prerequisite
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-north-low-animationplayer-target-loop-010')
+          r=json.loads((root/'nature-north-low-parent-exclusion-uc-target-receipt.json').read_text())
+          assert r['result']=='PASS_NATURE_NORTH_LOW_PARENT_EXCLUSION_CURRENT_UC_TARGET_RECEIVER_READY',r
+          assert r['heads']=={
+              'animation':'5cacd61e22433b0c33f29111827283b81cc0ba0d',
+              'rigging':'69640e558f0c1ac59d4d0e3155676e0967a03d04',
+              'uc':'7ddefca57b153fab02c1f54f38de22148cb52c1b',
+          },r
+          assert r['receiver']['surface_primitive_count']==12,r
+          assert r['receiver']['nodes_rebound']==12,r
+          assert r['receiver']['emitted_triangles']==620,r
+          assert r['animation']['branch_id']=='north-low',r
+          assert r['animation']['attachment_mode']=='DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY',r
+          assert r['animation']['sample_count']==41,r
+          assert r['animation']['visible_repeat_samples']==40,r
+          assert r['animation']['maximum_parent_command_leak_m'] <= 1e-12,r
+          assert r['truth_boundary']['target_host_import_proven'] is False,r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Prepare exact AnimationPlayer target receiver inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animationplayer-target-loop-010
+          rm -rf target-proof-animation-north-low/generated
+          mkdir -p target-proof-animation-north-low/generated
+          cp "$ROOT/nature-north-low-parent-exclusion-uc-target-receipt.json" target-proof-animation-north-low/generated/
+          cp "$ROOT/nature-north-low-parent-exclusion-target-oracle.json" target-proof-animation-north-low/generated/
+          cp "$ROOT/nature-north-low-parent-exclusion-receiver-rigid.glb" target-proof-animation-north-low/generated/
+          rm -f target-proof-animation-north-low/nature-north-low-animationplayer-loop-receipt.json
+
+      - name: Exercise all 40 visible keys and loop wrap through real AnimationPlayer
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animationplayer-target-loop-010
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --headless \
+            --path target-proof-animation-north-low \
+            --script observe_north_low_animationplayer_loop.gd \
+            | tee "$ROOT/godot-animationplayer-positive.log"
+          cp target-proof-animation-north-low/nature-north-low-animationplayer-loop-receipt.json \
+             "$ROOT/nature-north-low-animationplayer-loop-positive-receipt.json"
+
+      - name: Validate bounded AnimationPlayer result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-north-low-animationplayer-target-loop-010')
+          r=json.loads((root/'nature-north-low-animationplayer-loop-positive-receipt.json').read_text())
+          assert r['state']=='PASS_NATURE_NORTH_LOW_PARENT_EXCLUSION_ANIMATIONPLAYER_TARGET_LOOP',r
+          assert r['animationplayer']['visible_key_count']==40,r
+          assert r['animationplayer']['samples_verified']==40,r
+          assert r['animationplayer']['interpolation']=='NEAREST',r
+          assert r['animationplayer']['update_mode']=='DISCRETE',r
+          assert r['maximum_imported_local_witness_delta_m'] <= 5e-6,r
+          assert r['maximum_target_witness_residual_m'] <= 5e-6,r
+          assert r['maximum_witness_motion_from_neutral_m'] > 1e-3,r
+          assert r['maximum_parent_stress_command_abs_deg'] >= 2.49,r
+          assert r['nonzero_parent_stress_samples'] > 0,r
+          assert r['loop_wrap_target_residual_m'] <= 5e-6,r
+          assert r['loop_wrap_transition_step_residual_m'] <= 5e-6,r
+          assert r['truth_boundary']['animationplayer_exact_key_playback_proven'] is True,r
+          assert r['truth_boundary']['animationplayer_visible_repeat_wrap_transition_proven'] is True,r
+          assert r['truth_boundary']['wall_clock_40hz_delivery_proven'] is False,r
+          assert r['truth_boundary']['runtime_controller_or_target_device_proven'] is False,r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Fail closed when parent stress is polluted into child receiver motion
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animationplayer-target-loop-010
+          rm -f target-proof-animation-north-low/nature-north-low-animationplayer-loop-receipt.json
+          set +e
+          AXM_APPLY_PARENT_STRESS_AS_CHILD=1 \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+              --headless \
+              --path target-proof-animation-north-low \
+              --script observe_north_low_animationplayer_loop.gd \
+              > "$ROOT/negative-parent-stress.log" 2>&1
+          STATUS=$?
+          set -e
+          test "$STATUS" -ne 0
+          cp target-proof-animation-north-low/nature-north-low-animationplayer-loop-receipt.json \
+             "$ROOT/negative-parent-stress-receipt.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('evidence/nature-north-low-animationplayer-target-loop-010/negative-parent-stress-receipt.json')
+          r=json.loads(p.read_text())
+          assert r['state']=='FAIL_NATURE_NORTH_LOW_ANIMATIONPLAYER_TARGET_LOOP',r
+          assert r['negative_modes']['apply_parent_stress_as_child'] is True,r
+          assert 'residual exceeded tolerance' in r['failure'],r
+          PY
+
+      - name: Fail closed when AnimationPlayer loop semantics are disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animationplayer-target-loop-010
+          rm -f target-proof-animation-north-low/nature-north-low-animationplayer-loop-receipt.json
+          set +e
+          AXM_DISABLE_ANIMATION_LOOP=1 \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+              --headless \
+              --path target-proof-animation-north-low \
+              --script observe_north_low_animationplayer_loop.gd \
+              > "$ROOT/negative-loop-disabled.log" 2>&1
+          STATUS=$?
+          set -e
+          test "$STATUS" -ne 0
+          cp target-proof-animation-north-low/nature-north-low-animationplayer-loop-receipt.json \
+             "$ROOT/negative-loop-disabled-receipt.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('evidence/nature-north-low-animationplayer-target-loop-010/negative-loop-disabled-receipt.json')
+          r=json.loads(p.read_text())
+          assert r['state']=='FAIL_NATURE_NORTH_LOW_ANIMATIONPLAYER_TARGET_LOOP',r
+          assert r['negative_modes']['disable_animation_loop'] is True,r
+          assert 'visible-repeat wrap' in r['failure'],r
+          PY
+
+      - name: Retain exact provenance and proof source
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animationplayer-target-loop-010
+          mkdir -p "$ROOT"
+          cp contracts/east-rear-north-low-parent-exclusion-animationplayer-target-loop-010.json "$ROOT/" || true
+          cp target-proof-animation-north-low/project.godot "$ROOT/" || true
+          cp target-proof-animation-north-low/observe_north_low_animationplayer_loop.gd "$ROOT/" || true
+          cp .github/workflows/animation-east-rear-north-low-animationplayer-target-loop.yml "$ROOT/" || true
+          cp /tmp/exact-animation-proof-head.txt "$ROOT/" || true
+          git -C .animation-owner rev-parse HEAD > "$ROOT/exact-animation-semantic-owner-head.txt" || true
+          git -C .rigging rev-parse HEAD > "$ROOT/exact-rigging-owner-head.txt" || true
+          git -C .ta rev-parse HEAD > "$ROOT/exact-technical-art-owner-head.txt" || true
+          git -C .uc rev-parse HEAD > "$ROOT/exact-uc-owner-head.txt" || true
+
+      - name: Upload retained north-low AnimationPlayer target-loop evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-animationplayer-target-loop-${{ github.sha }}
+          path: evidence/nature-north-low-animationplayer-target-loop-010
+          if-no-files-found: warn
+          retention-days: 30

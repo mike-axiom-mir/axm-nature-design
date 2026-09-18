@@ -1,0 +1,218 @@
+name: Animation east rear north-low bridge continuous span bind
+
+on:
+  push:
+    branches: [studio/animation-north-low-parent-exclusion-temporal-rebind-005]
+    paths:
+      - "tools/build_north_low_animation_bridge_continuous_span_bind.py"
+      - "contracts/east-rear-north-low-animation-bridge-continuous-span-bind-011.json"
+      - "docs/ANIMATION_EAST_REAR_NORTH_LOW_BRIDGE_CONTINUOUS_SPAN_BIND_011.md"
+      - ".github/workflows/animation-east-rear-north-low-bridge-continuous-span-bind.yml"
+  pull_request:
+    paths:
+      - "tools/build_north_low_animation_bridge_continuous_span_bind.py"
+      - "contracts/east-rear-north-low-animation-bridge-continuous-span-bind-011.json"
+      - "docs/ANIMATION_EAST_REAR_NORTH_LOW_BRIDGE_CONTINUOUS_SPAN_BIND_011.md"
+      - ".github/workflows/animation-east-rear-north-low-bridge-continuous-span-bind.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Full receiving Nature suite
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v
+
+  exact-continuous-span-bind:
+    runs-on: ubuntu-latest
+    needs: regression
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Animation proof head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Record exact proof head
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/nature-north-low-animation-bridge-continuous-span-bind-011
+          git rev-parse HEAD | tee evidence/nature-north-low-animation-bridge-continuous-span-bind-011/exact-animation-proof-head.txt
+
+      - name: Checkout frozen Animation lane predecessor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 20d04d70845c51455cedfb8541e2eb4e4784b433
+          path: .animation-lane
+          fetch-depth: 0
+
+      - name: Checkout frozen Animation semantic owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 5cacd61e22433b0c33f29111827283b81cc0ba0d
+          path: .animation-semantic
+          fetch-depth: 0
+
+      - name: Checkout exact current Rigging owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: efe99261459858636dbe65b16cbe1d5ad2b93a56
+          path: .rigging
+          fetch-depth: 0
+
+      - name: Prove frozen Animation source motion was not rewritten
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp .animation-lane/src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+              .animation-semantic/src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py
+          cmp .animation-lane/contracts/east-rear-north-low-parent-exclusion-animation-009.json \
+              .animation-semantic/contracts/east-rear-north-low-parent-exclusion-animation-009.json
+          cmp .animation-lane/tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+              .animation-semantic/tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py
+
+      - name: Re-run frozen Animation source-mesh evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animation-bridge-continuous-span-bind-011
+          GEO=d32a41558910d78595042fb638a785714f825806
+          if ! git -C .animation-lane cat-file -e "$GEO^{commit}" 2>/dev/null; then
+            git -C .animation-lane fetch --no-tags origin "$GEO"
+          fi
+          git -C .animation-lane show "$GEO:contracts/east-rear-north-low-attachment-topology-geometry-005.json" \
+            > "$ROOT/exact-geometry-attachment-contract.json"
+          PYTHONPATH=.animation-lane/src \
+            python .animation-lane/tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+              --source .animation-lane/examples/east_rear_tree_neutral_001.json \
+              --geometry-contract "$ROOT/exact-geometry-attachment-contract.json" \
+              --output "$ROOT/frozen-animation-source-motion-receipt.json" \
+              | tee "$ROOT/frozen-animation-source-motion.log"
+
+      - name: Reconstruct frozen Animation socket identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animation-bridge-continuous-span-bind-011
+          PYTHONPATH=.animation-lane/src python - <<'PY'
+          import json
+          from pathlib import Path
+          from axm_nature_design import organic_form
+          from axm_nature_design import rear_tree_rigging_primary_branch_family as family
+          source=json.loads(Path('.animation-lane/examples/east_rear_tree_neutral_001.json').read_text())
+          mesh=organic_form.build_mesh(source)
+          probe=family._probe_branch(source,mesh,'north-low')
+          receipt={
+              'branch_id':'north-low',
+              'pivot_m':[float(x) for x in probe['joint_pivot_m']],
+              'source_derived_axis':[float(x) for x in probe['source_derived_axis']],
+              'diagnostic_interval_deg':[-5.0,5.0],
+              'selected_vertex_count':len(probe['selected_vertex_indices']),
+          }
+          assert receipt['selected_vertex_count']==52,receipt
+          Path('evidence/nature-north-low-animation-bridge-continuous-span-bind-011/frozen-animation-socket-identity.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(receipt,indent=2,sort_keys=True))
+          PY
+
+      - name: Re-run exact current Rigging full suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animation-bridge-continuous-span-bind-011
+          (cd .rigging && PYTHONPATH=src python -m unittest discover -s tests -v) \
+            2>&1 | tee "$ROOT/current-rigging-full-suite.log"
+
+      - name: Re-run exact current Rigging continuous span certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animation-bridge-continuous-span-bind-011
+          PYTHONPATH=.rigging/src \
+            python .rigging/tools/verify_rear_tree_rigging_north_low_bridge_continuous_span.py \
+              --source .rigging/examples/east_rear_tree_neutral_001.json \
+              --output "$ROOT/current-rigging-continuous-span-receipt.json" \
+              | tee "$ROOT/current-rigging-continuous-span.log"
+
+      - name: Compose exact Animation curve with current Rigging continuous span owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animation-bridge-continuous-span-bind-011
+          PYTHONPATH=.rigging/src \
+            python tools/build_north_low_animation_bridge_continuous_span_bind.py \
+              --animation-receipt "$ROOT/frozen-animation-source-motion-receipt.json" \
+              --animation-socket "$ROOT/frozen-animation-socket-identity.json" \
+              --rigging-receipt "$ROOT/current-rigging-continuous-span-receipt.json" \
+              --source .rigging/examples/east_rear_tree_neutral_001.json \
+              --output "$ROOT/animation-bridge-continuous-span-bind-result.json" \
+              | tee "$ROOT/animation-bridge-continuous-span-bind.log"
+
+      - name: Validate bounded result and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-animation-bridge-continuous-span-bind-011
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('evidence/nature-north-low-animation-bridge-continuous-span-bind-011/animation-bridge-continuous-span-bind-result.json')
+          r=json.loads(p.read_text())
+          assert r['status']=='PASS_NATURE_NORTH_LOW_ANIMATION_CURVE_INSIDE_CURRENT_BRIDGE_CONTINUOUS_SPAN_DOMAIN',r
+          assert r['exact_identity']['animation_lane_predecessor_head']=='20d04d70845c51455cedfb8541e2eb4e4784b433',r
+          assert r['exact_identity']['animation_semantic_owner_head']=='5cacd61e22433b0c33f29111827283b81cc0ba0d',r
+          assert r['exact_identity']['current_rigging_continuous_span_head']=='efe99261459858636dbe65b16cbe1d5ad2b93a56',r
+          assert r['composition']['continuous_range_contained'] is True,r
+          assert r['composition']['lower_margin_deg']==0.0,r
+          assert r['composition']['upper_margin_deg']==0.0,r
+          assert r['composition']['boundary_equality_is_covered'] is True,r
+          direct=r['direct_temporal_bridge_witness']
+          assert direct['authored_samples_checked']==41,direct
+          assert direct['paired_spans_per_sample']==8,direct
+          assert direct['minimum_sampled_span_m']>0.0,direct
+          assert direct['continuous_owner_minimum_span_m']>0.0,direct
+          assert direct['continuous_owner_minimum_span_m'] <= direct['minimum_sampled_span_m'] + 1e-12,direct
+          assert direct['maximum_direct_vs_closed_form_residual_m'] <= 1e-10,direct
+          assert r['negative_controls']['widened_plus5p01_curve_rejected'] is True,r
+          assert r['negative_controls']['socket_pivot_identity_mismatch_rejected'] is True,r
+          assert r['gates']['technical_art_target_host_current_pair']=='NOT_EVALUATED',r
+          assert r['gates']['runtime_controller_state_machine_input_device']=='NOT_EVALUATED',r
+          assert r['gates']['gameplay_collision_physics']=='NOT_EVALUATED',r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Retain exact bounded evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-animation-bridge-continuous-span-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            evidence/nature-north-low-animation-bridge-continuous-span-bind-011/
+            tools/build_north_low_animation_bridge_continuous_span_bind.py
+            contracts/east-rear-north-low-animation-bridge-continuous-span-bind-011.json
+            docs/ANIMATION_EAST_REAR_NORTH_LOW_BRIDGE_CONTINUOUS_SPAN_BIND_011.md
+            .github/workflows/animation-east-rear-north-low-bridge-continuous-span-bind.yml
