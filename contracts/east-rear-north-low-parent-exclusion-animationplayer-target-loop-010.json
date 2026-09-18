@@ -1,0 +1,57 @@
+{
+  "schema": "axm.nature-animation-north-low-parent-exclusion-animationplayer-target-loop/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "branch_id": "north-low",
+  "animation_pr": 26,
+  "animation_semantic_owner_head": "5cacd61e22433b0c33f29111827283b81cc0ba0d",
+  "rigging_owner_head": "69640e558f0c1ac59d4d0e3155676e0967a03d04",
+  "technical_art_owner_head": "02c5223dd9288c12607f0553e2f1103be38ae71f",
+  "geometry_attachment_donor_head": "d32a41558910d78595042fb638a785714f825806",
+  "universal_creation_owner_head": "7ddefca57b153fab02c1f54f38de22148cb52c1b",
+  "target_host": "Godot 4.7.2 stable official / GL Compatibility",
+  "motion_identity": {
+    "duration_s": 1.0,
+    "authored_sample_rate_hz": 40,
+    "endpoint_inclusive_samples": 41,
+    "visible_repeat_samples": 40,
+    "curve": "sin(2*pi*t)^3",
+    "north_low_child_landmarks_deg": [0.0, -5.0, 0.0, 5.0, 0.0],
+    "upper_trunk_parent_stress_landmarks_deg": [0.0, 2.5, 0.0, -2.5, 0.0],
+    "parent_stress_is_command_only_not_receiver_motion": true,
+    "attachment_mode": "DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY"
+  },
+  "bounded_animation_improvement": {
+    "clip_name": "north_low_parent_exclusion_loop",
+    "animationplayer_track": "north-low-woody:transform",
+    "track_interpolation": "NEAREST",
+    "track_update_mode": "DISCRETE",
+    "visible_key_count": 40,
+    "loop_mode": "LINEAR",
+    "proof_goal": "Exercise the exact current Technical-Art/UC receiver through a real AnimationPlayer track and verify exact-key correspondence plus the visible-repeat wrap transition without changing the frozen owner motion."
+  },
+  "acceptance": {
+    "maximum_target_witness_residual_m": 0.000005,
+    "maximum_loop_wrap_transition_residual_m": 0.000005,
+    "minimum_material_witness_motion_m": 0.001,
+    "require_all_40_visible_keys": true,
+    "require_endpoint_sample_40_equals_sample_0": true,
+    "require_unrelated_branch_transforms_unchanged": true,
+    "require_parent_stress_pollution_negative_to_fail": true,
+    "require_disabled_loop_negative_to_fail": true
+  },
+  "truth_boundary": {
+    "animationplayer_target_loop_proof_only": true,
+    "changes_source_motion": false,
+    "changes_rigging": false,
+    "changes_technical_art_receiver": false,
+    "technical_art_production_adoption_claimed": false,
+    "wall_clock_40hz_delivery_claimed": false,
+    "runtime_controller_claimed": false,
+    "input_or_device_behavior_claimed": false,
+    "physical_wind_claimed": false,
+    "connected_attachment_or_production_skinning_claimed": false,
+    "collision_physics_or_gameplay_claimed": false,
+    "art_or_visual_qa_acceptance_claimed": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}
