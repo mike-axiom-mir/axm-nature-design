@@ -18,7 +18,12 @@
     "head": "9b451ba1f65281f550a6754e18574f7ab2951e28",
     "mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
     "vertices": 390,
-    "triangles": 570
+    "triangles": 570,
+    "per_child_selected_vertices": 52,
+    "per_child_owned_triangles": 72,
+    "selected_vertex_union": 260,
+    "globally_fixed_vertices": 130,
+    "globally_fixed_triangles": 210
   },
   "branch_ids": [
     "south-low",
@@ -30,7 +35,10 @@
   "bounded_witness_family": {
     "neutral_states": 1,
     "extreme_corner_states": 32,
+    "total_states": 33,
     "per_branch_corner_angles_deg": [-5.0, 5.0],
+    "branch_pairs": 10,
+    "branch_pair_state_observations": 330,
     "continuous_interval_claimed": false,
     "simultaneous_motion_authored": false
   },
@@ -39,8 +47,15 @@
     "commit": "ce70d717e381df6ca8a27c0c9fabe9d48bb1b23c",
     "path": "src/axm_uc/mesh_self_intersection.py",
     "mode": "READ_ONLY_NONADJACENT_TRIANGLE_SELF_INTERSECTION_OBSERVER",
-    "pair_budget": 200000,
-    "expected_pair_checks_per_state": 162165,
+    "cross_branch_method": "COMBINED_TWO_CHILD_COUNT_MINUS_EXACT_LEFT_SOLO_COUNT_MINUS_EXACT_RIGHT_SOLO_COUNT",
+    "solo_triangles": 72,
+    "solo_pair_checks": 2556,
+    "combined_pair_triangles": 144,
+    "combined_pair_checks": 10296,
+    "pair_budget": 12000,
+    "full_receiver_pair_checks": 162165,
+    "full_receiver_verdict_used": false,
+    "full_receiver_reason": "The Nature receiver contains disconnected authored components that intentionally meet spatially, so a whole-receiver intersection count is not specific to simultaneous child-child contact.",
     "automatic_repair": false
   },
   "authority": {
@@ -51,5 +66,5 @@
     "collision_or_gameplay_acceptance_authorized": false,
     "canon_or_production_adoption_authorized": false
   },
-  "truth_boundary": "This contract proves only the exact structural composition properties and the exact read-only self-intersection observations of one neutral state plus the 32 simultaneous +/-5 degree corner witnesses. It does not prove the continuous five-dimensional deformation interval, biological ROM, branch stress/attachment validity, adjacent foldover/contact, collision, navigation, gameplay, target-host playback, target-device performance, final visual quality, CANON, production readiness, game readiness or Geometry mastery."
+  "truth_boundary": "This contract proves only the exact structural composition properties and exact pairwise child-child nonadjacent-triangle observations of one neutral state plus the 32 simultaneous +/-5 degree corner witnesses. It deliberately does not use a whole-receiver intersection count as a simultaneous-motion verdict. It does not prove the continuous five-dimensional deformation interval, biological ROM, child-versus-fixed-receiver clearance, branch stress/attachment validity, adjacent foldover/contact, collision, navigation, gameplay, target-host playback, target-device performance, final visual quality, CANON, production readiness, game readiness or Geometry mastery."
 }
