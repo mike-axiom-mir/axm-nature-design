@@ -15,6 +15,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Checkout exact pre-owner-source Procedural snapshot
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 4c1dada25151bcc8a5d09d9230b6c3f5eafcf756
+          path: .studio-deps/procedural-historical
       - name: Checkout exact Nature source-generator migration
         if: matrix.python == '3.11'
         uses: actions/checkout@v4
@@ -77,13 +84,14 @@ jobs:
           assert data['all_shared_edge_orientation_conflicts_zero'] is True
           assert data['all_failure_bounds_hold'] is True
           PY
-      - name: Derive exact Geometry leaf-backface candidate across all nine procedural outputs
+      - name: Derive historical Geometry leaf-backface family on exact pre-owner-source snapshot
         if: matrix.python == '3.11'
-        run: >-
-          python tools/build_procedural_leaf_backface_family_evidence.py
-          evidence/tree-procedural-leaf-backface-family-001
-          --geometry-root .studio-deps/geometry-leaf-backface
-      - name: Verify procedural leaf-backface family summary
+        run: |
+          cd .studio-deps/procedural-historical
+          python tools/build_procedural_leaf_backface_family_evidence.py \
+            "$GITHUB_WORKSPACE/evidence/tree-procedural-leaf-backface-family-001" \
+            --geometry-root "$GITHUB_WORKSPACE/.studio-deps/geometry-leaf-backface"
+      - name: Verify historical procedural leaf-backface family summary
         if: matrix.python == '3.11'
         run: |
           python - <<'PY'
@@ -92,6 +100,7 @@ jobs:
           p = Path('evidence/tree-procedural-leaf-backface-family-001/summary.json')
           data = json.loads(p.read_text())
           assert data['state'] == 'PASS_PROCEDURAL_VARIANTS_EXPLICIT_LEAF_BACKFACE_DERIVATION'
+          assert data['procedural_head'] == '4c1dada25151bcc8a5d09d9230b6c3f5eafcf756'
           assert data['source_case_count'] == 3
           assert data['retained_output_count'] == 9
           assert data['distinct_variant_source_digests'] == 9
@@ -102,13 +111,14 @@ jobs:
           assert data['all_failure_bounds_hold'] is True
           assert data['decision'] == 'PASS_DERIVED_REVIEW_FAMILY_ONLY__NO_SOURCE_OR_RECEIVER_ADOPTION'
           PY
-      - name: Exercise exact VFX leaf flutter across all nine procedural outputs
+      - name: Exercise historical VFX leaf flutter on exact pre-owner-source snapshot
         if: matrix.python == '3.11'
-        run: >-
-          python tools/build_procedural_leaf_flutter_family_evidence.py
-          evidence/tree-procedural-leaf-flutter-family-001
-          --vfx-root .studio-deps/vfx-leaf-flutter
-      - name: Verify procedural leaf-flutter family summary
+        run: |
+          cd .studio-deps/procedural-historical
+          python tools/build_procedural_leaf_flutter_family_evidence.py \
+            "$GITHUB_WORKSPACE/evidence/tree-procedural-leaf-flutter-family-001" \
+            --vfx-root "$GITHUB_WORKSPACE/.studio-deps/vfx-leaf-flutter"
+      - name: Verify historical procedural leaf-flutter family summary
         if: matrix.python == '3.11'
         run: |
           python - <<'PY'
@@ -117,6 +127,7 @@ jobs:
           p = Path('evidence/tree-procedural-leaf-flutter-family-001/summary.json')
           data = json.loads(p.read_text())
           assert data['state'] == 'PASS_PROCEDURAL_VARIANTS_VFX_LEAF_FLUTTER_COMPATIBILITY'
+          assert data['procedural_head'] == '4c1dada25151bcc8a5d09d9230b6c3f5eafcf756'
           assert data['source_case_count'] == 3
           assert data['retained_output_count'] == 9
           assert data['tested_phase_count_per_output'] == 5
@@ -134,14 +145,15 @@ jobs:
           assert data['zero_duration_control_rejected'] is True
           assert data['decision'] == 'PASS_DERIVED_VFX_COMPATIBILITY_FAMILY_ONLY__NO_SOURCE_OR_RECEIVER_ADOPTION'
           PY
-      - name: Exercise exact Map leaf-flutter receiver contract across all nine procedural outputs
+      - name: Exercise historical Map receiver contract on exact pre-owner-source snapshot
         if: matrix.python == '3.11'
-        run: >-
-          python tools/build_procedural_leaf_flutter_map_receiver_family_evidence.py
-          evidence/tree-procedural-leaf-flutter-map-receiver-family-001
-          --vfx-root .studio-deps/vfx-leaf-flutter
-          --map-root .studio-deps/map-leaf-flutter-receiver
-      - name: Verify procedural Map receiver compatibility summary
+        run: |
+          cd .studio-deps/procedural-historical
+          python tools/build_procedural_leaf_flutter_map_receiver_family_evidence.py \
+            "$GITHUB_WORKSPACE/evidence/tree-procedural-leaf-flutter-map-receiver-family-001" \
+            --vfx-root "$GITHUB_WORKSPACE/.studio-deps/vfx-leaf-flutter" \
+            --map-root "$GITHUB_WORKSPACE/.studio-deps/map-leaf-flutter-receiver"
+      - name: Verify historical procedural Map receiver compatibility summary
         if: matrix.python == '3.11'
         run: |
           python - <<'PY'
@@ -150,6 +162,7 @@ jobs:
           p = Path('evidence/tree-procedural-leaf-flutter-map-receiver-family-001/summary.json')
           data = json.loads(p.read_text())
           assert data['state'] == 'PASS_PROCEDURAL_VARIANTS_CURRENT_WORLD_LEAF_FLUTTER_RECEIVER_COMPATIBILITY'
+          assert data['procedural_head'] == '4c1dada25151bcc8a5d09d9230b6c3f5eafcf756'
           assert data['map_receiver']['head'] == '7713cbe5863c3bc38dabb6236eb4b393401224b6'
           assert data['map_receiver']['git_blob'] == '128f4881760b01a687ac13e56676822fd1dd7b10'
           assert data['source_case_count'] == 3
@@ -186,24 +199,24 @@ jobs:
           name: tree-branch-crown-migrated-lineage-001-${{ github.event.pull_request.head.sha || github.sha }}
           path: evidence/tree-branch-crown-migrated-lineage-001
           if-no-files-found: error
-      - name: Upload exact procedural leaf-backface family evidence
+      - name: Upload historical procedural leaf-backface family evidence
         if: matrix.python == '3.11'
         uses: actions/upload-artifact@v4
         with:
-          name: tree-procedural-leaf-backface-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          name: tree-procedural-leaf-backface-family-001-historical-4c1dada
           path: evidence/tree-procedural-leaf-backface-family-001
           if-no-files-found: error
-      - name: Upload exact procedural leaf-flutter family evidence
+      - name: Upload historical procedural leaf-flutter family evidence
         if: matrix.python == '3.11'
         uses: actions/upload-artifact@v4
         with:
-          name: tree-procedural-leaf-flutter-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          name: tree-procedural-leaf-flutter-family-001-historical-4c1dada
           path: evidence/tree-procedural-leaf-flutter-family-001
           if-no-files-found: error
-      - name: Upload exact procedural Map receiver compatibility evidence
+      - name: Upload historical procedural Map receiver compatibility evidence
         if: matrix.python == '3.11'
         uses: actions/upload-artifact@v4
         with:
-          name: tree-procedural-leaf-flutter-map-receiver-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          name: tree-procedural-leaf-flutter-map-receiver-family-001-historical-4c1dada
           path: evidence/tree-procedural-leaf-flutter-map-receiver-family-001
           if-no-files-found: error
