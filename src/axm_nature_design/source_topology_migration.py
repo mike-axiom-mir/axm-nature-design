@@ -2,8 +2,8 @@
 
 This module does not own Organic source form. It verifies that the current shared
 Nature generator emits exactly the already-proven Geometry reindex candidates for
-three established source studies, while retaining the historical baseline digests
-as lineage evidence.
+three established source studies, while retaining historical source and mesh
+identities as lineage evidence.
 """
 from __future__ import annotations
 
@@ -28,8 +28,10 @@ LINEAGE = {
         "proven_reindex_digest": "420135f6effbadb1b344675948b9ddc471dcb83177702888f0b32327c5121c18",
     },
     "east-rear-tree-neutral-001": {
-        "source_ref": "a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12",
-        "source_digest": "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307",
+        "source_ref": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+        "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+        "predecessor_source_ref": "a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12",
+        "predecessor_source_digest": "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307",
         "historical_mesh_digest": "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48",
         "proven_reindex_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
     },
@@ -98,6 +100,8 @@ def evaluate(source: dict) -> dict:
         "status": "PASS_SOURCE_GENERATOR_WINDING_MIGRATION" if passed else "FAIL",
         "source_ref": expected["source_ref"],
         "source_digest": source_digest,
+        "predecessor_source_ref": expected.get("predecessor_source_ref"),
+        "predecessor_source_digest": expected.get("predecessor_source_digest"),
         "historical_mesh_digest": expected["historical_mesh_digest"],
         "geometry_oracle_ref": GEOMETRY_ORACLE_REF,
         "proven_reindex_digest": expected["proven_reindex_digest"],
@@ -110,6 +114,7 @@ def evaluate(source: dict) -> dict:
         "truth_boundary": {
             "source_json_rewritten": False,
             "source_generator_index_emission_changed": True,
+            "predecessor_pass_transferred": False,
             "vertex_positions_changed_from_proven_candidate": False,
             "triangle_membership_changed_from_proven_candidate": False,
             "historical_mesh_receipts_rewritten": False,

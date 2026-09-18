@@ -25,13 +25,22 @@ tree or the Map receiving scene.
 `east-rear-tree-neutral-001` is deliberately taller and asymmetrical relative to the
 already accepted compact east-foreground body. It uses the existing Nature Organic
 source schema and generator, with six tapered trunk points, five branch chains, six
-leaf clusters / twenty-five planar leaf blades, and six flex zones that remain
+leaf clusters / twenty-five planar leaf blades, and seven flex zones that remain
 `DECLARED_NOT_DEFORMATION_TESTED`.
 
-Expected exact source digest from the authored JSON:
-`0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307`
+The seventh declaration is a metadata-only deformation-readiness successor for the
+previously uncovered `north-top` branch root. It is centered exactly at the authored
+root `[0.01, 0.0, 3.16] m` and uses radius `0.12 m`, the smaller of the two exact
+branch-flex radius classes already authored in this same source. The existing upper
+branch roots `east-mid` and `west-high` already use `0.12 m`; the larger/lower
+`south-low` and `north-low` roots use `0.14 m`. This choice completes exact-root
+metadata coverage without inventing a third radius class or changing source geometry.
+It does not imply that `0.12 m` is biologically, mechanically, or visually correct.
 
-Expected exact baseline mesh digest from the current Organic generator:
+Expected exact source digest from the authored JSON:
+`178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61`
+
+Expected exact baseline mesh digest from the current Organic generator remains:
 `d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48`
 
 Expected generated body:
@@ -41,23 +50,28 @@ Expected generated body:
 - positive retained proxy margins approximately
   `0.212878867 / 0.430655107 / 0.106991614 m`.
 
+The source digest changes because source metadata changed; the generated mesh digest
+remains byte-identical because flex-zone metadata is not consumed by the mesh builder.
+Receivers that pin the source digest must therefore rebind explicitly, while no mesh
+change is inferred merely from the new source identity.
+
 CI is authoritative for the exact published branch; these values are expected gates,
 not a substitute for exact-head workflow evidence.
 
 ## Geometry / topology boundary
 
 The source intentionally continues to use the established Organic generator so it
-does not silently rewrite existing Nature mesh lineage. Geometry PR #7 has separately
-identified a repeated tapered-cap winding issue and retains a reindex-only candidate.
-That repair is not imported here until Technical Art proves the downstream
-consequences and an explicit source migration is justified.
+does not silently rewrite existing Nature mesh lineage. Geometry PR #9 separately
+retains the migrated/reindexed topology successor. This metadata-only Organic change
+does not adopt or rewrite that Geometry lineage and does not imply a topology PASS.
 
 ## Truth boundary
 
 A PASS proves only that this exact authored stylized body satisfies the existing
-Organic structural/proportion checks and fits the exact retained seed-29 east-a
-receiving envelope without hidden scale or extra source rotation. It does not prove
-Map composition or Art Direction acceptance, botanical or biological correctness,
-production connected topology, self-intersection freedom, deformation/wind quality,
-rigging, Materials, target-engine/runtime behavior, gameplay, CANON, production
-readiness, or Organic/Nature mastery.
+Organic structural/proportion checks, fits the exact retained seed-29 east-a receiving
+envelope without hidden scale or extra source rotation, and now carries exact-root
+unproven flex metadata for all five authored primary branches. It does not prove Map
+composition or Art Direction acceptance, botanical or biological correctness, branch
+strength, production connected topology, self-intersection freedom, deformation/wind
+quality, rigging, Materials, target-engine/runtime behavior, gameplay, CANON,
+production readiness, or Organic/Nature mastery.

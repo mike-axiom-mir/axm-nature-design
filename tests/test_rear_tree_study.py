@@ -10,7 +10,7 @@ from axm_nature_design.organic_form import load_source
 from axm_nature_design.rear_tree_study import evaluate
 
 SOURCE = ROOT / "examples" / "east_rear_tree_neutral_001.json"
-EXPECTED_SOURCE_DIGEST = "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307"
+EXPECTED_SOURCE_DIGEST = "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61"
 HISTORICAL_MESH_DIGEST = "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48"
 MIGRATED_MESH_DIGEST = "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31"
 

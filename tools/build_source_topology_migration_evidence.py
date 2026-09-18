@@ -34,10 +34,13 @@ def main() -> int:
             "study_id": stem,
             "source_ref": report["source_ref"],
             "source_digest": report["source_digest"],
+            "predecessor_source_ref": report["predecessor_source_ref"],
+            "predecessor_source_digest": report["predecessor_source_digest"],
             "historical_mesh_digest": report["historical_mesh_digest"],
             "proven_reindex_digest": report["proven_reindex_digest"],
             "migrated_mesh_digest": report["migrated_mesh_digest"],
             "topology": report["topology"],
+            "truth_boundary": report["truth_boundary"],
             "status": report["status"],
         })
 
@@ -50,7 +53,7 @@ def main() -> int:
         "items": items,
         "non_claims": [
             "historical source and mesh receipts remain valid for their exact old identities",
-            "source JSON and authored form semantics are unchanged",
+            "source successor identity is rebound explicitly; predecessor PASS is not transferred",
             "only tapered-cap index emission is migrated",
             "no connected production vegetation topology claim",
             "no self-intersection, normals, tangents, UV, deformation or wind acceptance claim",

@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from axm_nature_design.organic_form import build_mesh, load_source
+from axm_nature_design.organic_form import build_mesh, digest, load_source
 from axm_nature_design.source_topology_migration import LINEAGE, evaluate, inspect_shared_edge_orientation
 
 SOURCES = [
@@ -37,6 +37,31 @@ class SourceTopologyMigrationTests(unittest.TestCase):
             self.assertEqual(report["source_digest"], LINEAGE[source["study_id"]]["source_digest"])
             self.assertFalse(report["truth_boundary"]["source_json_rewritten"])
             self.assertTrue(report["truth_boundary"]["source_generator_index_emission_changed"])
+            self.assertFalse(report["truth_boundary"]["predecessor_pass_transferred"])
+
+    def test_east_rear_metadata_successor_rebind_preserves_migrated_mesh_identity(self):
+        source = load_source(SOURCES[2])
+        lineage = LINEAGE[source["study_id"]]
+        self.assertEqual(digest(source), lineage["source_digest"])
+        self.assertEqual(lineage["source_ref"], "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a")
+        self.assertEqual(lineage["predecessor_source_ref"], "a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12")
+
+        predecessor = copy.deepcopy(source)
+        predecessor["flex_zones"] = [
+            zone for zone in predecessor["flex_zones"]
+            if zone.get("id") != "north-top-branch-flex"
+        ]
+        self.assertEqual(digest(predecessor), lineage["predecessor_source_digest"])
+
+        current_mesh_digest = digest(build_mesh(source))
+        predecessor_mesh_digest = digest(build_mesh(predecessor))
+        self.assertEqual(current_mesh_digest, lineage["proven_reindex_digest"])
+        self.assertEqual(predecessor_mesh_digest, lineage["proven_reindex_digest"])
+        self.assertEqual(current_mesh_digest, predecessor_mesh_digest)
+
+        report = evaluate(source)
+        self.assertFalse(report["truth_boundary"]["predecessor_pass_transferred"])
+        self.assertEqual(report["predecessor_source_digest"], lineage["predecessor_source_digest"])
 
     def test_reversing_one_migrated_cap_face_reintroduces_a_shared_edge_conflict(self):
         source = load_source(SOURCES[0])
