@@ -1,0 +1,225 @@
+name: UC Nature dynamic window target receiver
+
+on:
+  push:
+    branches: [studio/uc-nature-surface-bridge-001]
+    paths:
+      - "src/axm_nature_design/uc_dynamic_window_receiver.py"
+      - "tools/build_uc_dynamic_window_target_evidence.py"
+      - "contracts/nature-east-rear-dynamic-window-target-001.json"
+      - "target-proof/observe_dynamic_window_update.gd"
+      - ".github/workflows/uc-nature-dynamic-window-target.yml"
+  pull_request:
+    paths:
+      - "src/axm_nature_design/uc_dynamic_window_receiver.py"
+      - "tools/build_uc_dynamic_window_target_evidence.py"
+      - "contracts/nature-east-rear-dynamic-window-target-001.json"
+      - "target-proof/observe_dynamic_window_update.gd"
+      - ".github/workflows/uc-nature-dynamic-window-target.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-runtime-window-current-uc-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - name: Checkout exact Technical Art head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Technical Art head
+        run: |
+          set -euo pipefail
+          OBSERVED="$(git rev-parse HEAD)"
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > /tmp/exact-technical-art-head.txt
+
+      - name: Checkout exact Runtime owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          path: .runtime
+
+      - name: Checkout exact current Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4
+          path: .uc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile bounded Technical Art receiver
+        run: |
+          python -m compileall -q \
+            src/axm_nature_design/uc_dynamic_window_receiver.py \
+            tools/build_uc_dynamic_window_target_evidence.py
+
+      - name: Build exact Runtime window to current UC evidence
+        run: |
+          set -euo pipefail
+          rm -rf evidence/nature-east-rear-dynamic-window-target-001
+          mkdir -p evidence/nature-east-rear-dynamic-window-target-001
+          PYTHONPATH=src:.uc/src \
+            python tools/build_uc_dynamic_window_target_evidence.py \
+              --runtime-root .runtime \
+              --uc-root .uc \
+              --out evidence/nature-east-rear-dynamic-window-target-001
+          cp /tmp/exact-technical-art-head.txt evidence/nature-east-rear-dynamic-window-target-001/
+
+      - name: Validate pre-target contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-east-rear-dynamic-window-target-001')
+          r=json.loads((root/'nature-east-rear-dynamic-window-uc-target-receipt.json').read_text())
+          assert r['result']=='PASS_NATURE_EAST_REAR_RUNTIME_WINDOW_CURRENT_UC_TARGET_RECEIVER_READY',r
+          assert r['heads']=={
+              'runtime':'6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f',
+              'vfx':'ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475',
+              'rigging':'754797a815266a643c6b08f1606eb76ba95dd8c6',
+              'uc':'5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4',
+          },r
+          q=r['receiver']
+          assert q['source_vertex_count']==390,q
+          assert q['source_vertex_to_uc_vertex_identity'] is True,q
+          assert q['dynamic_window_target_vertex_indices']==[110,370],q
+          assert q['target_vertex_stride_bytes']==12,q
+          assert q['target_dynamic_byte_offset']==1320,q
+          assert q['target_dynamic_byte_length']==3120,q
+          assert q['target_full_position_bytes']==4680,q
+          assert q['coordinate_handedness_determinant']==-1,q
+          assert q['triangle_winding_reversed_exactly_once'] is True,q
+          assert r['pose_count']==5,r
+          assert r['uc']['vertices']==390,r
+          assert r['uc']['product_code_modified_by_technical_art'] is False,r
+          assert r['uc']['nature_or_runtime_domain_semantics_moved_to_uc'] is False,r
+          assert r['truth_boundary']['real_target_host_partial_vertex_update_proven'] is False,r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Fail closed on window drift and authority inflation
+        run: |
+          set -euo pipefail
+          if PYTHONPATH=src:.uc/src python tools/build_uc_dynamic_window_target_evidence.py \
+              --runtime-root .runtime --uc-root .uc --out /tmp/negative-window \
+              --mutate-window-end 371; then
+            echo "mutated Runtime window unexpectedly passed" >&2
+            exit 1
+          fi
+          if PYTHONPATH=src:.uc/src python tools/build_uc_dynamic_window_target_evidence.py \
+              --runtime-root .runtime --uc-root .uc --out /tmp/negative-authority \
+              --claim-target-device-performance; then
+            echo "target-device authority inflation unexpectedly passed" >&2
+            exit 1
+          fi
+          printf '%s\n' 'PASS_REJECTED_RUNTIME_WINDOW_DRIFT_AND_TARGET_DEVICE_AUTHORITY_INFLATION' \
+            > evidence/nature-east-rear-dynamic-window-target-001/negative-controls.txt
+
+      - name: Download pinned Godot 4.7.2
+        if: matrix.python-version == '3.11'
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        if: matrix.python-version == '3.11'
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Exercise exact full and partial target-host vertex updates
+        if: matrix.python-version == '3.11'
+        run: |
+          set -euo pipefail
+          rm -rf target-proof/generated
+          mkdir -p target-proof/generated
+          cp evidence/nature-east-rear-dynamic-window-target-001/nature-east-rear-dynamic-window-uc-target-receipt.json target-proof/generated/
+          cp evidence/nature-east-rear-dynamic-window-target-001/nature-east-rear-dynamic-window-target-oracle.json target-proof/generated/
+          cp evidence/nature-east-rear-dynamic-window-target-001/nature-east-rear-dynamic-window.glb target-proof/generated/
+          rm -f target-proof/nature-east-rear-dynamic-window-godot-target-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof \
+            --script observe_dynamic_window_update.gd
+          cp target-proof/nature-east-rear-dynamic-window-godot-target-receipt.json \
+            evidence/nature-east-rear-dynamic-window-target-001/
+          cp target-proof/generated/*.png evidence/nature-east-rear-dynamic-window-target-001/
+
+      - name: Validate exact real-Godot target result
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-east-rear-dynamic-window-target-001')
+          r=json.loads((root/'nature-east-rear-dynamic-window-godot-target-receipt.json').read_text())
+          assert r['state']=='PASS_NATURE_EAST_REAR_CURRENT_UC_GODOT_PARTIAL_VERTEX_WINDOW_RECEIVER',r
+          assert r['imported_vertices']==390,r
+          assert r['dynamic_window_vertices']==[110,370],r
+          assert r['dynamic_window_byte_offset']==1320,r
+          assert r['dynamic_window_byte_length']==3120,r
+          assert r['full_position_byte_length']==4680,r
+          assert r['position_packet_reduction_bytes']==1560,r
+          assert abs(r['position_packet_reduction_percent']-(100.0/3.0)) < 1e-9,r
+          assert r['maximum_imported_neutral_vertex_delta_m'] <= 5e-6,r
+          assert len(r['driver_rows'])==5,r
+          assert all(row['control_candidate_render_delta']['byte_identical'] for row in r['driver_rows']),r
+          assert sum(row['candidate_vs_neutral_render_delta']['changed_pixels'] > 100 for row in r['driver_rows']) >= 4,r
+          t=r['truth_boundary']
+          assert t['real_target_host_partial_vertex_region_update_exercised'] is True,r
+          assert t['full_vs_partial_shaded_render_byte_identity_proven_for_five_retained_static_poses'] is True,r
+          assert t['target_device_performance_proven'] is False,r
+          assert t['uc_inferred_nature_or_runtime_semantics'] is False,r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Retain exact source and contract provenance
+        if: always()
+        run: |
+          set -euo pipefail
+          root=evidence/nature-east-rear-dynamic-window-target-001
+          mkdir -p "$root"
+          cp contracts/nature-east-rear-dynamic-window-target-001.json "$root/" || true
+          cp src/axm_nature_design/uc_dynamic_window_receiver.py "$root/" || true
+          cp tools/build_uc_dynamic_window_target_evidence.py "$root/" || true
+          cp target-proof/observe_dynamic_window_update.gd "$root/" || true
+          git rev-parse HEAD > "$root/exact-technical-art-head.txt"
+          git -C .runtime rev-parse HEAD > "$root/exact-runtime-head.txt"
+          git -C .uc rev-parse HEAD > "$root/exact-uc-head.txt"
+
+      - name: Upload retained Nature dynamic-window target evidence
+        if: always() && matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-dynamic-window-target-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-east-rear-dynamic-window-target-001
+          if-no-files-found: warn
+          retention-days: 30
