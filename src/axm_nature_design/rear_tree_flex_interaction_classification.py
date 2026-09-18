@@ -125,8 +125,8 @@ def evaluate(source: dict) -> dict:
                     "nearest_neutral_trunk_segment": support["segment"],
                     "nearest_neutral_trunk_segment_t": support["segment_t"],
                     "nearest_neutral_trunk_centerline_point_m": support[
-                        "closest_centerline_point_m"
-                    ] if "closest_centerline_point_m" in support else support["closest_centerline_point"],
+                        "closest_centerline_point"
+                    ],
                     "neutral_root_centerline_distance_m": support["centerline_distance_m"],
                     "neutral_local_trunk_radius_m": support["local_trunk_radius_m"],
                     "neutral_support_margin_after_branch_radius_m": support_margin,
