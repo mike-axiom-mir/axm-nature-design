@@ -1,0 +1,189 @@
+name: VFX east rear north-low analytic bridge Animation Weather response
+
+on:
+  pull_request:
+    paths:
+      - "tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py"
+      - "contracts/east-rear-north-low-analytic-bridge-animation-weather-vfx-012.json"
+      - "docs/VFX_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_ANIMATION_WEATHER_012.md"
+      - ".github/workflows/vfx-east-rear-north-low-analytic-bridge-animation-weather.yml"
+  push:
+    branches:
+      - "studio/vfx-north-low-analytic-bridge-weather-response-011"
+    paths:
+      - "tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py"
+      - "contracts/east-rear-north-low-analytic-bridge-animation-weather-vfx-012.json"
+      - "docs/VFX_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_ANIMATION_WEATHER_012.md"
+      - ".github/workflows/vfx-east-rear-north-low-analytic-bridge-animation-weather.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact VFX head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Checkout exact Animation owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: d4442cbbe6dcdcde1abadfcd358bb7a6bcdc3701
+          path: .animation
+          fetch-depth: 0
+
+      - name: Checkout exact current Rigging owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: efe99261459858636dbe65b16cbe1d5ad2b93a56
+          path: .rigging
+          fetch-depth: 0
+
+      - name: Checkout exact Weather visual-direction owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-weather-design
+          ref: ca2eaba519e8449835b0ea6ef944b7080c3caa6a
+          path: .weather
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Bind exact owner identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .animation rev-parse HEAD)" = "d4442cbbe6dcdcde1abadfcd358bb7a6bcdc3701"
+          test "$(git -C .rigging rev-parse HEAD)" = "efe99261459858636dbe65b16cbe1d5ad2b93a56"
+          test "$(git -C .weather rev-parse HEAD)" = "ca2eaba519e8449835b0ea6ef944b7080c3caa6a"
+          test "$(git -C .weather rev-parse HEAD:examples/wind_atmosphere_baseline_001.json)" = "11298d447f262da8a78e43e2df68bc0346c99a2c"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('.animation/contracts/east-rear-north-low-animation-bridge-continuous-span-bind-011.json').read_text())
+          assert a['schema']=='axm.nature-animation-north-low-bridge-continuous-span-bind/v0.1'
+          assert a['current_rigging_continuous_span_head']=='efe99261459858636dbe65b16cbe1d5ad2b93a56'
+          assert a['frozen_animation']['endpoint_inclusive_samples']==41
+          assert a['frozen_animation']['retimed_or_reauthored'] is False
+          w=json.loads(Path('.weather/examples/wind_atmosphere_baseline_001.json').read_text())
+          assert w['wind_xy']==[1.0,0.35]
+          assert w['wind_semantics']=='VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED'
+          PY
+
+      - name: Compile VFX observer
+        run: python -m py_compile tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py
+
+      - name: Test full VFX receiving repository
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Re-run exact current Rigging suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd .rigging
+          PYTHONPATH=src python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Rebuild exact frozen Animation receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          GEO=d32a41558910d78595042fb638a785714f825806
+          if ! git -C .animation cat-file -e "$GEO^{commit}" 2>/dev/null; then
+            git -C .animation fetch --no-tags origin "$GEO"
+          fi
+          git -C .animation show "$GEO:contracts/east-rear-north-low-attachment-topology-geometry-005.json" > /tmp/exact-geometry-attachment-contract.json
+          PYTHONPATH=.animation/src python .animation/tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+            --source .animation/examples/east_rear_tree_neutral_001.json \
+            --geometry-contract /tmp/exact-geometry-attachment-contract.json \
+            --output /tmp/exact-animation-owner-evidence.json \
+            | tee /tmp/exact-animation-owner.log
+
+      - name: Build exact temporal VFX evidence
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/north-low-analytic-bridge-animation-weather-vfx-012
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          PYTHONPATH=.rigging/src python tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py \
+            --animation-evidence /tmp/exact-animation-owner-evidence.json \
+            --animation-bind-contract .animation/contracts/east-rear-north-low-animation-bridge-continuous-span-bind-011.json \
+            --source .rigging/examples/east_rear_tree_neutral_001.json \
+            --output "$ROOT/evidence.json" \
+            --svg "$ROOT/review.svg" \
+            | tee "$ROOT/verifier.log"
+          cp /tmp/exact-animation-owner-evidence.json "$ROOT/animation-owner-evidence.json"
+          cp /tmp/exact-animation-owner.log "$ROOT/animation-owner.log"
+          cp .animation/contracts/east-rear-north-low-animation-bridge-continuous-span-bind-011.json "$ROOT/animation-bind-contract.json"
+          cp contracts/east-rear-north-low-analytic-bridge-animation-weather-vfx-012.json "$ROOT/vfx-contract.json"
+          cp tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py "$ROOT/verifier.py"
+          cp .weather/examples/wind_atmosphere_baseline_001.json "$ROOT/weather-owner.json"
+          cp .rigging/examples/east_rear_tree_neutral_001.json "$ROOT/source.json"
+          cp .rigging/src/axm_nature_design/rear_tree_rigging_north_low_bridge_continuous_span.py "$ROOT/rigging-continuous-span-owner.py"
+          cp .rigging/src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py "$ROOT/rigging-endpoint-owner.py"
+          test ! -f docs/VFX_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_ANIMATION_WEATHER_012.md || cp docs/VFX_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_ANIMATION_WEATHER_012.md "$ROOT/README.md"
+          git rev-parse HEAD > "$ROOT/exact-vfx-head.txt"
+          printf '%s\n' d4442cbbe6dcdcde1abadfcd358bb7a6bcdc3701 > "$ROOT/animation-owner-head.txt"
+          printf '%s\n' efe99261459858636dbe65b16cbe1d5ad2b93a56 > "$ROOT/rigging-owner-head.txt"
+          printf '%s\n' ca2eaba519e8449835b0ea6ef944b7080c3caa6a > "$ROOT/weather-owner-head.txt"
+
+      - name: Assert bounded truth gate
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('evidence/north-low-analytic-bridge-animation-weather-vfx-012/evidence.json').read_text())
+          assert p['result']=='PASS_NORTH_LOW_ANALYTIC_BRIDGE_TEMPORAL_WEATHER_VISUAL_RESPONSE'
+          m=p['measurements']
+          assert len(m['rows'])==41
+          assert m['weather_polarity_sign_violations']==0
+          assert m['maximum_trunk_centroid_drift_m'] <= 1e-12
+          assert m['maximum_bridge_vs_half_branch_response_residual_m'] <= 1e-12
+          assert m['maximum_direct_vs_rigging_closed_form_span_residual_m'] <= 1e-10
+          assert m['loop_closure_response_error_m'] <= 1e-12
+          assert m['minus5_branch_weather_parallel_m'] > 0.0
+          assert m['plus5_branch_weather_parallel_m'] < 0.0
+          truth=p['truth_boundary']
+          assert truth['source_space_temporal_visual_response_evidence_only'] is True
+          assert not any(v for k,v in truth.items() if k!='source_space_temporal_visual_response_evidence_only')
+          PY
+
+      - name: Assert fail-closed authority and donor controls
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="--animation-evidence /tmp/exact-animation-owner-evidence.json --animation-bind-contract .animation/contracts/east-rear-north-low-animation-bridge-continuous-span-bind-011.json --source .rigging/examples/east_rear_tree_neutral_001.json --output /tmp/x.json --svg /tmp/x.svg"
+          ! env PYTHONPATH=.rigging/src python tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py $BASE --weather-y 0.36
+          ! env PYTHONPATH=.rigging/src python tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py $BASE --animation-head 0000000000000000000000000000000000000000
+          ! env PYTHONPATH=.rigging/src python tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py $BASE --claim-physical-wind
+          ! env PYTHONPATH=.rigging/src python tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py $BASE --claim-target-host
+          ! env PYTHONPATH=.rigging/src python tools/verify_rear_tree_vfx_north_low_bridge_animation_weather_temporal.py $BASE --claim-gameplay-or-physics
+
+      - name: Upload retained temporal VFX evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-analytic-bridge-animation-weather-vfx-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-analytic-bridge-animation-weather-vfx-012/
+          if-no-files-found: error
+          retention-days: 90
