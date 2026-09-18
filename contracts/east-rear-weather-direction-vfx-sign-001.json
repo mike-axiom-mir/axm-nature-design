@@ -1,0 +1,31 @@
+{
+  "schema": "axm.nature-vfx-weather-direction-socket-sign/v0.1",
+  "study_id": "east-rear-north-top-weather-direction-sign-001",
+  "nature_animation_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pull_request": 15,
+    "head": "74354ff851538d4d8aba9332900ae40218415eaf",
+    "truth_label": "ANIMATION_DIAGNOSTIC_SOCKET_PULSE_NOT_WIND_NOT_BIOLOGICAL_ROM_NOT_CONTROLLER"
+  },
+  "weather_visual_direction_donor": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pull_request": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "source_path": "examples/wind_atmosphere_baseline_001.json",
+    "source_blob_sha": "11298d447f262da8a78e43e2df68bc0346c99a2c",
+    "source_digest": "b33feba47b0a0f9a99ec439e32a87ff6d4cb2dacffe33ba78f8b646c3a1be8d6",
+    "wind_xy": [1.0, 0.35],
+    "wind_semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "bounded_question": "Which sign of the exact Rigging diagnostic +/-5 degree north-top socket moves the actual selected child geometry more downwind in XY relative to the source-owned Weather visual direction?",
+  "allowed_mutation": "NONE__REVIEW_ONLY_SIGN_COMPATIBILITY",
+  "diagnostic_angles_deg": [-5.0, 0.0, 5.0],
+  "selection_rule": "Compare the selected-child centroid XY displacement projected onto the normalized source-owned Weather visual direction at exact -5 and +5 degree Rigging witnesses; retain the larger projection as the review-only downwind-alignment sign.",
+  "automatic_animation_adoption": false,
+  "automatic_vfx_motion_adoption": false,
+  "physical_wind_claimed": false,
+  "biological_response_claimed": false,
+  "runtime_controller_claimed": false,
+  "gameplay_claimed": false,
+  "truth_boundary": "A PASS only resolves the sign relationship between one exact source-owned visual Weather direction and one exact Rigging diagnostic socket using the actual generated Nature child geometry. It does not author wind strength, timing, amplitude, biological motion, physical force, controller behavior, gameplay, final animation, Art Direction acceptance, Runtime adoption, target-device performance, CANON or production readiness."
+}
