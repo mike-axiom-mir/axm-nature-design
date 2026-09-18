@@ -1,9 +1,11 @@
 """Exact source-owned interaction classes for east/rear tree flex declarations.
 
 This observer is intentionally narrower than rigging. It classifies authored neutral-space
-relationships between trunk flex envelopes and exact branch-root flex envelopes, and binds
-each branch root to its authored neutral trunk support. It does not choose hierarchy,
-weights, constraints, motion range, or any physical/biological interpretation.
+relationships between trunk flex envelopes and exact branch-root flex envelopes, binds
+each branch root to its authored neutral trunk support, and records whether each trunk
+flex envelope actually reaches the neutral trunk cross-section at that attachment locus.
+It does not choose hierarchy, weights, constraints, motion range, or any physical or
+biological interpretation.
 """
 from __future__ import annotations
 
@@ -16,7 +18,7 @@ from axm_nature_design.rear_tree_deformation_readiness import (
     _vector_matches,
 )
 
-SCHEMA = "axm.nature-trunk-branch-flex-interaction-classification/v0.1"
+SCHEMA = "axm.nature-trunk-branch-flex-interaction-classification/v0.2"
 
 ROOT_CENTER_CONTAINED = "ROOT_CENTER_CONTAINED_IN_TRUNK_FLEX"
 FLEX_ENVELOPE_OVERLAP_ONLY = "FLEX_ENVELOPE_OVERLAP_ONLY"
@@ -92,6 +94,18 @@ def evaluate(source: dict) -> dict:
             envelope_margin = trunk_flex_radius + branch_flex_radius - center_distance
             interaction_class = _classify(center_margin, envelope_margin)
 
+            attachment_centerline_distance = _length(
+                _sub(support["closest_centerline_point"], trunk_zone.get("center"))
+            )
+            attachment_cross_section_boundary_signed = (
+                attachment_centerline_distance
+                - trunk_flex_radius
+                - support["local_trunk_radius_m"]
+            )
+            attachment_cross_section_intersects = (
+                attachment_cross_section_boundary_signed <= TOLERANCE
+            )
+
             rows.append(
                 {
                     "trunk_flex_zone_id": trunk_zone.get("id"),
@@ -117,6 +131,15 @@ def evaluate(source: dict) -> dict:
                     "neutral_local_trunk_radius_m": support["local_trunk_radius_m"],
                     "neutral_support_margin_after_branch_radius_m": support_margin,
                     "full_branch_root_radius_supported_in_neutral_form": full_neutral_support,
+                    "trunk_flex_to_neutral_attachment_centerline_distance_m": (
+                        attachment_centerline_distance
+                    ),
+                    "neutral_attachment_cross_section_to_trunk_flex_boundary_signed_m": (
+                        attachment_cross_section_boundary_signed
+                    ),
+                    "trunk_flex_intersects_neutral_attachment_cross_section": (
+                        attachment_cross_section_intersects
+                    ),
                 }
             )
 
@@ -147,6 +170,15 @@ def evaluate(source: dict) -> dict:
         for row in rows
         if row["interaction_class"] == ROOT_CENTER_CONTAINED
     ]
+    attachment_cross_section_intersection_pairs = [
+        {
+            "trunk_flex_zone_id": row["trunk_flex_zone_id"],
+            "branch_id": row["branch_id"],
+            "branch_flex_zone_id": row["branch_flex_zone_id"],
+        }
+        for row in rows
+        if row["trunk_flex_intersects_neutral_attachment_cross_section"]
+    ]
 
     if not all(row["full_branch_root_radius_supported_in_neutral_form"] for row in rows):
         state = "FAIL_NEUTRAL_BRANCH_ROOT_SUPPORT"
@@ -161,15 +193,24 @@ def evaluate(source: dict) -> dict:
         "interaction_class_counts": class_counts,
         "root_center_contained_pairs": contained_pairs,
         "flex_envelope_overlap_only_pairs": overlap_only_pairs,
+        "neutral_attachment_cross_section_intersection_pair_count": len(
+            attachment_cross_section_intersection_pairs
+        ),
+        "neutral_attachment_cross_section_intersection_pairs": (
+            attachment_cross_section_intersection_pairs
+        ),
         "pairs": rows,
         "truth_boundary": {
             "source_metadata_spatial_relations_measured": True,
             "neutral_attachment_support_measured": True,
+            "neutral_attachment_cross_section_relation_to_trunk_flex_measured": True,
             "interaction_classes_are_source_geometry_only": True,
             "source_geometry_changed": False,
             "flex_zone_metadata_changed": False,
             "interaction_class_assigns_rig_policy": False,
+            "attachment_cross_section_intersection_assigns_rig_policy": False,
             "neutral_attachment_support_is_deformation_proof": False,
+            "neutral_attachment_cross_section_intersection_is_deformation_proof": False,
             "deformation_simulated": False,
             "hierarchy_or_weighting_inferred": False,
             "biological_interpretation_claimed": False,
