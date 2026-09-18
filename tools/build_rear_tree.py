@@ -15,6 +15,9 @@ from axm_nature_design.rear_tree_flex_interaction_classification import (
 from axm_nature_design.rear_tree_root_transition_readiness import (
     evaluate as evaluate_root_transition_readiness,
 )
+from axm_nature_design.rear_tree_transition_exit_frames import (
+    evaluate as evaluate_transition_exit_frames,
+)
 from axm_nature_design.rear_tree_study import evaluate
 
 SOURCE = ROOT / "examples" / "east_rear_tree_neutral_001.json"
@@ -79,6 +82,7 @@ def main() -> int:
     readiness = evaluate_deformation_readiness(source)
     flex_interactions = evaluate_flex_interaction_classification(source)
     root_transitions = evaluate_root_transition_readiness(source)
+    transition_exit_frames = evaluate_transition_exit_frames(source)
     if report["status"] != "PASS_REAR_SOURCE_ENVELOPE":
         raise SystemExit("east rear tree evidence failed")
     if readiness["state"] not in {
@@ -96,6 +100,11 @@ def main() -> int:
         != "PASS_EXACT_NEUTRAL_BRANCH_TRANSITION_ENVELOPES__CONNECTED_TOPOLOGY_HELD"
     ):
         raise SystemExit("east rear tree root-transition readiness evidence failed")
+    if (
+        transition_exit_frames["state"]
+        != "PASS_EXACT_NEUTRAL_BRANCH_TRANSITION_EXIT_FRAMES__CONNECTED_TOPOLOGY_HELD"
+    ):
+        raise SystemExit("east rear tree transition exit-frame evidence failed")
 
     _write_json(out / "source.json", source)
     _write_json(out / "mesh.json", mesh)
@@ -103,6 +112,7 @@ def main() -> int:
     _write_json(out / "deformation-readiness.json", readiness)
     _write_json(out / "flex-interaction-classification.json", flex_interactions)
     _write_json(out / "root-transition-readiness.json", root_transitions)
+    _write_json(out / "root-transition-exit-frames.json", transition_exit_frames)
     _write_obj(mesh, out / "east-rear-tree-neutral-001.obj", source["study_id"])
     for view in ("front", "side", "top"):
         _write_svg(mesh, out / f"{view}.svg", view, source["study_id"])
