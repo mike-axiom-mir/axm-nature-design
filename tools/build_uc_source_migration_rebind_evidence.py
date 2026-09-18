@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -14,10 +15,19 @@ from axm_nature_design.uc_surface_bridge import adapt_mesh_for_uc
 from axm_uc.mesh_topology import inspect_mesh_topology
 from axm_uc.procedural_3d import publish_glb, verify_glb
 
-SOURCE_MIGRATION_COMMIT = "4ddbe66e5c02d22407ef773d5346a2fe6f349a2d"
+SOURCE_MIGRATION_COMMIT = "9b451ba1f65281f550a6754e18574f7ab2951e28"
+PREDECESSOR_SOURCE_MIGRATION_COMMIT = "4ddbe66e5c02d22407ef773d5346a2fe6f349a2d"
 HISTORICAL_REAR_COMMIT = "a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12"
-UC_COMMIT = "21e206fad99d53f6f01a9d3093b49e590cff7032"
+UC_COMMIT = "ce70d717e381df6ca8a27c0c9fabe9d48bb1b23c"
 GEOMETRY_ORACLE_COMMIT = "e2224d4bf88f7e68503072c884e5a726b8d0c53d"
+CURRENT_EAST_REAR_SOURCE_DIGEST = "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61"
+PREDECESSOR_EAST_REAR_SOURCE_DIGEST = "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307"
+EXPECTED_NORTH_TOP_FLEX = {
+    "id": "north-top-branch-flex",
+    "center": [0.01, 0.0, 3.16],
+    "radius": 0.12,
+    "status": "DECLARED_NOT_DEFORMATION_TESTED",
+}
 
 EXPECTED = {
     "sapling-neutral-001": {
@@ -34,7 +44,7 @@ EXPECTED = {
     },
     "east-rear-tree-neutral-001": {
         "path": "examples/east_rear_tree_neutral_001.json",
-        "source": "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307",
+        "source": CURRENT_EAST_REAR_SOURCE_DIGEST,
         "historical": "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48",
         "migrated": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
     },
@@ -45,12 +55,20 @@ def canonical(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
 
 
+def value_digest(value: Any) -> str:
+    return hashlib.sha256(canonical(value).encode("utf-8")).hexdigest()
+
+
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def git_head(root: Path) -> str:
     return subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+
+
+def git_blob(root: Path, path: str) -> str:
+    return subprocess.check_output(["git", "-C", str(root), "rev-parse", f"HEAD:{path}"], text=True).strip()
 
 
 def donor_mesh(root: Path, relative_path: str) -> dict[str, Any]:
@@ -74,6 +92,65 @@ print(json.dumps({
     env["AXM_SOURCE_PATH"] = str(root / relative_path)
     raw = subprocess.check_output([sys.executable, "-c", code], cwd=root, env=env, text=True)
     return json.loads(raw)
+
+
+def donor_mesh_from_source(root: Path, source: dict[str, Any]) -> dict[str, Any]:
+    code = r'''
+import json
+import os
+from axm_nature_design.organic_form import build_mesh, digest, validate_source
+source = json.loads(os.environ["AXM_SOURCE_JSON"])
+validate_source(source)
+mesh = build_mesh(source)
+print(json.dumps({
+    "source": source,
+    "mesh": mesh,
+    "source_digest": digest(source),
+    "mesh_digest": digest(mesh),
+}, sort_keys=True, separators=(",", ":")))
+'''
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(root / "src")
+    env["AXM_SOURCE_JSON"] = canonical(source)
+    raw = subprocess.check_output([sys.executable, "-c", code], cwd=root, env=env, text=True)
+    return json.loads(raw)
+
+
+def verify_east_rear_metadata_successor(source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Bind the one exact owner metadata successor without interpreting flex semantics."""
+    current_digest = value_digest(source)
+    if current_digest != CURRENT_EAST_REAR_SOURCE_DIGEST:
+        raise ValueError(f"east-rear current source identity drifted: {current_digest}")
+    flex_zones = source.get("flex_zones")
+    if not isinstance(flex_zones, list):
+        raise ValueError("east-rear source flex_zones must be a list")
+    matches = [item for item in flex_zones if isinstance(item, dict) and item.get("id") == EXPECTED_NORTH_TOP_FLEX["id"]]
+    if len(matches) != 1:
+        raise ValueError("east-rear current source must contain exactly one north-top-branch-flex declaration")
+    if matches[0] != EXPECTED_NORTH_TOP_FLEX:
+        raise ValueError(f"north-top-branch-flex declaration drifted: {matches[0]!r}")
+
+    predecessor = copy.deepcopy(source)
+    predecessor["flex_zones"] = [
+        item for item in predecessor["flex_zones"]
+        if not (isinstance(item, dict) and item.get("id") == EXPECTED_NORTH_TOP_FLEX["id"])
+    ]
+    predecessor_digest = value_digest(predecessor)
+    if predecessor_digest != PREDECESSOR_EAST_REAR_SOURCE_DIGEST:
+        raise ValueError(
+            "east-rear metadata successor contains additional source changes; "
+            f"reconstructed predecessor digest is {predecessor_digest}"
+        )
+
+    return predecessor, {
+        "state": "PASS_EXACT_OWNER_METADATA_SUCCESSOR_RELATION",
+        "current_source_digest": current_digest,
+        "predecessor_source_digest": predecessor_digest,
+        "added_declaration": EXPECTED_NORTH_TOP_FLEX,
+        "source_change_scope": "ONE_EXACT_FLEX_ZONE_METADATA_DECLARATION_ONLY",
+        "technical_art_interprets_flex_semantics": False,
+        "automatic_downstream_adoption": False,
+    }
 
 
 def topology(mesh: dict[str, Any]) -> dict[str, Any]:
@@ -128,7 +205,13 @@ def main() -> None:
     if observed_uc != UC_COMMIT:
         raise SystemExit(f"UC donor drifted: {observed_uc}")
 
+    uc_blobs = {
+        "src/axm_uc/mesh_topology.py": git_blob(uc_root, "src/axm_uc/mesh_topology.py"),
+        "src/axm_uc/procedural_3d.py": git_blob(uc_root, "src/axm_uc/procedural_3d.py"),
+    }
+
     studies: dict[str, Any] = {}
+    metadata_successor: dict[str, Any] | None = None
     for study_id, expected in EXPECTED.items():
         donor = donor_mesh(migration_root, expected["path"])
         if donor["source"].get("study_id") != study_id:
@@ -160,7 +243,7 @@ def main() -> None:
         if not verification["geometry_validation"]["winding_matches_vertex_normals"]:
             raise SystemExit(f"{study_id} UC winding/normal verification failed")
 
-        studies[study_id] = {
+        study_record: dict[str, Any] = {
             "source_digest": donor["source_digest"],
             "historical_mesh_digest": expected["historical"],
             "source_generated_migrated_mesh_digest": donor["mesh_digest"],
@@ -180,9 +263,56 @@ def main() -> None:
             "result": "PASS_SOURCE_GENERATED_MIGRATED_MESH_THROUGH_CURRENT_UC_GLB",
         }
 
+        if study_id == "east-rear-tree-neutral-001":
+            predecessor_source, relation = verify_east_rear_metadata_successor(donor["source"])
+            predecessor = donor_mesh_from_source(migration_root, predecessor_source)
+            if predecessor["source_digest"] != PREDECESSOR_EAST_REAR_SOURCE_DIGEST:
+                raise SystemExit("reconstructed east-rear predecessor source digest drifted")
+            if predecessor["mesh_digest"] != expected["migrated"]:
+                raise SystemExit(
+                    "current Geometry generator no longer keeps predecessor/current metadata sources geometry-equivalent"
+                )
+            predecessor_bridge = adapt_mesh_for_uc(
+                predecessor["source"],
+                predecessor["mesh"],
+                mesh_relation=(
+                    "CURRENT_GEOMETRY_GENERATOR_RECONSTRUCTED_METADATA_PREDECESSOR@"
+                    f"{SOURCE_MIGRATION_COMMIT}"
+                ),
+            )
+            predecessor_publish = publish(out, f"{study_id}-predecessor-metadata", predecessor_bridge)
+            same_surface = predecessor_bridge["surface_digest"] == bridge["surface_digest"]
+            same_glb = predecessor_publish["glb_sha256"] == published["glb_sha256"]
+            if not same_surface or not same_glb:
+                raise SystemExit(
+                    "metadata-only east-rear owner successor unexpectedly changed the TA/UC geometry transport payload"
+                )
+            metadata_successor = {
+                **relation,
+                "predecessor_source_migration_commit": PREDECESSOR_SOURCE_MIGRATION_COMMIT,
+                "current_source_migration_commit": SOURCE_MIGRATION_COMMIT,
+                "current_generator_predecessor_mesh_digest": predecessor["mesh_digest"],
+                "current_generator_current_mesh_digest": donor["mesh_digest"],
+                "migrated_mesh_byte_equivalent": predecessor["mesh_digest"] == donor["mesh_digest"],
+                "technical_art_surface_digest_predecessor": predecessor_bridge["surface_digest"],
+                "technical_art_surface_digest_current": bridge["surface_digest"],
+                "technical_art_surface_byte_equivalent": same_surface,
+                "current_uc_glb_sha256_predecessor": predecessor_publish["glb_sha256"],
+                "current_uc_glb_sha256_current": published["glb_sha256"],
+                "current_uc_glb_byte_equivalent": same_glb,
+                "nature_flex_semantics_moved_to_uc": False,
+                "state": "PASS_NATURE_EAST_REAR_METADATA_SUCCESSOR_TRANSPORT_EQUIVALENCE",
+            }
+            study_record["metadata_predecessor_uc_glb"] = predecessor_publish
+
+        studies[study_id] = study_record
+
+    if metadata_successor is None:
+        raise SystemExit("east-rear metadata-successor evidence was not produced")
+
     rear_expected = EXPECTED["east-rear-tree-neutral-001"]
     historical = donor_mesh(historical_root, rear_expected["path"])
-    if historical["source_digest"] != rear_expected["source"]:
+    if historical["source_digest"] != PREDECESSOR_EAST_REAR_SOURCE_DIGEST:
         raise SystemExit("historical rear source digest drifted")
     if historical["mesh_digest"] != rear_expected["historical"]:
         raise SystemExit("historical rear mesh digest drifted")
@@ -200,20 +330,23 @@ def main() -> None:
 
     receiving_head = git_head(Path.cwd())
     overall = {
-        "schema": "axm.nature-uc-source-migration-rebind/v0.1",
-        "state": "PASS_SOURCE_GENERATED_MIGRATED_NATURE_THROUGH_CURRENT_UC_GLB",
+        "schema": "axm.nature-uc-source-migration-rebind/v0.2",
+        "state": "PASS_CURRENT_NATURE_SOURCE_SUCCESSOR_THROUGH_CURRENT_UC_GLB",
         "receiving_repository": "mike-axiom-mir/axm-nature-design",
         "receiving_head": receiving_head,
         "source_migration_repository": "mike-axiom-mir/axm-nature-design",
         "source_migration_pr": 9,
         "source_migration_commit": observed_migration,
+        "predecessor_source_migration_commit": PREDECESSOR_SOURCE_MIGRATION_COMMIT,
         "historical_rear_pr": 8,
         "historical_rear_commit": observed_historical,
         "geometry_oracle_pr": 7,
         "geometry_oracle_commit": GEOMETRY_ORACLE_COMMIT,
         "uc_repository": "mike-axiom-mir/axm-universal-creation",
         "uc_commit": observed_uc,
+        "uc_executable_blobs": uc_blobs,
         "studies": studies,
+        "metadata_successor": metadata_successor,
         "historical_rear": {
             "source_digest": historical["source_digest"],
             "mesh_digest": historical["mesh_digest"],
@@ -223,12 +356,16 @@ def main() -> None:
         "pipeline_decision": {
             "uc_core_change_required": False,
             "nature_domain_semantics_moved_to_uc": False,
+            "nature_flex_semantics_moved_to_uc": False,
             "source_generator_bytes_consumed_directly": True,
             "derived_geometry_repair_reapplied_by_technical_art": False,
-            "reason": "Nature PR #9 now owns the exact cap-index migration. Technical Art consumes those source-generated bytes directly, while current UC continues to provide only domain-neutral topology inspection and deterministic GLB publication.",
+            "automatic_downstream_adoption": False,
+            "reason": "Nature PR #9 owns the current source successor and exact cap-index migration. Technical Art binds the metadata-only source succession explicitly, consumes the current generated bytes directly, and lets fresh UC provide only domain-neutral topology inspection and deterministic GLB publication.",
         },
         "truth_boundary": {
             "historical_lineage_preserved": True,
+            "current_owner_source_identity_bound": True,
+            "metadata_successor_relation_proven_without_interpreting_flex_semantics": True,
             "source_generated_migrated_meshes_exactly_match_prior_geometry_oracle": True,
             "uc_core_modified": False,
             "exact_uc_glb_bytes_published_and_verified": True,
@@ -240,7 +377,8 @@ def main() -> None:
             "runtime_or_gameplay_acceptance_claimed": False,
         },
         "non_claims": [
-            "This receipt rebinds exact source-generated migrated Nature bytes through current UC; it does not merge Nature PR #9 or transfer its lineage into other consumers automatically.",
+            "This receipt rebinds the exact current Nature source successor and source-generated migrated bytes through fresh UC; it does not merge Nature PR #9 or transfer its lineage into other consumers automatically.",
+            "The north-top flex declaration is identity/provenance input only here; Technical Art and UC do not interpret it as deformation semantics or source/biological ROM.",
             "Target-host culling is validated by a separate retained observer in the same workflow, not inferred from topology or GLB verification alone.",
             "No final normals/tangents/UVs, lookdev, wind/deformation, Map acceptance, target-device performance, collision/gameplay, CANON, production-readiness, or Technical-Art mastery claim is made.",
         ],
@@ -253,8 +391,11 @@ def main() -> None:
         "receiving_head": receiving_head,
         "source_migration_commit": observed_migration,
         "uc_commit": observed_uc,
+        "uc_executable_blobs": uc_blobs,
+        "metadata_successor": metadata_successor,
         "studies": {
             key: {
+                "source": value["source_digest"],
                 "mesh": value["source_generated_migrated_mesh_digest"],
                 "conflicts": value["uc_source_topology"]["orientation_conflict_edge_count"],
                 "glb": value["uc_glb"]["glb_sha256"],
