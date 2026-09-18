@@ -1,0 +1,24 @@
+{
+  "schema": "axm.nature-north-low-indexed-surface-rebind-geometry-contract/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "branch_id": "north-low",
+  "reusable_geometry_rule": "ANALYTIC_ENVELOPE_HANDOFF_REQUIRES_EXACT_INDEXED_SURFACE_REPROJECTION_BEFORE_CUT_CONNECTIVITY",
+  "exact_source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+  "analytic_geometry_donor_head": "14d05fdabc943376c231308001d00eb87dc23430",
+  "analytic_geometry_module_blob": "47ba57110f43b0f3f1f29582b46a90505fa4515c",
+  "rigging_owner_head": "efe99261459858636dbe65b16cbe1d5ad2b93a56",
+  "expected_result": "PASS_NORTH_LOW_EXACT_INDEXED_TRUNK_SURFACE_REBIND__HOLD_INDEXED_CUT_CONNECTED_JUNCTION",
+  "expected_trunk_region": "trunk:mid->upper",
+  "expected_loop_vertices": 8,
+  "expected_touched_side_cells": [0, 1, 2, 9],
+  "acceptance_boundary": {
+    "source_or_default_mesh_mutated": false,
+    "indexed_trunk_cut_integrated": false,
+    "connected_branch_trunk_indexed_topology_proven": false,
+    "neutral_indexed_surface_membership_proven": true,
+    "continuous_deformation_clearance_proven": false,
+    "analytic_rigging_pass_transferred": false,
+    "target_host_or_runtime_accepted": false,
+    "game_ready_or_mastery_claimed": false
+  }
+}
