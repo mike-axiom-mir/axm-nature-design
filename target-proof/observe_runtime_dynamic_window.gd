@@ -7,7 +7,8 @@ const RENDER_DIR := "res://renders/runtime-east-rear-target-host"
 const EXPECTED_VERTICES := 390
 const WINDOW_START := 110
 const WINDOW_END := 370
-const EXPECTED_STRIDE := 12
+const EXPECTED_IMPORTED_STRIDE := 8
+const EXPECTED_MUTABLE_STRIDE := 12
 const EXPECTED_OFFSET := 1320
 const EXPECTED_LENGTH := 3120
 const POSITION_GATE_M := 0.000005
@@ -49,11 +50,17 @@ func _packed_vectors(rows: Array) -> PackedVector3Array:
         out[index] = Vector3(float(row[0]), float(row[1]), float(row[2]))
     return out
 
-func _clone_mesh(source: ArrayMesh) -> ArrayMesh:
+func _clone_mutable_mesh(source: ArrayMesh) -> ArrayMesh:
     var result := ArrayMesh.new()
     for surface in range(source.get_surface_count()):
         var arrays := source.surface_get_arrays(surface)
-        result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays)
+        result.add_surface_from_arrays(
+            source.surface_get_primitive_type(surface),
+            arrays,
+            [],
+            {},
+            Mesh.ARRAY_FLAG_USE_DYNAMIC_UPDATE
+        )
         var material := source.surface_get_material(surface)
         if material != null:
             result.surface_set_material(surface, material)
@@ -79,6 +86,17 @@ func _max_component_delta_static(left: PackedVector3Array, right: PackedVector3A
         result = max(result, abs(left[index].x - right[index].x))
         result = max(result, abs(left[index].y - right[index].y))
         result = max(result, abs(left[index].z - right[index].z))
+    return result
+
+func _max_window_packet_delta(full_positions: PackedVector3Array, packet: PackedVector3Array) -> float:
+    if full_positions.size() != EXPECTED_VERTICES or packet.size() != WINDOW_END - WINDOW_START:
+        return INF
+    var result := 0.0
+    for local_index in range(packet.size()):
+        var full_index := WINDOW_START + local_index
+        result = max(result, abs(full_positions[full_index].x - packet[local_index].x))
+        result = max(result, abs(full_positions[full_index].y - packet[local_index].y))
+        result = max(result, abs(full_positions[full_index].z - packet[local_index].z))
     return result
 
 func _max_distance(left: PackedVector3Array, right: PackedVector3Array) -> float:
@@ -172,14 +190,37 @@ func _run() -> void:
         _fail("imported vertex count drift")
         return
 
-    var format := neutral_mesh.surface_get_format(0)
-    var vertex_stride := RenderingServer.mesh_surface_get_format_vertex_stride(format, EXPECTED_VERTICES)
-    var vertex_offset := RenderingServer.mesh_surface_get_format_offset(format, EXPECTED_VERTICES, Mesh.ARRAY_VERTEX)
-    if vertex_stride != EXPECTED_STRIDE:
-        _fail("Godot vertex stride drift: %s" % vertex_stride)
+    var imported_format := neutral_mesh.surface_get_format(0)
+    var imported_stride := RenderingServer.mesh_surface_get_format_vertex_stride(imported_format, EXPECTED_VERTICES)
+    var imported_offset := RenderingServer.mesh_surface_get_format_offset(imported_format, EXPECTED_VERTICES, Mesh.ARRAY_VERTEX)
+    var imported_compressed := (imported_format & Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES) != 0
+    if imported_stride != EXPECTED_IMPORTED_STRIDE:
+        _fail("Godot imported vertex stride drift: %s" % imported_stride)
         return
-    if vertex_offset != 0:
-        _fail("Godot vertex position offset drift: %s" % vertex_offset)
+    if imported_offset != 0:
+        _fail("Godot imported vertex position offset drift: %s" % imported_offset)
+        return
+    if not imported_compressed:
+        _fail("Godot exact GLB receiver unexpectedly lost automatic attribute compression")
+        return
+
+    var mutable_probe := _clone_mutable_mesh(neutral_mesh)
+    var mutable_format := mutable_probe.surface_get_format(0)
+    var mutable_stride := RenderingServer.mesh_surface_get_format_vertex_stride(mutable_format, EXPECTED_VERTICES)
+    var mutable_offset := RenderingServer.mesh_surface_get_format_offset(mutable_format, EXPECTED_VERTICES, Mesh.ARRAY_VERTEX)
+    var mutable_compressed := (mutable_format & Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES) != 0
+    var mutable_dynamic := (mutable_format & Mesh.ARRAY_FLAG_USE_DYNAMIC_UPDATE) != 0
+    if mutable_stride != EXPECTED_MUTABLE_STRIDE:
+        _fail("Godot mutable vertex stride drift: %s" % mutable_stride)
+        return
+    if mutable_offset != 0:
+        _fail("Godot mutable vertex position offset drift: %s" % mutable_offset)
+        return
+    if mutable_compressed:
+        _fail("Runtime mutable receiver unexpectedly retained compressed position storage")
+        return
+    if not mutable_dynamic:
+        _fail("Runtime mutable receiver lost ARRAY_FLAG_USE_DYNAMIC_UPDATE")
         return
 
     var camera := Camera3D.new()
@@ -221,22 +262,33 @@ func _run() -> void:
     var max_control_expected_delta := 0.0
     var max_candidate_expected_delta := 0.0
     var max_static_delta := 0.0
+    var max_owner_window_packet_delta := 0.0
+    var max_imported_static_vs_owner_delta := 0.0
     var max_readback_motion := 0.0
 
     for pose in pose_rows:
         var driver := float(pose.get("shared_driver_deg", 999.0))
-        var control_positions := _packed_vectors(pose.get("control_target_positions_m", []))
+        var owner_control_positions := _packed_vectors(pose.get("control_target_positions_m", []))
         var dynamic_positions := _packed_vectors(pose.get("candidate_dynamic_target_positions_m", []))
-        if control_positions.size() != EXPECTED_VERTICES:
-            _fail("control position count drift at driver %s" % driver)
+        if owner_control_positions.size() != EXPECTED_VERTICES:
+            _fail("owner control position count drift at driver %s" % driver)
             return
         if dynamic_positions.size() != WINDOW_END - WINDOW_START:
             _fail("dynamic position count drift at driver %s" % driver)
             return
 
-        var control_mesh := _clone_mesh(neutral_mesh)
-        var candidate_mesh := _clone_mesh(neutral_mesh)
-        control_mesh.surface_update_vertex_region(0, 0, control_positions.to_byte_array())
+        var owner_window_packet_delta := _max_window_packet_delta(owner_control_positions, dynamic_positions)
+        var imported_static_vs_owner_delta := _max_component_delta_static(neutral_vertices, owner_control_positions)
+        max_owner_window_packet_delta = max(max_owner_window_packet_delta, owner_window_packet_delta)
+        max_imported_static_vs_owner_delta = max(max_imported_static_vs_owner_delta, imported_static_vs_owner_delta)
+
+        var runtime_control_positions := neutral_vertices.duplicate()
+        for local_index in range(dynamic_positions.size()):
+            runtime_control_positions[WINDOW_START + local_index] = dynamic_positions[local_index]
+
+        var control_mesh := _clone_mutable_mesh(neutral_mesh)
+        var candidate_mesh := _clone_mutable_mesh(neutral_mesh)
+        control_mesh.surface_update_vertex_region(0, 0, runtime_control_positions.to_byte_array())
         candidate_mesh.surface_update_vertex_region(0, candidate_offset, dynamic_positions.to_byte_array())
         await process_frame
 
@@ -245,8 +297,8 @@ func _run() -> void:
         var control_after: PackedVector3Array = control_after_arrays[Mesh.ARRAY_VERTEX]
         var candidate_after: PackedVector3Array = candidate_after_arrays[Mesh.ARRAY_VERTEX]
 
-        var control_expected_delta := _max_component_delta(control_after, control_positions)
-        var candidate_expected_delta := _max_component_delta(candidate_after, control_positions)
+        var control_expected_delta := _max_component_delta(control_after, runtime_control_positions)
+        var candidate_expected_delta := _max_component_delta(candidate_after, runtime_control_positions)
         var pair_delta := _max_component_delta(control_after, candidate_after)
         var static_delta := _max_component_delta_static(control_after, candidate_after)
         var readback_motion := _max_distance(candidate_after, neutral_vertices)
@@ -265,8 +317,10 @@ func _run() -> void:
 
         result_rows.append({
             "shared_driver_deg": driver,
-            "control_readback_vs_expected_max_component_delta_m": control_expected_delta,
-            "candidate_readback_vs_expected_max_component_delta_m": candidate_expected_delta,
+            "owner_window_packet_max_component_delta_m": owner_window_packet_delta,
+            "imported_static_vs_owner_max_component_delta_m": imported_static_vs_owner_delta,
+            "control_readback_vs_runtime_expected_max_component_delta_m": control_expected_delta,
+            "candidate_readback_vs_runtime_expected_max_component_delta_m": candidate_expected_delta,
             "control_candidate_readback_max_component_delta_m": pair_delta,
             "static_control_candidate_max_component_delta_m": static_delta,
             "candidate_readback_max_distance_from_neutral_m": readback_motion,
@@ -277,6 +331,7 @@ func _run() -> void:
     var state_name := "PASS_NATURE_EAST_REAR_RUNTIME_WINDOW_GODOT_PARTIAL_VERTEX_UPDATE"
     var passed := (
         candidate_offset == EXPECTED_OFFSET
+        and max_owner_window_packet_delta <= POSITION_GATE_M
         and max_control_expected_delta <= POSITION_GATE_M
         and max_candidate_expected_delta <= POSITION_GATE_M
         and max_control_candidate_delta <= POSITION_GATE_M
@@ -286,25 +341,41 @@ func _run() -> void:
     if not passed:
         state_name = "FAIL_NATURE_EAST_REAR_RUNTIME_WINDOW_GODOT_PARTIAL_VERTEX_UPDATE"
 
+    var imported_position_bytes := EXPECTED_VERTICES * imported_stride
+    var mutable_position_bytes := EXPECTED_VERTICES * mutable_stride
+    var storage_delta_bytes := mutable_position_bytes - imported_position_bytes
     var receipt := {
-        "schema": "axm.nature-runtime-east-rear-godot-partial-window-receipt/v0.1",
+        "schema": "axm.nature-runtime-east-rear-godot-partial-window-receipt/v0.2",
         "state": state_name,
         "godot": Engine.get_version_info(),
         "receiver": {
             "vertex_count": EXPECTED_VERTICES,
             "surface_count": neutral_mesh.get_surface_count(),
-            "vertex_stride_bytes": vertex_stride,
-            "vertex_position_offset_bytes": vertex_offset,
+            "imported_vertex_stride_bytes": imported_stride,
+            "imported_vertex_position_offset_bytes": imported_offset,
+            "imported_positions_compressed": imported_compressed,
+            "imported_position_buffer_bytes": imported_position_bytes,
+            "mutable_vertex_stride_bytes": mutable_stride,
+            "mutable_vertex_position_offset_bytes": mutable_offset,
+            "mutable_positions_compressed": mutable_compressed,
+            "mutable_dynamic_update_flag": mutable_dynamic,
+            "mutable_position_buffer_bytes": mutable_position_bytes,
+            "mutable_vs_imported_position_storage_delta_bytes": storage_delta_bytes,
+            "mutable_vs_imported_position_storage_delta_percent": float(storage_delta_bytes) / float(imported_position_bytes) * 100.0,
             "dynamic_window_vertices": [WINDOW_START, WINDOW_END],
-            "control_full_update_bytes": EXPECTED_VERTICES * EXPECTED_STRIDE,
+            "control_full_update_bytes": EXPECTED_VERTICES * mutable_stride,
             "candidate_update_offset_bytes": candidate_offset,
             "candidate_update_bytes": EXPECTED_LENGTH,
+            "candidate_update_bytes_saved": EXPECTED_VERTICES * mutable_stride - EXPECTED_LENGTH,
+            "candidate_update_percent_saved": float(EXPECTED_VERTICES * mutable_stride - EXPECTED_LENGTH) / float(EXPECTED_VERTICES * mutable_stride) * 100.0,
             "api": "ArrayMesh.surface_update_vertex_region",
         },
         "measurements": {
             "pose_count": pose_rows.size(),
-            "maximum_control_readback_vs_expected_component_delta_m": max_control_expected_delta,
-            "maximum_candidate_readback_vs_expected_component_delta_m": max_candidate_expected_delta,
+            "maximum_owner_window_packet_component_delta_m": max_owner_window_packet_delta,
+            "maximum_imported_static_vs_owner_component_delta_m": max_imported_static_vs_owner_delta,
+            "maximum_control_readback_vs_runtime_expected_component_delta_m": max_control_expected_delta,
+            "maximum_candidate_readback_vs_runtime_expected_component_delta_m": max_candidate_expected_delta,
             "maximum_control_candidate_readback_component_delta_m": max_control_candidate_delta,
             "maximum_static_control_candidate_component_delta_m": max_static_delta,
             "maximum_candidate_readback_distance_from_neutral_m": max_readback_motion,
@@ -315,6 +386,9 @@ func _run() -> void:
             "pixel_comparison_performed_by_followup_workflow_step": true,
             "normal_or_tangent_buffer_updated": false,
             "material_scope": oracle.get("target_material_scope", "UNKNOWN"),
+            "imported_receiver_uses_8_byte_compressed_positions": true,
+            "runtime_mutable_receiver_uses_12_byte_float_positions": true,
+            "runtime_mutable_position_storage_cost_bytes": storage_delta_bytes,
             "art_direction_review_state": "HOLD_ART_QA_FINAL_LOOK_NORMAL_DEFORMATION_AND_TARGET_DEVICE",
         },
         "truth_boundary": {
@@ -322,6 +396,9 @@ func _run() -> void:
             "full_position_control_api_exercised": true,
             "source_or_geometry_reauthored": false,
             "index_buffer_reauthored": false,
+            "godot_import_compression_observed_not_assumed": true,
+            "runtime_mutable_surface_conversion_required_for_float32_update_path": true,
+            "compressed_position_direct_update_proven": false,
             "normal_or_tangent_deformation_correctness_proven": false,
             "physical_wind_or_animation_timing_proven": false,
             "target_device_cpu_gpu_fps_vram_thermal_battery_proven": false,
