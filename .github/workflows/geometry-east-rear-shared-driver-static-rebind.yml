@@ -10,6 +10,12 @@ on:
       - "docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md"
       - ".github/workflows/geometry-east-rear-shared-driver-static-rebind.yml"
       - ".github/workflows/geometry-east-rear-simultaneous-socket-audit.yml"
+      - "src/axm_nature_design/rear_tree_geometry_shared_driver_continuous_clearance.py"
+      - "tests/test_rear_tree_geometry_shared_driver_continuous_clearance.py"
+      - "tools/verify_rear_tree_geometry_shared_driver_continuous_clearance.py"
+      - "contracts/east-rear-shared-driver-continuous-clearance-003.json"
+      - "docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_CONTINUOUS_CLEARANCE_003.md"
+      - ".github/workflows/geometry-east-rear-shared-driver-continuous-clearance.yml"
   workflow_dispatch:
 
 permissions:
@@ -28,23 +34,36 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
-      - name: Preserve prior Geometry head and bound new delta
+      - name: Preserve prior Geometry head and bind current Rigging base
         shell: bash
         run: |
           set -euo pipefail
           prior=76c89348d63fd3523f81287767fc37527d6a8fcb
+          current_rigging=b4b480b415047fea90b4740f7702ced0dba9142d
           git merge-base --is-ancestor "$prior" HEAD
-          cat > /tmp/expected-new-files <<'EOF'
+          git merge-base --is-ancestor "$current_rigging" HEAD
+          cat > /tmp/expected-geometry-files <<'EOF'
+          .github/workflows/geometry-east-rear-shared-driver-continuous-clearance.yml
           .github/workflows/geometry-east-rear-shared-driver-static-rebind.yml
           .github/workflows/geometry-east-rear-simultaneous-socket-audit.yml
+          contracts/east-rear-shared-driver-continuous-clearance-003.json
           contracts/east-rear-shared-driver-static-geometry-rebind-002.json
+          contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json
+          docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_CONTINUOUS_CLEARANCE_003.md
           docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md
+          docs/GEOMETRY_EAST_REAR_SIMULTANEOUS_PRIMARY_BRANCH_AUDIT_001.md
+          src/axm_nature_design/rear_tree_geometry_shared_driver_continuous_clearance.py
           src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py
+          src/axm_nature_design/rear_tree_geometry_simultaneous_socket_audit.py
+          tests/test_rear_tree_geometry_shared_driver_continuous_clearance.py
           tests/test_rear_tree_geometry_shared_driver_static_rebind.py
+          tests/test_rear_tree_geometry_simultaneous_socket_audit.py
+          tools/verify_rear_tree_geometry_shared_driver_continuous_clearance.py
           tools/verify_rear_tree_geometry_shared_driver_static_rebind.py
+          tools/verify_rear_tree_geometry_simultaneous_socket_audit.py
           EOF
-          git diff --name-only "$prior"...HEAD | sort > /tmp/actual-new-files
-          diff -u /tmp/expected-new-files /tmp/actual-new-files
+          git diff --name-only "$current_rigging"...HEAD | sort > /tmp/actual-geometry-files
+          diff -u /tmp/expected-geometry-files /tmp/actual-geometry-files
           test "$(git rev-parse "$prior":src/axm_nature_design/rear_tree_geometry_simultaneous_socket_audit.py)" = \
                "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_simultaneous_socket_audit.py)"
           test "$(git rev-parse "$prior":tools/verify_rear_tree_geometry_simultaneous_socket_audit.py)" = \
