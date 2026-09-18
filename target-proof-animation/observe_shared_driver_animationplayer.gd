@@ -286,7 +286,7 @@ func _run() -> void:
     var natural_observed: Array[int] = []
     var natural_unique := {}
     var natural_wraps := 0
-    var previous_index := bridge.sample_index
+    var previous_index: int = int(bridge.sample_index)
     var change_intervals_ms: Array[float] = []
     var last_change_usec := Time.get_ticks_usec()
     var natural_start_usec := last_change_usec
