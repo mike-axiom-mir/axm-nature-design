@@ -122,8 +122,17 @@ func _run() -> void:
     if int(oracle.get("vertex_count", -1)) != EXPECTED_VERTICES:
         _fail("oracle vertex count drift")
         return
-    if oracle.get("dynamic_window_vertices", []) != [WINDOW_START, WINDOW_END]:
-        _fail("oracle dynamic window drift")
+    var oracle_window = oracle.get("dynamic_window_vertices", [])
+    if typeof(oracle_window) != TYPE_ARRAY or oracle_window.size() != 2:
+        _fail("oracle dynamic window shape drift")
+        return
+    var start_kind := typeof(oracle_window[0])
+    var end_kind := typeof(oracle_window[1])
+    if (start_kind != TYPE_INT and start_kind != TYPE_FLOAT) or (end_kind != TYPE_INT and end_kind != TYPE_FLOAT):
+        _fail("oracle dynamic window type drift")
+        return
+    if float(oracle_window[0]) != float(WINDOW_START) or float(oracle_window[1]) != float(WINDOW_END):
+        _fail("oracle dynamic window value drift")
         return
     if int(oracle.get("dynamic_byte_offset", -1)) != EXPECTED_OFFSET:
         _fail("oracle byte offset drift")
