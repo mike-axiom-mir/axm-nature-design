@@ -79,7 +79,10 @@ jobs:
             --output evidence/east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json \
             | tee evidence/verifier.log
 
-          cp contracts/east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json evidence/
+          # Keep the generated evidence and the static contract under distinct names.
+          # A same-basename copy would silently overwrite the generated receipt.
+          cp contracts/east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json \
+            evidence/contract-east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json
           cp docs/RIGGING_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_CONTINUOUS_SPAN_010.md evidence/
           cp src/axm_nature_design/rear_tree_rigging_north_low_bridge_continuous_span.py evidence/
           cp tests/test_rear_tree_rigging_north_low_bridge_continuous_span.py evidence/
