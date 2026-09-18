@@ -1,8 +1,8 @@
 # Organic east/rear downstream deformation handoff 002
 
-Status: **PASS_FIVE_ROOT_DOWNSTREAM_STRUCTURAL_HANDOFF__ORGANIC_SOURCE_FROZEN__SOURCE_FLEX_SEMANTICS_REMAIN_UNTESTED**
+Status: **PASS_FIVE_ROOT_DOWNSTREAM_STRUCTURAL_HANDOFF__FINITE_SIMULTANEOUS_EXTREME_CORNERS_CHILD_CHILD_CLEAR__ORGANIC_SOURCE_FROZEN__SOURCE_FLEX_SEMANTICS_REMAIN_UNTESTED**
 
-This packet is an Organic Form ownership/handoff receipt for the exact east/rear Nature source. It records fresh downstream evidence without rewriting Organic source form, source flex semantics, Geometry, Rigging, VFX, Animation, Runtime, Art/QA, or CANON state.
+This packet is an Organic Form ownership/handoff receipt for the exact east/rear Nature source. It records downstream deformation-readiness evidence without rewriting Organic source form, source flex semantics, Geometry, Rigging, VFX, Animation, Runtime, Art/QA, or CANON state.
 
 ## Exact Organic owner identity
 
@@ -26,17 +26,17 @@ The Organic source still declares exactly five primary branch-root flex zones, a
 
 The neutral Organic observer remains `PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED`. No branch point, trunk point, radius, leaf placement, silhouette, crown mass, flex radius, source position, or source-generated mesh is changed by this handoff packet.
 
-## Fresh Rigging return consumed
+## Rigging return consumed — all five exact roots independently probed
 
 Nature Rigging PR #14 exact head:
 
 `898529f602893c8f6be179bd3e9b6821fc099904`
 
-Scoped Rigging result:
+Scoped result:
 
 `PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_RIGID_CHILD_FAMILY_GEOMETRY_RECEIVER_DIAGNOSTIC_MINUS5_TO_PLUS5`
 
-All five exact Organic-declared primary roots are now independently tested on the exact Geometry-migrated receiver under the Rigging-owned diagnostic interval `[-5,+5]°`, with representative poses `-5 / -2.5 / 0 / +2.5 / +5°`.
+All five exact Organic-declared primary roots are independently tested on the exact Geometry-migrated receiver under the Rigging-owned diagnostic interval `[-5,+5]°`, with representative poses `-5 / -2.5 / 0 / +2.5 / +5°`.
 
 For each root independently:
 
@@ -58,9 +58,40 @@ Per-root retained Rigging measurements:
 
 Rigging workflow `35307194044` succeeded. Retained artifact `10532211321` is `18,374 B`, SHA-256 `dc931439ced38350f646353c8904c8448b871696cfd8ac326d1b3beef737349e`, independently rehashed by the Rigging lane.
 
-This closes the previous sibling-root structural-diagnostic gap. It does **not** rewrite the Organic source flex declarations into source-authored ROM or deformation truth.
+This closes the previous sibling-root independent structural-diagnostic gap. It does **not** rewrite the Organic source flex declarations into source-authored ROM or deformation truth.
 
-## Fresh VFX compatibility return consumed
+## Fresh Geometry simultaneous-composition return consumed
+
+Nature Geometry PR #18 exact tested head:
+
+`76c89348d63fd3523f81287767fc37527d6a8fcb`
+
+It stacks exactly on Rigging PR #14 head `898529f602893c8f6be179bd3e9b6821fc099904` and preserves the migrated receiver `aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31` at `390` vertices / `570` triangles.
+
+Scoped result: finite structural evidence for neutral plus all `32` simultaneous corner combinations formed by assigning every primary root either `-5°` or `+5°` inside Rigging's existing diagnostic interval.
+
+Exact retained structural facts:
+
+- five child-owned triangle groups of `72` triangles each;
+- `210` globally fixed triangles;
+- `260` unique selected child vertices and `130` globally fixed vertices;
+- `0` partial-selection triangles;
+- `0` cross-owner triangles;
+- canonical-vs-reverse five-child composition delta: `0.0 m` across all `33` witnesses;
+- globally fixed drift: `0.0 m`;
+- pivot drift: `0.0 m`.
+
+Geometry consumed merged UC read-only observer `mike-axiom-mir/axm-universal-creation@ce70d717e381df6ca8a27c0c9fabe9d48bb1b23c`, `src/axm_uc/mesh_self_intersection.py`, blob `2de80eada941de54a067b551e51b75a9bde0500b`.
+
+The first whole-receiver diagnostic produced roughly `1705–1707` nonadjacent-triangle intersections per witness and was **not** promoted to a simultaneous-motion verdict because the Nature mesh contains disconnected authored components that already meet spatially. Geometry therefore used attribution-safe child-pair subtraction: for each of the `33` witnesses and each of the `10` unordered primary-branch pairs, the exact cross-child count is `combined - left_solo - right_solo`.
+
+That yields `330` branch-pair/state observations. **All `330` report zero cross-branch nonadjacent-triangle intersections.** A full-receiver observer budget control at `162,164` checks versus `162,165` required returns HOLD before scanning, with no partial verdict.
+
+Geometry workflow `35310347901` succeeded on Python `3.11` and `3.13`. Retained artifact `10533466345` is `13,329 B`, SHA-256 `deea2024e5dfab779a85c4b6be248c058991f9bdf6152a4f63ecd8a4e83431f5`, independently rehashed by the Geometry lane.
+
+Organic consumes this as a **finite receiver-side deformation-readiness improvement only**. Zero child-child nonadjacent intersections at neutral plus all 32 extreme corners does **not** prove every interior angle combination clear, child-versus-fixed-receiver clearance, adjacent fold/contact freedom, physical collision freedom, blended attachment, biological ROM, or motion acceptance. It returns no source-localized Organic defect and therefore does not justify reshaping the tree.
+
+## VFX compatibility return consumed — local polarity is per socket, not global
 
 Nature VFX PR #17 exact head:
 
@@ -96,16 +127,16 @@ This VFX map is downstream coordinate/visual-direction compatibility only. Organ
 
 Fresh downstream evidence returns **no defect localized to Organic-owned mass, branch placement, proportion, silhouette, source positions/radii, neutral support intent, or source-authored flex metadata**.
 
-Therefore the highest-leverage Organic action is to freeze the current source and upgrade the handoff boundary:
+Therefore the highest-leverage Organic action remains to freeze the current source while strengthening the exact deformation-readiness handoff:
 
-`FIVE_ROOT_STRUCTURAL_DIAGNOSTIC_COMPLETE__PER_SOCKET_VISUAL_DIRECTION_POLARITY_EXPLICIT__ORGANIC_SOURCE_FORM_FROZEN__NO_AUTOMATIC_SOURCE_COMPENSATION`
+`FIVE_ROOT_INDEPENDENT_STRUCTURAL_DIAGNOSTICS_COMPLETE__FINITE_33_STATE_SIMULTANEOUS_COMPOSITION_ORDER_STABLE__330_CHILD_PAIR_STATE_NONADJACENT_INTERSECTION_OBSERVATIONS_CLEAR__PER_SOCKET_VISUAL_DIRECTION_POLARITY_EXPLICIT__ORGANIC_SOURCE_FORM_FROZEN__NO_AUTOMATIC_SOURCE_COMPENSATION`
 
-Reopen Organic source-form work only if a later exact receiver experiment survives topology, transport, representation, coordinate-sign, Animation/VFX, and presentation explanations and returns a defect specifically localized to an Organic-owned property.
+Reopen Organic source-form work only if a later exact receiver experiment survives topology, transport, representation, coordinate-sign, finite simultaneous-geometry, Animation/VFX, and presentation explanations and returns a defect specifically localized to an Organic-owned property.
 
 ## Exact ownership boundaries
 
 - **Organic Form:** owns source mass, proportion, silhouette, branch/leaf placement, neutral support intent, source positions/radii, and source-authored flex metadata.
-- **Geometry:** owns migrated topology/receiver identity; its PASS does not become Organic source authority.
+- **Geometry:** owns migrated topology/receiver identity and the finite simultaneous-composition/intersection audit; its PASS does not become Organic source authority or continuous collision truth.
 - **Rigging:** owns the five independent rigid-child diagnostic probes; its `[-5,+5]°` interval is not source or biological ROM.
 - **VFX:** owns the bounded per-socket visual-direction sign compatibility map; it does not define Organic source semantics or motion.
 - **Animation:** retains timing, interpolation, cadence, simultaneous motion, and playback authority; no five-root Animation PASS is claimed here.
@@ -121,15 +152,15 @@ This handoff does **not** establish:
 - branch strength, stress, tissue mechanics, fatigue, failure, or physically valid flex radii;
 - real plant range of motion;
 - production skinning/weights or blended branch-trunk attachment;
-- simultaneous five-branch deformation;
-- collision, clearance, or self-intersection freedom;
+- every interior simultaneous angle combination;
+- child-versus-fixed-receiver clearance;
+- adjacent fold/contact freedom or physical collision freedom;
 - physical wind, drag, turbulence, force, timing, cadence, or amplitude;
-- Animation acceptance;
-- VFX motion adoption;
+- Animation acceptance or VFX motion adoption;
 - target-host/device Runtime readiness;
 - final Art Direction or independent Visual QA acceptance;
 - CANON;
 - production/game readiness;
-- Organic Form, Rigging, VFX, or Nature mastery.
+- Organic Form, Geometry, Rigging, VFX, or Nature mastery.
 
 The four AXM roots remain the merge gate: **Truth, Agency / non-domination, Continuity, Wisdom before speed**.
