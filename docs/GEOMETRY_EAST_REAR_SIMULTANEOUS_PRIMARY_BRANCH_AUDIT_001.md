@@ -24,17 +24,26 @@ No inherited source/Rigging file is edited by this Geometry branch.
 
 ## Bounded witness family
 
-The Geometry evaluator re-runs the exact five-socket Rigging prerequisite, rebuilds the exact 390-vertex / 570-triangle migrated receiver, and then evaluates:
-
-- one exact neutral state;
-- all 32 simultaneous corner combinations formed by assigning each of the five branches either `-5°` or `+5°` from the existing Rigging diagnostic interval.
+The Geometry evaluator re-runs the exact five-socket Rigging prerequisite, rebuilds the exact 390-vertex / 570-triangle migrated receiver, and then evaluates one exact neutral state plus all 32 simultaneous corner combinations formed by assigning each of the five branches either `-5°` or `+5°` from the existing Rigging diagnostic interval.
 
 Every child transform is evaluated from the same neutral receiver. Canonical branch order and reverse branch order are compared directly. The evaluator also audits triangle ownership against the five selected vertex sets and records the globally fixed vertex set.
 
-The dedicated verifier passes each exact witness mesh to UC's merged read-only nonadjacent-triangle self-intersection observer under an explicit all-pairs work budget. A deliberate one-pair-short budget must return a HOLD before scanning and must not expose a partial verdict.
+## Verified structural result
+
+The exact receiver partitions cleanly into five child-owned triangle groups of 72 triangles each plus 210 globally fixed triangles. The five child selections contain 260 unique selected vertices total, leaving 130 globally fixed vertices. There are zero partial-selection triangles and zero triangles crossing two child owners. Across all 33 witnesses, canonical-vs-reverse composition delta is exactly `0.0 m`, globally fixed drift is `0.0 m`, and pivot drift is `0.0 m`.
+
+That proves the five exact rigid-child transforms compose deterministically on this receiver without index-ownership ambiguity. It does not by itself prove geometric clearance.
+
+## Self-intersection observer scope correction
+
+An initial whole-receiver observer attempt produced roughly 1705–1707 nonadjacent-triangle intersections per witness. That result was not promoted into a simultaneous-motion verdict: the Nature receiver intentionally contains many disconnected authored components that meet spatially, so a whole-body count mixes pre-existing attachment contacts with any possible new child-child contact. The same early retained run also exposed an evidence-packaging bug where the copied contract reused the receipt filename; that run was kept as failed evidence and the packaging path was corrected rather than relabelled as PASS.
+
+The accepted method therefore stays narrower and attribution-safe. For each witness and each of the 10 unordered branch pairs, UC observes the 72-triangle left child, the 72-triangle right child, and their 144-triangle combination. The exact cross-child count is `combined - left_solo - right_solo`. This yields 330 branch-pair/state observations across the 33-witness family without copying UC's triangle-intersection algorithm into Nature.
+
+The accepted evidence reports **zero cross-branch nonadjacent-triangle intersections in all 330 pair/state observations**. The observer work identities are 2,556 unordered checks per 72-triangle solo child and 10,296 per 144-triangle two-child combination. A separate full-receiver one-pair-short budget control (`162,164` requested vs `162,165` required) returns HOLD before scanning and exposes no partial intersection verdict.
 
 ## Truth boundary
 
-This is a finite structural witness family, not a continuous five-dimensional deformation proof. Even a zero-intersection result across all 32 extreme corners would not prove every interior angle combination clear. UC's observer excludes topological-neighbor pairs and does not establish adjacent foldover/contact, physical collision, stress, branch attachment strength, biological motion, Animation/VFX timing, target-host playback, target-device fitness, final visual quality, CANON, production readiness, game readiness or Geometry mastery.
+This is a finite structural witness family, not a continuous five-dimensional deformation proof. Zero child-child intersections at neutral plus all 32 extreme corners does not prove every interior angle combination clear. This lane also does not establish child-versus-fixed-receiver clearance, adjacent foldover/contact, physical collision, stress, branch attachment strength, biological motion, Animation/VFX timing, target-host playback, target-device fitness, final visual quality, CANON, production readiness, game readiness or Geometry mastery.
 
 Organic keeps source/form authority. Rigging keeps pivots, axes and diagnostic articulation authority. Geometry owns only this bounded composition/topology evidence. UC remains a neutral read-only observer and gains no Nature-specific policy.
