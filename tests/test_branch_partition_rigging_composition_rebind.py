@@ -50,6 +50,7 @@ class BranchPartitionRiggingCompositionRebindTests(unittest.TestCase):
             "result": "PASS_RIGGING",
             "lineage": {"procedural_rebind_contract_blob": "a" * 40},
             "rigging_family": {
+                "branch_ids": self.branches,
                 "probes": [
                     {
                         "branch_id": "alpha",
@@ -67,7 +68,7 @@ class BranchPartitionRiggingCompositionRebindTests(unittest.TestCase):
                         "selected_triangles": 2,
                         "fixed_vertices": 3,
                     },
-                ]
+                ],
             },
         }
         self.polarity = {
@@ -164,6 +165,13 @@ class BranchPartitionRiggingCompositionRebindTests(unittest.TestCase):
         self.assertTrue(result["all_exact_selection_identities_match"])
         self.assertEqual(2, len({row["partition_digest"] for row in result["comparisons"]}))
         self.assertTrue(result["rigging_composition_observed_not_adopted"])
+
+    def test_procedural_partition_list_order_is_non_semantic(self):
+        family = copy.deepcopy(self.family)
+        family["partitions"] = list(reversed(family["partitions"]))
+        result = self.assemble(family=family)
+        self.assertEqual(self.branches, [row["branch_id"] for row in result["comparisons"]])
+        self.assertTrue(result["all_exact_selection_identities_match"])
 
     def test_vertex_selection_drift_fails_closed(self):
         rigging = copy.deepcopy(self.rigging)
