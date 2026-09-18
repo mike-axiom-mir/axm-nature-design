@@ -1,0 +1,269 @@
+name: Runtime east rear compressed shader driver
+
+on:
+  push:
+    branches: [studio/runtime-east-rear-dynamic-prefix-001]
+    paths:
+      - "tools/build_rear_tree_runtime_shader_driver.py"
+      - "target-proof/observe_runtime_shader_driver.gd"
+      - ".github/workflows/runtime-east-rear-shader-driver.yml"
+      - "docs/RUNTIME_EAST_REAR_SHADER_DRIVER_001.md"
+      - "contracts/east-rear-runtime-shader-driver-001.json"
+  pull_request:
+    paths:
+      - "tools/build_rear_tree_runtime_shader_driver.py"
+      - "target-proof/observe_runtime_shader_driver.gd"
+      - ".github/workflows/runtime-east-rear-shader-driver.yml"
+      - "docs/RUNTIME_EAST_REAR_SHADER_DRIVER_001.md"
+      - "contracts/east-rear-runtime-shader-driver-001.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-shader-driver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Runtime candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Runtime candidate head
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD | tee /tmp/exact-runtime-candidate-head.txt
+
+      - name: Checkout exact pass-52 Runtime owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          path: .runtime-owner
+
+      - name: Checkout exact Technical Art receiver donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: b96f794325f825188b6fd9a920e3fb575e43e467
+          path: .technical-art
+
+      - name: Checkout exact Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4
+          path: .uc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build exact receiver, owner oracle, and shader-driver oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-shader-driver-001
+          rm -rf "$root"
+          mkdir -p "$root"
+          PYTHONPATH=.technical-art/src:.uc/src \
+            python tools/build_rear_tree_runtime_target_host_window.py \
+              --runtime-root .runtime-owner \
+              --technical-art-root .technical-art \
+              --uc-root .uc \
+              --out "$root" > "$root/receiver-build.log" 2>&1
+          PYTHONPATH=.runtime-owner/src \
+            python tools/build_rear_tree_runtime_shader_driver.py \
+              --runtime-root .runtime-owner \
+              --out "$root" 2>&1 | tee "$root/shader-driver-build.log"
+          cp /tmp/exact-runtime-candidate-head.txt "$root/exact-runtime-candidate-head.txt"
+
+      - name: Validate bounded representation budget and fail closed on group-range drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-shader-driver-001
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          root=Path('evidence/east-rear-runtime-shader-driver-001')
+          r=json.loads((root/'runtime-shader-driver-oracle.json').read_text())
+          assert r['result']=='PASS_VERTEX_ID_GROUPS_TILE_EXACT_DYNAMIC_WINDOW',r
+          assert r['vertex_count']==390,r
+          assert r['moving_window']==[110,370],r
+          assert r['moving_vertices']==260,r
+          groups=r['groups']
+          assert len(groups)==5,groups
+          assert [g['vertex_count'] for g in groups]==[52]*5,groups
+          assert groups[0]['start_vertex']==110 and groups[-1]['end_vertex_exclusive']==370,groups
+          for left,right in zip(groups,groups[1:]):
+              assert left['end_vertex_exclusive']==right['start_vertex'],groups
+          b=r['representation_budget']
+          assert b['pass53_partial_float32_position_packet_bytes']==3120,b
+          assert b['pass53_mutable_float32_position_storage_bytes']==4680,b
+          assert b['godot_imported_compressed_position_storage_bytes']==3120,b
+          assert b['shader_semantic_driver_payload_bytes']==4,b
+          assert b['semantic_payload_bytes_saved_vs_pass53_partial']==3116,b
+          assert math.isclose(b['semantic_payload_reduction_percent_vs_pass53_partial'],99.87179487179488,abs_tol=1e-9),b
+          assert b['compressed_position_storage_bytes_saved_vs_pass53_mutable']==1560,b
+          assert math.isclose(b['compressed_position_storage_reduction_percent_vs_pass53_mutable'],100.0/3.0,abs_tol=1e-9),b
+          PY
+          if PYTHONPATH=.runtime-owner/src \
+            python tools/build_rear_tree_runtime_shader_driver.py \
+              --runtime-root .runtime-owner \
+              --out /tmp/runtime-shader-negative \
+              --mutate-first-range-start 111 > "$root/group-range-negative.log" 2>&1; then
+            echo "mutated VERTEX_ID group range unexpectedly passed" >&2
+            exit 1
+          fi
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display and pixel comparator
+        run: |
+          set -euo pipefail
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+          python -m pip install --disable-pip-version-check --quiet Pillow
+
+      - name: Exercise compressed shader-driver candidate in real Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-shader-driver-001
+          rm -rf target-proof/generated target-proof/renders
+          mkdir -p target-proof/generated
+          cp "$root/nature-east-rear-dynamic-window.glb" target-proof/generated/
+          cp "$root/nature-east-rear-dynamic-window-target-oracle.json" target-proof/generated/
+          cp "$root/runtime-shader-driver-oracle.json" target-proof/generated/
+          cp "$root/runtime-shader-driver.gdshader" target-proof/generated/
+          rm -f target-proof/runtime-east-rear-shader-driver-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+              --display-driver x11 --rendering-method gl_compatibility \
+              --path target-proof --script observe_runtime_shader_driver.gd \
+            2>&1 | tee "$root/godot-shader-driver.log"
+          cp target-proof/runtime-east-rear-shader-driver-receipt.json "$root/"
+          cp -R target-proof/renders/runtime-east-rear-shader-driver "$root/renders"
+
+      - name: Validate measured storage and control path
+        run: |
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          root=Path('evidence/east-rear-runtime-shader-driver-001')
+          r=json.loads((root/'runtime-east-rear-shader-driver-receipt.json').read_text())
+          assert r['state']=='PASS_NATURE_EAST_REAR_RUNTIME_VERTEX_ID_SHADER_DRIVER',r
+          x=r['receiver']
+          assert x['vertex_count']==390 and x['surface_count']==1,x
+          assert x['candidate_imported_vertex_stride_bytes']==8,x
+          assert x['candidate_imported_positions_compressed'] is True,x
+          assert x['candidate_position_storage_bytes']==3120,x
+          assert x['pass53_mutable_position_storage_bytes']==4680,x
+          assert x['position_storage_bytes_saved_vs_pass53_mutable']==1560,x
+          assert math.isclose(x['position_storage_reduction_percent_vs_pass53_mutable'],100.0/3.0,abs_tol=1e-9),x
+          assert x['pass53_partial_float32_position_packet_bytes']==3120,x
+          assert x['shader_semantic_driver_payload_bytes']==4,x
+          assert x['semantic_payload_bytes_saved_vs_pass53_partial']==3116,x
+          assert x['candidate_geometry_reindexed'] is False,x
+          assert x['candidate_surface_count_changed'] is False,x
+          assert x['candidate_cpu_position_buffer_mutated_per_pose'] is False,x
+          m=r['measurements']
+          assert m['pose_count']==5,m
+          assert m['maximum_control_mutable_readback_vs_cpu_analytic_component_delta_m'] <= 5e-6,m
+          assert m['maximum_cpu_analytic_vs_exact_owner_component_delta_m'] <= 0.00008,m
+          assert r['truth_boundary']['shader_semantic_driver_payload_is_not_measured_gpu_command_transport'] is True,r
+          assert r['truth_boundary']['candidate_gpu_vertex_positions_read_back_directly'] is False,r
+          assert r['truth_boundary']['target_device_cpu_gpu_fps_vram_thermal_battery_proven'] is False,r
+          PY
+
+      - name: Compare five fixed-view CPU-control vs shader-driver pairs
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image, ImageChops
+          root=Path('evidence/east-rear-runtime-shader-driver-001')
+          rr=root/'renders'
+          tokens=['m5p0','m2p5','0p0','2p5','5p0']
+          rows=[]; total_pixels=0; total_changed=0; total_gt1=0; maximum=0
+          for token in tokens:
+              a=Image.open(rr/f'control_{token}.png').convert('RGBA')
+              b=Image.open(rr/f'candidate_{token}.png').convert('RGBA')
+              assert a.size==b.size
+              left=a.tobytes(); right=b.tobytes()
+              changed=0; gt1=0; frame_max=0
+              pixels=len(left)//4
+              for i in range(0,len(left),4):
+                  delta=max(abs(left[i+j]-right[i+j]) for j in range(4))
+                  changed += int(delta>0); gt1 += int(delta>1); frame_max=max(frame_max,delta)
+              rows.append({'token':token,'pixels':pixels,'changed_pixels':changed,'pixels_gt_1_lsb':gt1,'maximum_channel_delta_lsb':frame_max})
+              total_pixels += pixels; total_changed += changed; total_gt1 += gt1; maximum=max(maximum,frame_max)
+          neutral=Image.open(rr/'candidate_0p0.png').convert('RGBA')
+          moved=Image.open(rr/'candidate_5p0.png').convert('RGBA')
+          witness=sum(1 for px in ImageChops.difference(neutral,moved).getdata() if max(px)>1)
+          fraction_gt1=total_gt1/total_pixels if total_pixels else 1.0
+          assert rows[2]['pixels_gt_1_lsb']==0,rows
+          assert fraction_gt1 <= 0.0025,(fraction_gt1,rows)
+          assert witness>50,witness
+          payload={
+              'schema':'axm.nature-runtime-shader-driver-shaded-a-b/v0.1',
+              'pair_count':len(rows),'pairs':rows,
+              'total_pixels':total_pixels,'total_changed_pixels':total_changed,
+              'total_pixels_gt_1_lsb':total_gt1,'fraction_pixels_gt_1_lsb':fraction_gt1,
+              'maximum_channel_delta_lsb':maximum,
+              'observer_discriminating_candidate_0_vs_plus5_pixels_gt_1_lsb':witness,
+              'result':'PASS_BOUNDED_CPU_CONTROL_VS_VERTEX_ID_SHADER_DRIVER_FIXED_VIEW',
+              'acceptance_gate':{'max_fraction_pixels_gt_1_lsb':0.0025,'neutral_pair_pixels_gt_1_lsb':0,'observer_motion_pixels_gt_1_lsb_minimum':50},
+              'truth_boundary':{
+                  'proof_material_only':True,
+                  'candidate_gpu_vertex_positions_read_back_directly':False,
+                  'normal_or_tangent_deformation_correctness_proven':False,
+                  'art_direction_or_visual_qa_acceptance_proven':False,
+                  'target_device_performance_proven':False,
+              },
+          }
+          (root/'visual-comparison.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(payload,indent=2,sort_keys=True))
+          PY
+
+      - name: Retain exact provenance and implementation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-shader-driver-001
+          mkdir -p "$root"
+          git rev-parse HEAD > "$root/exact-runtime-candidate-head.txt"
+          git -C .runtime-owner rev-parse HEAD > "$root/exact-runtime-owner-head.txt"
+          git -C .technical-art rev-parse HEAD > "$root/exact-technical-art-donor-head.txt"
+          git -C .uc rev-parse HEAD > "$root/exact-uc-head.txt"
+          cp tools/build_rear_tree_runtime_shader_driver.py "$root/" || true
+          cp target-proof/observe_runtime_shader_driver.gd "$root/" || true
+          cp .github/workflows/runtime-east-rear-shader-driver.yml "$root/" || true
+
+      - name: Upload retained shader-driver evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-runtime-shader-driver-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/east-rear-runtime-shader-driver-001
+          if-no-files-found: error
