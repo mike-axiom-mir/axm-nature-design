@@ -7,9 +7,10 @@ const OUTPUT := "res://nature-east-rear-dynamic-window-godot-target-receipt.json
 # This is only a target-import observation gate. The exact UC GLB stores FLOAT
 # positions; Godot's runtime import may quantize/pack its receiver arrays. We do
 # not promote this tolerance into source/Geometry/UC authority. The operational
-# proof below is stricter: one target-host dynamic ArrayMesh receiver is reused
-# for full-position and [110,370) partial updates, and the retained renders must
-# be byte-identical for every pose.
+# proof therefore compares two updates against the same imported target-host
+# baseline: a full-position packet with the exact dynamic window overlaid, and
+# the [110,370) partial packet itself. Their retained renders must be
+# byte-identical for every pose.
 const IMPORT_OBSERVATION_TOL_M := 0.0001
 const EXPECTED_VERTICES := 390
 const EXPECTED_WINDOW_START := 110
@@ -18,7 +19,7 @@ const EXPECTED_WINDOW_END := 370
 var receipt := {
     "schema": "axm.nature-east-rear-dynamic-window-godot-target/v0.1",
     "state": "NOT_RUN",
-    "renderer_boundary": "Godot 4.7.2 GL Compatibility; exact current-UC GLB import, then one target-host ArrayMesh dynamic receiver rebuilt from imported arrays and exercised with full versus partial position-buffer updates."
+    "renderer_boundary": "Godot 4.7.2 GL Compatibility; exact current-UC GLB import, then one target-host ArrayMesh dynamic receiver rebuilt from imported arrays and exercised with host-normalized full versus partial position-buffer updates."
 }
 var camera := Camera3D.new()
 var environment := Environment.new()
@@ -285,13 +286,25 @@ func _run() -> void:
     var discriminating_pose_count := 0
     for pose in oracle.get("poses", []):
         var driver := float(pose.get("shared_driver_deg", 999.0))
-        var full_positions := packed_positions(pose.get("control_target_positions_m"))
+        var oracle_full_positions := packed_positions(pose.get("control_target_positions_m"))
         var dynamic_positions := packed_positions(pose.get("candidate_dynamic_target_positions_m"))
-        if full_positions.size() != EXPECTED_VERTICES or dynamic_positions.size() != EXPECTED_WINDOW_END - EXPECTED_WINDOW_START:
+        if oracle_full_positions.size() != EXPECTED_VERTICES or dynamic_positions.size() != EXPECTED_WINDOW_END - EXPECTED_WINDOW_START:
             fail("target pose packet count drift")
             return
 
-        var full_bytes := full_positions.to_byte_array()
+        # Full-control and partial-control must start from the same actual target
+        # baseline. Godot import is a bounded observation of the UC FLOAT data,
+        # not exact source numeric identity, so source-derived values outside the
+        # dynamic window are not written back into the full control.
+        var target_control_positions := neutral_vertices.duplicate()
+        for local_index in range(dynamic_positions.size()):
+            target_control_positions[EXPECTED_WINDOW_START + local_index] = dynamic_positions[local_index]
+        var target_control_vs_oracle_stats := position_delta_stats(target_control_positions, pose.get("control_target_positions_m"))
+        if float(target_control_vs_oracle_stats.get("maximum_distance_m", INF)) > IMPORT_OBSERVATION_TOL_M:
+            fail("host-normalized full control exceeds bounded oracle observation envelope at driver " + str(driver) + ": " + str(target_control_vs_oracle_stats))
+            return
+
+        var full_bytes := target_control_positions.to_byte_array()
         var dynamic_bytes := dynamic_positions.to_byte_array()
         if full_bytes.size() != full_length or dynamic_bytes.size() != dynamic_length:
             fail("Godot PackedVector3Array byte serialization drift")
@@ -306,7 +319,7 @@ func _run() -> void:
 
         var pair := image_delta(control_image, candidate_image)
         if not bool(pair.get("byte_identical", false)):
-            fail("partial target update diverged from full control at driver " + str(driver) + ": " + str(pair))
+            fail("partial target update diverged from host-normalized full control at driver " + str(driver) + ": " + str(pair))
             return
 
         var neutral_delta := image_delta(neutral_image, candidate_image)
@@ -331,6 +344,7 @@ func _run() -> void:
             "full_update_bytes": full_bytes.size(),
             "partial_update_offset_bytes": dynamic_offset,
             "partial_update_bytes": dynamic_bytes.size(),
+            "target_control_vs_oracle_observation": target_control_vs_oracle_stats,
             "control_candidate_render_delta": pair,
             "candidate_vs_neutral_render_delta": neutral_delta
         })
@@ -354,6 +368,7 @@ func _run() -> void:
     receipt["target_update_api"] = "ArrayMesh.surface_update_vertex_region"
     receipt["dynamic_update_flag"] = "Mesh.ARRAY_FLAG_USE_DYNAMIC_UPDATE"
     receipt["target_receiver_resource_reused_between_full_and_partial_updates"] = true
+    receipt["full_control_baseline"] = "Godot-imported neutral target positions with only the exact Runtime dynamic window overlaid"
     receipt["dynamic_window_vertices"] = [EXPECTED_WINDOW_START, EXPECTED_WINDOW_END]
     receipt["dynamic_window_byte_offset"] = dynamic_offset
     receipt["dynamic_window_byte_length"] = dynamic_length
@@ -366,6 +381,7 @@ func _run() -> void:
         "godot_import_preserved_vertex_count": true,
         "godot_import_exact_source_numeric_identity_proven": false,
         "godot_import_numeric_observation_bounded_only": true,
+        "full_control_uses_imported_target_baseline_outside_dynamic_window": true,
         "target_region_correspondence_proven_operationally_by_full_vs_partial_render_identity": true,
         "real_target_host_partial_vertex_region_update_exercised": true,
         "full_vs_partial_shaded_render_byte_identity_proven_for_five_retained_static_poses": true,
