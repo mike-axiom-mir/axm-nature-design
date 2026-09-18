@@ -1,0 +1,35 @@
+{
+  "schema": "axm.nature-vfx-shared-driver-spatial-response-envelope/v0.1",
+  "study_id": "east-rear-shared-driver-vfx-response-envelope-003",
+  "rigging_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pull_request": 14,
+    "head": "754797a815266a643c6b08f1606eb76ba95dd8c6",
+    "result": "PASS_FIVE_SOCKET_SHARED_DRIVER_POLARITY_BINDING_DIAGNOSTIC_MINUS5_TO_PLUS5"
+  },
+  "vfx_sign_donor": {
+    "pull_request": 17,
+    "head": "ef7b35af27d5ca98a6447c1e33be07863e387305",
+    "result": "PASS_FIVE_SOCKET_WEATHER_VISUAL_DIRECTION_SIGN_MAP"
+  },
+  "weather_visual_direction_donor": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pull_request": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "source_blob_sha": "11298d447f262da8a78e43e2df68bc0346c99a2c",
+    "wind_xy": [1.0, 0.35],
+    "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "branch_ids": ["south-low", "north-low", "east-mid", "west-high", "north-top"],
+  "shared_driver_values_deg": [-5.0, -2.5, 0.0, 2.5, 5.0],
+  "bounded_question": "Does the exact Rigging sign-normalized shared diagnostic driver produce a coherent signed static visual-response envelope across all five generated branch receivers relative to the exact Weather visual direction?",
+  "allowed_mutation": "NONE__REVIEW_ONLY_SPATIAL_RESPONSE_MEASUREMENT",
+  "pose_semantics": "STATIC_SIMULTANEOUS_VISUAL_RESPONSE_REVIEW_NOT_MOTION",
+  "automatic_animation_adoption": false,
+  "automatic_runtime_adoption": false,
+  "physical_wind_claimed": false,
+  "final_vegetation_amplitude_adopted": false,
+  "simultaneous_multi_branch_motion_claimed": false,
+  "art_direction_acceptance_claimed": false,
+  "visual_qa_acceptance_claimed": false
+}
