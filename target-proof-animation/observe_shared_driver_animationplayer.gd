@@ -323,6 +323,9 @@ func _run() -> void:
         if int(bridge.sample_index) != representative_index:
             _fail("representative AnimationPlayer bridge index drift")
             return
+        # Freeze exact-key review before render settling yields process frames;
+        # otherwise natural playback advances while the screenshot is captured.
+        player.pause()
         var candidate_image := await _capture_image()
         mutable_mesh.surface_update_vertex_region(0, 0, expected_full.to_byte_array())
         var control_image := await _capture_image()
