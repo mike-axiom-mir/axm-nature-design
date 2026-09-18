@@ -48,7 +48,7 @@ class BranchPartitionGeometryRebindTests(unittest.TestCase):
             "triangles": [[tri[0], tri[2], tri[1]] for tri in triangles],
             "regions": copy.deepcopy(regions),
         }
-        from axm_nature_design.branch_partition_family import digest
+        from axm_nature_design.branch_partition_family import assemble_family, digest
         self.predecessor_contract = {
             "schema": "axm.nature-branch-child-partition-family/v0.1",
             "family_id": "test-family",
@@ -76,7 +76,7 @@ class BranchPartitionGeometryRebindTests(unittest.TestCase):
             "predecessor_family_contract": {
                 "path": "family.json",
                 "blob": "5" * 40,
-                "family_digest": "6" * 64,
+                "family_digest": assemble_family(self.source, self.historical, self.predecessor_contract)["family_digest"],
             },
             "organic_provider": {
                 "repository": "owner/repo",
