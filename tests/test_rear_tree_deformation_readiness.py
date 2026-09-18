@@ -27,6 +27,41 @@ class RearTreeDeformationReadinessTests(unittest.TestCase):
         self.assertEqual(report["branch_roots_missing_exact_flex_zone"], [])
         self.assertGreater(report["minimum_neutral_support_margin_after_branch_radius_m"], 0.0)
 
+    def test_current_declared_trunk_flex_envelopes_bind_exact_neutral_trunk_points(self):
+        report = evaluate(self.source)
+        self.assertEqual(
+            report["trunk_flex_state"],
+            "PASS_DECLARED_TRUNK_FLEX_ENVELOPES_BOUND__DEFORMATION_UNTESTED",
+        )
+        self.assertEqual(report["trunk_flex_zone_count"], 2)
+        self.assertTrue(report["checks"]["declared_trunk_flex_zones_present"])
+        self.assertTrue(
+            report["checks"]["all_declared_trunk_flex_zones_match_exact_trunk_point"]
+        )
+        self.assertTrue(
+            report["checks"]["all_declared_trunk_flex_zones_cover_authored_trunk_cross_section"]
+        )
+        self.assertAlmostEqual(report["minimum_trunk_flex_envelope_margin_m"], 0.13, places=12)
+
+        rows = {row["flex_zone_id"]: row for row in report["trunk_flex_zones"]}
+        lower = rows["trunk-lower-flex"]
+        self.assertEqual(lower["trunk_point_id"], "lower")
+        self.assertAlmostEqual(lower["flex_zone_radius_m"], 0.28, places=12)
+        self.assertAlmostEqual(lower["trunk_point_radius_m"], 0.15, places=12)
+        self.assertAlmostEqual(lower["neutral_cross_section_envelope_margin_m"], 0.13, places=12)
+        self.assertTrue(lower["exact_trunk_point_anchor"])
+        self.assertTrue(lower["covers_authored_trunk_cross_section"])
+        self.assertEqual(lower["flex_zone_status"], "DECLARED_NOT_DEFORMATION_TESTED")
+
+        upper = rows["trunk-upper-flex"]
+        self.assertEqual(upper["trunk_point_id"], "upper")
+        self.assertAlmostEqual(upper["flex_zone_radius_m"], 0.22, places=12)
+        self.assertAlmostEqual(upper["trunk_point_radius_m"], 0.09, places=12)
+        self.assertAlmostEqual(upper["neutral_cross_section_envelope_margin_m"], 0.13, places=12)
+        self.assertTrue(upper["exact_trunk_point_anchor"])
+        self.assertTrue(upper["covers_authored_trunk_cross_section"])
+        self.assertEqual(upper["flex_zone_status"], "DECLARED_NOT_DEFORMATION_TESTED")
+
     def test_exact_current_minimum_support_is_north_top_and_positive(self):
         report = evaluate(self.source)
         north_top = next(item for item in report["branch_roots"] if item["branch_id"] == "north-top")
@@ -54,6 +89,39 @@ class RearTreeDeformationReadinessTests(unittest.TestCase):
         self.assertFalse(report["truth_boundary"]["deformation_simulated"])
         self.assertFalse(report["truth_boundary"]["rigging_tested"])
 
+    def test_removing_declared_trunk_flex_zones_holds_source_readiness(self):
+        candidate = copy.deepcopy(self.source)
+        candidate["flex_zones"] = [
+            zone for zone in candidate["flex_zones"] if not zone["id"].startswith("trunk-")
+        ]
+        report = evaluate(candidate)
+        self.assertEqual(report["state"], "HOLD_TRUNK_FLEX_ZONE_COVERAGE")
+        self.assertEqual(report["trunk_flex_state"], "HOLD_TRUNK_FLEX_ZONE_COVERAGE")
+        self.assertEqual(report["trunk_flex_zone_count"], 0)
+        self.assertFalse(report["checks"]["declared_trunk_flex_zones_present"])
+
+    def test_shifted_trunk_flex_center_fails_closed(self):
+        bad = copy.deepcopy(self.source)
+        lower = next(zone for zone in bad["flex_zones"] if zone["id"] == "trunk-lower-flex")
+        lower["center"][0] += 0.01
+        report = evaluate(bad)
+        self.assertEqual(report["state"], "FAIL")
+        self.assertEqual(report["trunk_flex_state"], "FAIL_TRUNK_FLEX_ENVELOPE_BINDING")
+        self.assertFalse(
+            report["checks"]["all_declared_trunk_flex_zones_match_exact_trunk_point"]
+        )
+
+    def test_undersized_trunk_flex_envelope_fails_closed(self):
+        bad = copy.deepcopy(self.source)
+        lower = next(zone for zone in bad["flex_zones"] if zone["id"] == "trunk-lower-flex")
+        lower["radius"] = 0.14
+        report = evaluate(bad)
+        self.assertEqual(report["state"], "FAIL")
+        self.assertEqual(report["trunk_flex_state"], "FAIL_TRUNK_FLEX_ENVELOPE_BINDING")
+        self.assertFalse(
+            report["checks"]["all_declared_trunk_flex_zones_cover_authored_trunk_cross_section"]
+        )
+
     def test_detached_branch_root_fails_closed(self):
         bad = copy.deepcopy(self.source)
         bad["branches"][0]["points"][0][0] += 0.40
@@ -74,10 +142,12 @@ class RearTreeDeformationReadinessTests(unittest.TestCase):
     def test_truth_boundary_remains_non_promotional(self):
         boundary = evaluate(self.source)["truth_boundary"]
         self.assertTrue(boundary["neutral_form_relationships_measured"])
+        self.assertTrue(boundary["trunk_flex_envelopes_measured"])
         self.assertFalse(boundary["source_geometry_changed"])
         self.assertFalse(boundary["flex_zone_metadata_changed"])
         self.assertFalse(boundary["deformation_simulated"])
         self.assertFalse(boundary["rigging_tested"])
+        self.assertFalse(boundary["trunk_deformation_tested"])
         self.assertFalse(boundary["wind_physics_tested"])
         self.assertFalse(boundary["botanical_correctness_claimed"])
         self.assertFalse(boundary["runtime_tested"])
