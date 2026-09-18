@@ -1,0 +1,47 @@
+{
+  "schema": "axm.nature-vfx-north-low-parent-stress-weather-response-contract/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "owner": "VFX / Atmosphere",
+  "animation_owner": {
+    "pull_request": 26,
+    "head": "5cacd61e22433b0c33f29111827283b81cc0ba0d",
+    "result": "PASS_NORTH_LOW_PARENT_EXCLUSION_TEMPORAL_REBIND_SAMPLED_DIAGNOSTIC_MOTION"
+  },
+  "rigging_owner": {
+    "pull_request": 14,
+    "head": "69640e558f0c1ac59d4d0e3155676e0967a03d04"
+  },
+  "vfx_static_predecessor": {
+    "pull_request": 25,
+    "head": "687a81590db35b1b06fa3d436a726cc272a8ea77"
+  },
+  "weather_visual_direction_donor": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pull_request": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "source_blob_sha": "11298d447f262da8a78e43e2df68bc0346c99a2c",
+    "wind_xy": [1.0, 0.35],
+    "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "bounded_question": "Does the exact detached north-low Animation loop preserve the established Weather visual-direction polarity under the new same-phase upper-trunk parent-command stress, and does the forbidden inherited-parent counterfactual produce a measurably different visual-direction response?",
+  "required_checks": [
+    "reexecute exact Animation owner",
+    "reproduce every Animation pose digest",
+    "preserve Weather polarity for all nonzero samples",
+    "preserve exact neutral and endpoint closure",
+    "measure accepted versus forbidden inherited-parent response",
+    "fail closed on authority promotion"
+  ],
+  "automatic_adoption": false,
+  "truth_boundary": {
+    "source_space_visual_response_only": true,
+    "physical_wind": false,
+    "botanical_motion": false,
+    "animation_authorship": false,
+    "target_host_playback": false,
+    "runtime": false,
+    "gameplay_or_physics": false,
+    "art_or_qa_acceptance": false,
+    "canon_or_production_readiness": false
+  }
+}
