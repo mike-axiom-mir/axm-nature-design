@@ -109,7 +109,7 @@ jobs:
           tools/verify_rear_tree_geometry_simultaneous_socket_audit.py
           tools/verify_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
           tools/verify_rear_tree_rigging_north_low_parent_influence_gate.py
-          tools/verify_rear_tree_rigging_upper_trunk-east-mid-hierarchy.py
+          tools/verify_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
           EOF
           git diff --name-only "$current_rigging"...HEAD | sort > /tmp/actual-geometry-files
           diff -u /tmp/expected-geometry-files /tmp/actual-geometry-files
