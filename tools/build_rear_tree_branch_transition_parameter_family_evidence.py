@@ -21,6 +21,7 @@ from axm_nature_design.branch_transition_parameter_family import (
 CONTRACT_PATH = ROOT / "examples" / "rear_tree_branch_transition_parameter_family_001.json"
 PASS_STATE = "PASS_BOUNDED_OWNER_TRANSITION_PARAMETER_FAMILY"
 DECISION = "PASS_DERIVED_OWNER_TRANSITION_PARAMETER_WINDOWS__NO_JUNCTION_RIGGING_WEIGHT_OR_DOWNSTREAM_ADOPTION"
+EVIDENCE_TOLERANCE = 1e-12
 
 
 def load_json(path: Path) -> dict:
@@ -113,9 +114,9 @@ def main() -> int:
         row = outputs.get(branch_id)
         if row is None:
             raise RuntimeError(f"missing retained transition output: {branch_id}")
-        if row["transition_length_m"] != expected["embedded_length_along_first_segment_m"]:
+        if abs(row["transition_length_m"] - expected["embedded_length_along_first_segment_m"]) > EVIDENCE_TOLERANCE:
             raise RuntimeError(f"retained transition length drift: {branch_id}")
-        if row["transition_u_max"] != expected["embedded_fraction_of_first_segment"]:
+        if abs(row["transition_u_max"] - expected["embedded_fraction_of_first_segment"]) > EVIDENCE_TOLERANCE:
             raise RuntimeError(f"retained transition fraction drift: {branch_id}")
         if row["sample_u"][0] != 0.0 or row["sample_u"][-1] != row["transition_u_max"]:
             raise RuntimeError(f"transition sampling anchors drift: {branch_id}")

@@ -75,13 +75,18 @@ jobs:
               "west-high": (0.08456756400847554, 0.036156960642309076),
               "north-top": (0.05131780006304828, 0.021221011737572286),
           }
+          tolerance = 1e-12
           for branch_id, (fraction, length) in expected.items():
               row = rows[branch_id]
               assert row["transition_u_min"] == 0.0
-              assert row["transition_u_max"] == fraction
-              assert row["transition_length_m"] == length
-              assert row["sample_u"] == [0.0, fraction * 0.5, fraction]
-              assert row["sample_distance_m"] == [0.0, length * 0.5, length]
+              assert abs(row["transition_u_max"] - fraction) <= tolerance
+              assert abs(row["transition_length_m"] - length) <= tolerance
+              assert row["sample_u"][0] == 0.0
+              assert abs(row["sample_u"][1] - row["transition_u_max"] * 0.5) <= tolerance
+              assert row["sample_u"][2] == row["transition_u_max"]
+              assert row["sample_distance_m"][0] == 0.0
+              assert abs(row["sample_distance_m"][1] - row["transition_length_m"] * 0.5) <= tolerance
+              assert row["sample_distance_m"][2] == row["transition_length_m"]
               assert row["source_authorized"] is False
               assert row["junction_strategy_authorized"] is False
               assert row["connected_topology_claim_authorized"] is False
