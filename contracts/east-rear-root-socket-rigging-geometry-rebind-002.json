@@ -1,0 +1,76 @@
+{
+  "authority": {
+    "animation_acceptance": false,
+    "canon": false,
+    "geometry_topology_authorship": false,
+    "geometry_pass_transfer_without_retest": false,
+    "production_ready": false,
+    "production_skin_weights_claimed": false,
+    "runtime_acceptance": false,
+    "source_rewritten": false,
+    "technical_art_target_host_acceptance": false,
+    "vfx_wind_acceptance": false,
+    "visual_acceptance": false
+  },
+  "axis_policy": "NORMALIZED_CROSS_OF_NEAREST_LOCAL_TRUNK_TANGENT_AND_FIRST_BRANCH_TANGENT",
+  "branch_id": "north-top",
+  "child_partition": {
+    "expected_fixed_vertices": 338,
+    "expected_selected_triangles": 72,
+    "expected_selected_vertices": 52,
+    "region_prefixes": [
+      "branch:north-top:",
+      "leaf:north-top-leaves:"
+    ]
+  },
+  "diagnostic_probe": {
+    "angle_max_deg": 5.0,
+    "angle_min_deg": -5.0,
+    "representative_angles_deg": [
+      -5.0,
+      -2.5,
+      0.0,
+      2.5,
+      5.0
+    ],
+    "semantics": "RIGGING_VERIFICATION_PROBE_ONLY_NOT_SOURCE_OR_BIOLOGICAL_ROM"
+  },
+  "flex_zone": {
+    "center_m": [
+      0.01,
+      0.0,
+      3.16
+    ],
+    "id": "north-top-branch-flex",
+    "radius_m": 0.12,
+    "source_status": "DECLARED_NOT_DEFORMATION_TESTED"
+  },
+  "four_root_gate": [
+    "Truth",
+    "Agency / non-domination",
+    "Continuity",
+    "Wisdom before speed"
+  ],
+  "geometry_receiver": {
+    "head": "9b451ba1f65281f550a6754e18574f7ab2951e28",
+    "historical_organic_mesh_digest": "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48",
+    "migrated_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
+    "pr": 9,
+    "rebind_semantics": "EXPLICIT_GEOMETRY_RECEIVER_REBIND__NO_PASS_TRANSFER",
+    "repository": "mike-axiom-mir/axm-nature-design"
+  },
+  "leaf_cluster_id": "north-top-leaves",
+  "rigging_lineage": {
+    "predecessor_head": "87ce8b2ff10937abec4432e1c6d5a7114a076cdb",
+    "pr": 14,
+    "predecessor_result": "PASS_NORTH_TOP_ROOT_SOCKET_RIGID_CHILD_ARTICULATION_DIAGNOSTIC_MINUS5_TO_PLUS5"
+  },
+  "schema": "axm.nature-east-rear-root-socket-rigging-contract/v0.2",
+  "source_owner": {
+    "head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "pr": 8,
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61"
+  },
+  "study_id": "east-rear-tree-neutral-001"
+}
