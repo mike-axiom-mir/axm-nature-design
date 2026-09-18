@@ -266,7 +266,7 @@ func _run() -> void:
         })
 
     var state_name := "PASS_NATURE_EAST_REAR_RUNTIME_WINDOW_GODOT_PARTIAL_VERTEX_UPDATE"
-    var pass := (
+    var passed := (
         candidate_offset == EXPECTED_OFFSET
         and max_control_expected_delta <= POSITION_GATE_M
         and max_candidate_expected_delta <= POSITION_GATE_M
@@ -274,7 +274,7 @@ func _run() -> void:
         and max_static_delta <= POSITION_GATE_M
         and max_readback_motion > 0.05
     )
-    if not pass:
+    if not passed:
         state_name = "FAIL_NATURE_EAST_REAR_RUNTIME_WINDOW_GODOT_PARTIAL_VERTEX_UPDATE"
 
     var receipt := {
@@ -322,7 +322,7 @@ func _run() -> void:
         },
     }
     _write_json(RECEIPT_PATH, receipt)
-    if not pass:
+    if not passed:
         _fail("target-host partial-window comparison failed: %s" % JSON.stringify(receipt))
         return
     print(JSON.stringify(receipt, "  ", false))
