@@ -140,6 +140,107 @@ def _evaluate_declared_trunk_flex_zones(trunk: list[dict], flex_zones: list[dict
     }
 
 
+def _evaluate_trunk_branch_flex_interactions(branches: list[dict], flex_zones: list[dict]) -> dict:
+    """Record exact neutral-space relations between declared trunk and branch flex zones.
+
+    Flex-zone overlap is source metadata geometry only. It is not a collision, a
+    weighting rule, a joint hierarchy, a deformation defect, or a biological claim.
+    The purpose of this map is to make future trunk+branch deformation work choose an
+    explicit hierarchy/influence policy instead of silently treating the declarations
+    as independent when their authored envelopes intersect.
+    """
+
+    trunk_zones = [
+        zone for zone in flex_zones if str(zone.get("id", "")).startswith("trunk-")
+    ]
+    pairs = []
+    missing_branch_flex = []
+
+    for branch in branches:
+        points = branch.get("points", [])
+        if not points:
+            raise ValueError(f"branch {branch.get('id')} is missing root geometry")
+        root = [float(value) for value in points[0]]
+        matches = [zone for zone in flex_zones if _vector_matches(zone.get("center"), root)]
+        if len(matches) > 1:
+            raise ValueError(f"branch {branch.get('id')} has multiple flex zones at its exact root")
+        branch_zone = matches[0] if matches else None
+        if branch_zone is None:
+            missing_branch_flex.append(branch.get("id"))
+            continue
+
+        branch_radius = float(branch_zone.get("radius", 0.0))
+        if branch_radius <= 0.0:
+            raise ValueError(f"branch flex zone {branch_zone.get('id')} radius must be positive")
+
+        for trunk_zone in trunk_zones:
+            trunk_radius = float(trunk_zone.get("radius", 0.0))
+            if trunk_radius <= 0.0:
+                raise ValueError(f"trunk flex zone {trunk_zone.get('id')} radius must be positive")
+            distance = _length(_sub(root, trunk_zone.get("center")))
+            center_margin = trunk_radius - distance
+            envelope_margin = trunk_radius + branch_radius - distance
+            pairs.append(
+                {
+                    "trunk_flex_zone_id": trunk_zone.get("id"),
+                    "branch_id": branch.get("id"),
+                    "branch_flex_zone_id": branch_zone.get("id"),
+                    "center_distance_m": distance,
+                    "trunk_flex_zone_radius_m": trunk_radius,
+                    "branch_flex_zone_radius_m": branch_radius,
+                    "branch_root_center_inside_trunk_flex_zone": center_margin >= -TOLERANCE,
+                    "branch_root_center_containment_margin_m": center_margin,
+                    "declared_flex_envelopes_overlap": envelope_margin >= -TOLERANCE,
+                    "declared_flex_envelope_overlap_margin_m": envelope_margin,
+                }
+            )
+
+    root_containment_pairs = [
+        {
+            "trunk_flex_zone_id": row["trunk_flex_zone_id"],
+            "branch_id": row["branch_id"],
+            "branch_flex_zone_id": row["branch_flex_zone_id"],
+        }
+        for row in pairs
+        if row["branch_root_center_inside_trunk_flex_zone"]
+    ]
+    overlap_pairs = [
+        {
+            "trunk_flex_zone_id": row["trunk_flex_zone_id"],
+            "branch_id": row["branch_id"],
+            "branch_flex_zone_id": row["branch_flex_zone_id"],
+        }
+        for row in pairs
+        if row["declared_flex_envelopes_overlap"]
+    ]
+
+    if not trunk_zones:
+        state = "HOLD_TRUNK_FLEX_ZONE_COVERAGE"
+    elif missing_branch_flex:
+        state = "HOLD_BRANCH_ROOT_FLEX_ZONE_COVERAGE"
+    else:
+        state = "PASS_DECLARED_TRUNK_BRANCH_FLEX_INTERACTION_MAP__DEFORMATION_UNTESTED"
+
+    return {
+        "state": state,
+        "pair_count": len(pairs),
+        "branch_roots_missing_exact_flex_zone": missing_branch_flex,
+        "branch_root_centers_inside_trunk_flex_zone_count": len(root_containment_pairs),
+        "branch_root_center_containment_pairs": root_containment_pairs,
+        "declared_flex_envelope_overlap_pair_count": len(overlap_pairs),
+        "declared_flex_envelope_overlap_pairs": overlap_pairs,
+        "pairs": pairs,
+        "truth_boundary": {
+            "source_metadata_spatial_relations_measured": True,
+            "overlap_is_deformation_failure": False,
+            "hierarchy_or_weighting_inferred": False,
+            "trunk_branch_composition_tested": False,
+            "physical_collision_tested": False,
+            "biological_interpretation_claimed": False,
+        },
+    }
+
+
 def evaluate(source: dict) -> dict:
     trunk = source.get("trunk", [])
     branches = source.get("branches", [])
@@ -200,6 +301,7 @@ def evaluate(source: dict) -> dict:
         )
 
     trunk_flex = _evaluate_declared_trunk_flex_zones(trunk, flex_zones)
+    trunk_branch_interactions = _evaluate_trunk_branch_flex_interactions(branches, flex_zones)
     flex_statuses_safe = all(zone.get("status") == FLEX_STATUS for zone in flex_zones)
     branch_count = len(branch_reports)
     full_flex_coverage = covered_branch_roots == branch_count
@@ -248,15 +350,20 @@ def evaluate(source: dict) -> dict:
         "minimum_trunk_flex_envelope_margin_m": trunk_flex[
             "minimum_neutral_cross_section_envelope_margin_m"
         ],
+        "trunk_branch_flex_interaction_state": trunk_branch_interactions["state"],
+        "trunk_branch_flex_interactions": trunk_branch_interactions,
         "checks": checks,
         "truth_boundary": {
             "neutral_form_relationships_measured": True,
             "trunk_flex_envelopes_measured": True,
+            "trunk_branch_flex_interactions_measured": True,
             "source_geometry_changed": False,
             "flex_zone_metadata_changed": False,
             "deformation_simulated": False,
             "rigging_tested": False,
             "trunk_deformation_tested": False,
+            "trunk_branch_composition_tested": False,
+            "hierarchy_or_weighting_inferred": False,
             "wind_physics_tested": False,
             "botanical_correctness_claimed": False,
             "runtime_tested": False,
