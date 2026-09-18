@@ -1,0 +1,97 @@
+name: Geometry east rear upper-trunk east-mid hierarchy rebind
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "tests/test_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "tools/verify_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "contracts/east-rear-upper-trunk-east-mid-geometry-rebind-004.json"
+      - "docs/GEOMETRY_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_REBIND_004.md"
+      - ".github/workflows/geometry-east-rear-upper-trunk-east-mid-hierarchy-rebind.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Geometry head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact predecessor and Rigging hierarchy owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor f4e8d408480ccb81f559fc56d915e5b4a935851d HEAD
+          git merge-base --is-ancestor 6cf64925f0ea00737e4d3f2d4f15979c773f309d HEAD
+          test "$(git rev-parse 6cf64925f0ea00737e4d3f2d4f15979c773f309d:src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py)" = "d58d2ff3456069e7bbcebba64438edbbc73673bf"
+          test "$(git rev-parse 6cf64925f0ea00737e4d3f2d4f15979c773f309d:contracts/east-rear-upper-trunk-east-mid-hierarchy-rigging-006.json)" = "a1dc6d06491dafdfb44e8fa6bfdebe566162dbfd"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py)" = "d58d2ff3456069e7bbcebba64438edbbc73673bf"
+          test "$(git rev-parse HEAD:contracts/east-rear-upper-trunk-east-mid-hierarchy-rigging-006.json)" = "a1dc6d06491dafdfb44e8fa6bfdebe566162dbfd"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile and run full repository suite
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Geometry hierarchy rebind evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-geometry-head.txt
+          printf '%s\n' 'f4e8d408480ccb81f559fc56d915e5b4a935851d' > evidence/geometry-predecessor-head.txt
+          printf '%s\n' '6cf64925f0ea00737e4d3f2d4f15979c773f309d' > evidence/rigging-hierarchy-owner-head.txt
+          python tools/verify_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py \
+            --output evidence/east-rear-upper-trunk-east-mid-geometry-rebind-004.json \
+            | tee evidence/verifier.log
+          cp contracts/east-rear-upper-trunk-east-mid-geometry-rebind-004.json evidence/east-rear-upper-trunk-east-mid-geometry-rebind-contract-004.json
+          cp contracts/east-rear-upper-trunk-east-mid-hierarchy-rigging-006.json evidence/
+          cp docs/GEOMETRY_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_REBIND_004.md evidence/
+          cp examples/east_rear_tree_neutral_001.json evidence/exact-organic-source.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("evidence/east-rear-upper-trunk-east-mid-geometry-rebind-004.json").read_text())
+          assert report["result"] == "PASS_EAST_MID_HIERARCHICAL_REBASE_CHILD_TOPOLOGY_ISOMETRY__HOLD_WHOLE_TREE_CLEARANCE"
+          assert report["receiver"]["selected_vertices"] == 52
+          assert report["receiver"]["owned_triangles"] == 72
+          assert report["receiver"]["partial_selected_triangles"] == 0
+          assert report["representative_recheck"]["witness_count"] == 9
+          assert report["continuous_structural_certificate"]["continuous_child_topology_isometry"] is True
+          assert report["continuous_structural_certificate"]["predecessor_five_child_continuous_clearance_transferred"] is False
+          assert report["continuous_structural_certificate"]["trunk_mesh_deformation_proven"] is False
+          assert report["continuous_structural_certificate"]["branch_trunk_surface_attachment_proven"] is False
+          assert report["continuous_structural_certificate"]["collision_or_self_intersection_proven"] is False
+          assert report["all_failure_controls_rejected"] is True
+          assert report["truth_boundary"]["canon_production_game_readiness_claimed"] is False
+          assert report["truth_boundary"]["geometry_mastery_claimed"] is False
+          PY
+
+      - name: Upload retained Geometry hierarchy evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-geometry-upper-trunk-east-mid-rebind-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
