@@ -1,0 +1,102 @@
+name: VFX east rear Weather-direction socket sign
+
+on:
+  pull_request:
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/rear_tree_rigging.py"
+      - "src/axm_nature_design/rear_tree_animation.py"
+      - "src/axm_nature_design/rear_tree_vfx_weather_sign.py"
+      - "contracts/east-rear-root-socket-rigging-001.json"
+      - "contracts/east-rear-root-socket-animation-001.json"
+      - "contracts/east-rear-weather-direction-vfx-sign-001.json"
+      - "tools/verify_rear_tree_vfx_weather_sign.py"
+      - "tests/test_rear_tree_vfx_weather_sign.py"
+      - "docs/VFX_EAST_REAR_WEATHER_DIRECTION_SIGN_001.md"
+      - ".github/workflows/vfx-east-rear-weather-direction-sign.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin exact Nature Animation parent and owner bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ANIMATION_HEAD=74354ff851538d4d8aba9332900ae40218415eaf
+          git merge-base --is-ancestor "$ANIMATION_HEAD" HEAD
+          git diff --exit-code "$ANIMATION_HEAD" HEAD -- \
+            examples/east_rear_tree_neutral_001.json \
+            src/axm_nature_design/organic_form.py \
+            src/axm_nature_design/rear_tree_rigging.py \
+            src/axm_nature_design/rear_tree_animation.py \
+            contracts/east-rear-root-socket-rigging-001.json \
+            contracts/east-rear-root-socket-animation-001.json
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact VFX sign evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-head.txt
+          printf '%s\n' 74354ff851538d4d8aba9332900ae40218415eaf > evidence/exact-animation-parent.txt
+          printf '%s\n' ca2eaba519e8449835b0ea6ef944b7080c3caa6a > evidence/exact-weather-donor-head.txt
+          printf '%s\n' 11298d447f262da8a78e43e2df68bc0346c99a2c > evidence/exact-weather-source-blob.txt
+          python tools/verify_rear_tree_vfx_weather_sign.py \
+            --output evidence/east-rear-weather-direction-vfx-sign-evidence-001.json \
+            --svg-output evidence/east-rear-weather-direction-vfx-sign-review-001.svg
+          cp contracts/east-rear-weather-direction-vfx-sign-001.json evidence/
+          cp docs/VFX_EAST_REAR_WEATHER_DIRECTION_SIGN_001.md evidence/
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          payload = json.loads(Path('evidence/east-rear-weather-direction-vfx-sign-evidence-001.json').read_text())
+          assert payload['result'] == 'PASS_EAST_REAR_WEATHER_VISUAL_DIRECTION_SOCKET_SIGN_COMPATIBILITY'
+          assert all(payload['checks'].values())
+          assert payload['weather_visual_direction_donor']['wind_xy'] == [1.0, 0.35]
+          assert payload['weather_visual_direction_donor']['wind_semantics'] == 'VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED'
+          assert payload['decision']['state'] == 'PASS_SIGN_COMPATIBILITY_ONLY_NO_MOTION_ADOPTION'
+          assert payload['decision']['review_only_downwind_alignment_angle_deg'] in (-5.0, 5.0)
+          assert payload['measurements']['signed_centroid_projection_separation_m'] > 1e-9
+          assert not any(payload['truth_boundary'].values())
+          ET.parse('evidence/east-rear-weather-direction-vfx-sign-review-001.svg')
+          PY
+
+      - name: Upload retained VFX sign evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-weather-direction-vfx-sign-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
