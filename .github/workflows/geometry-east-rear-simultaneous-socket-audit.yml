@@ -27,6 +27,18 @@ on:
       - "contracts/east-rear-upper-trunk-east-mid-geometry-rebind-004.json"
       - "docs/GEOMETRY_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_REBIND_004.md"
       - ".github/workflows/geometry-east-rear-upper-trunk-east-mid-hierarchy-rebind.yml"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "tests/test_rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "tools/verify_rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "contracts/east-rear-north-low-upper-trunk-parent-influence-gate-rigging-007.json"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_PARENT_INFLUENCE_GATE_007.md"
+      - ".github/workflows/rigging-east-rear-north-low-parent-influence-gate.yml"
+      - "src/axm_nature_design/rear_tree_geometry_north_low_attachment_topology.py"
+      - "tests/test_rear_tree_geometry_north_low_attachment_topology.py"
+      - "tools/verify_rear_tree_geometry_north_low_attachment_topology.py"
+      - "contracts/east-rear-north-low-attachment-topology-geometry-005.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_ATTACHMENT_TOPOLOGY_005.md"
+      - ".github/workflows/geometry-east-rear-north-low-attachment-topology.yml"
   workflow_dispatch:
 
 permissions:
@@ -56,36 +68,48 @@ jobs:
           git merge-base --is-ancestor "$current_rigging" HEAD
           git merge-base --is-ancestor "$hierarchy_rigging" HEAD
           cat > /tmp/expected-geometry-files <<'EOF'
+          .github/workflows/geometry-east-rear-north-low-attachment-topology.yml
           .github/workflows/geometry-east-rear-shared-driver-continuous-clearance.yml
           .github/workflows/geometry-east-rear-shared-driver-static-rebind.yml
           .github/workflows/geometry-east-rear-simultaneous-socket-audit.yml
           .github/workflows/geometry-east-rear-upper-trunk-east-mid-hierarchy-rebind.yml
+          .github/workflows/rigging-east-rear-north-low-parent-influence-gate.yml
           .github/workflows/rigging-east-rear-upper-trunk-east-mid-hierarchy.yml
+          contracts/east-rear-north-low-attachment-topology-geometry-005.json
+          contracts/east-rear-north-low-upper-trunk-parent-influence-gate-rigging-007.json
           contracts/east-rear-shared-driver-continuous-clearance-003.json
           contracts/east-rear-shared-driver-static-geometry-rebind-002.json
           contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json
           contracts/east-rear-upper-trunk-east-mid-geometry-rebind-004.json
           contracts/east-rear-upper-trunk-east-mid-hierarchy-rigging-006.json
+          docs/GEOMETRY_EAST_REAR_NORTH_LOW_ATTACHMENT_TOPOLOGY_005.md
           docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_CONTINUOUS_CLEARANCE_003.md
           docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md
           docs/GEOMETRY_EAST_REAR_SIMULTANEOUS_PRIMARY_BRANCH_AUDIT_001.md
           docs/GEOMETRY_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_REBIND_004.md
+          docs/RIGGING_EAST_REAR_NORTH_LOW_PARENT_INFLUENCE_GATE_007.md
           docs/RIGGING_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_006.md
+          src/axm_nature_design/rear_tree_geometry_north_low_attachment_topology.py
           src/axm_nature_design/rear_tree_geometry_shared_driver_continuous_clearance.py
           src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py
           src/axm_nature_design/rear_tree_geometry_simultaneous_socket_audit.py
           src/axm_nature_design/rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
+          src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py
           src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
+          tests/test_rear_tree_geometry_north_low_attachment_topology.py
           tests/test_rear_tree_geometry_shared_driver_continuous_clearance.py
           tests/test_rear_tree_geometry_shared_driver_static_rebind.py
           tests/test_rear_tree_geometry_simultaneous_socket_audit.py
           tests/test_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
+          tests/test_rear_tree_rigging_north_low_parent_influence_gate.py
           tests/test_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
+          tools/verify_rear_tree_geometry_north_low_attachment_topology.py
           tools/verify_rear_tree_geometry_shared_driver_continuous_clearance.py
           tools/verify_rear_tree_geometry_shared_driver_static_rebind.py
           tools/verify_rear_tree_geometry_simultaneous_socket_audit.py
           tools/verify_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
-          tools/verify_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
+          tools/verify_rear_tree_rigging_north_low_parent_influence_gate.py
+          tools/verify_rear_tree_rigging_upper_trunk-east-mid-hierarchy.py
           EOF
           git diff --name-only "$current_rigging"...HEAD | sort > /tmp/actual-geometry-files
           diff -u /tmp/expected-geometry-files /tmp/actual-geometry-files
