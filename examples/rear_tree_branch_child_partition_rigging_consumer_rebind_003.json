@@ -1,0 +1,39 @@
+{
+  "schema": "axm.nature-branch-child-partition-rigging-consumer-rebind/v0.1",
+  "family_id": "east-rear-tree-primary-branch-child-partition-rigging-consumer-rebind-003",
+  "relation": "EXACT_RIGGING_CONSUMER_REBIND_SELECTION_IDENTITY_ONLY",
+  "branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "procedural_provider": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 4,
+    "predecessor_head": "f2136669418caf2f91d4fe43e6e61aa7aca9657d",
+    "family_contract_path": "examples/rear_tree_branch_child_partition_family_001.json",
+    "family_digest": "ab688f5281dc4e79770e133b49e7af3a533092acc1e0a0945bfa86e647e7b122",
+    "geometry_rebind_contract_path": "examples/rear_tree_branch_child_partition_geometry_rebind_002.json",
+    "geometry_rebind_contract_blob": "73e38d08f426efb742e1d66b992ede04737ed576"
+  },
+  "rigging_consumer": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 14,
+    "ref": "754797a815266a643c6b08f1606eb76ba95dd8c6",
+    "family_result": "PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_RIGID_CHILD_FAMILY_GEOMETRY_RECEIVER_DIAGNOSTIC_MINUS5_TO_PLUS5",
+    "family_module_path": "src/axm_nature_design/rear_tree_rigging_primary_branch_family.py",
+    "family_module_blob": "94cc1904b7355b4e17e25e4fb1fcdf2cd6ba42f7",
+    "shared_driver_result": "PASS_FIVE_SOCKET_SHARED_DRIVER_POLARITY_BINDING_DIAGNOSTIC_MINUS5_TO_PLUS5",
+    "shared_driver_module_path": "src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py",
+    "shared_driver_module_blob": "dd17527ba58034da8b25e36033f187ef4601e4b8"
+  },
+  "automatic_rigging_adoption": false,
+  "rigging_authority_transferred": false,
+  "deformation_semantics_authorized": false,
+  "animation_or_vfx_motion_adopted": false,
+  "automatic_downstream_adoption": false,
+  "failure_policy": "FAIL_CLOSED_ON_PROCEDURAL_FAMILY_RIGGING_HEAD_MODULE_BLOB_REGION_VERTEX_COUNT_SHARED_DRIVER_OR_AUTHORITY_DRIFT",
+  "truth_boundary": "This rebind proves only that the existing five materially different Procedural generated-region selections are still the exact child partitions consumed by current Rigging PR #14. The current shared-driver successor is observed only to prove that Rigging did not change those partitions. Procedural does not adopt Rigging axes, pivots, deformation, polarity, Animation or VFX motion, Runtime, Art/QA, CANON or production authority."
+}
