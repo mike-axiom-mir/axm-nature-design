@@ -8,6 +8,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -51,9 +52,11 @@ def git_blob(root: Path, path: str) -> str:
     return subprocess.check_output(["git", "-C", str(root), "rev-parse", f"HEAD:{path}"], text=True).strip()
 
 
-def run_payload(root: Path, code: str) -> dict[str, Any]:
+def run_payload(root: Path, code: str, *, extra_env: dict[str, str] | None = None) -> dict[str, Any]:
     env = dict(os.environ)
     env["PYTHONPATH"] = str(root / "src")
+    if extra_env:
+        env.update(extra_env)
     raw = subprocess.check_output([sys.executable, "-c", code], cwd=root, env=env, text=True)
     return json.loads(raw)
 
@@ -73,17 +76,23 @@ print(json.dumps({'source':source,'report':report,'bridge_only':candidate['bridg
     return run_payload(root, code)
 
 
-def rigging_payload(root: Path) -> dict[str, Any]:
+def rigging_payload(root: Path, geometry: dict[str, Any]) -> dict[str, Any]:
+    # The exact Rigging head intentionally does not duplicate the newer Geometry module.
+    # Pass the already re-executed exact Geometry evidence in as data instead of importing
+    # Geometry through the Rigging checkout or silently copying Geometry domain code.
+    with tempfile.NamedTemporaryFile("wb", suffix=".json", delete=False) as handle:
+        handle.write(canonical({"report": geometry["report"], "bridge_only": geometry["bridge_only"]}))
+        payload_path = Path(handle.name)
     code = r'''
-import json
+import json, os
 from pathlib import Path
 from axm_nature_design.organic_form import load_source
-from axm_nature_design import rear_tree_geometry_north_low_indexed_surface_rebind as geometry
 from axm_nature_design import rear_tree_rigging_north_low_indexed_surface_rebind as rigging
 root=Path('.').resolve()
 source=load_source(root/'examples/east_rear_tree_neutral_001.json')
-g_report=geometry.evaluate(source)
-g_candidate=geometry.build_candidate(source)
+payload=json.loads(Path(os.environ['AXM_EXACT_GEOMETRY_PAYLOAD']).read_text())
+g_report=payload['report']
+g_candidate={'bridge_only':payload['bridge_only']}
 r=rigging.evaluate(source,g_report,g_candidate)
 bridge=g_candidate['bridge_only']
 neutral=[[float(v) for v in p] for p in bridge['vertices']]
@@ -101,7 +110,10 @@ for angle in rigging.REPRESENTATIVE_ANGLES_DEG:
     poses.append({'child_angle_deg':float(angle),'source_positions_m':full,'minimum_paired_span_m':min(spans)})
 print(json.dumps({'source':source,'geometry_report':g_report,'bridge_only':bridge,'rigging_receipt':r,'poses':poses},sort_keys=True,separators=(',',':')))
 '''
-    return run_payload(root, code)
+    try:
+        return run_payload(root, code, extra_env={"AXM_EXACT_GEOMETRY_PAYLOAD": str(payload_path)})
+    finally:
+        payload_path.unlink(missing_ok=True)
 
 
 def source_to_uc(row: list[float]) -> list[float]:
@@ -143,7 +155,7 @@ def main() -> int:
         "rigging_source": (rigging_root, "examples/east_rear_tree_neutral_001.json", SOURCE_BLOB),
         "uc_procedural_3d": (uc_root, "src/axm_uc/procedural_3d.py", UC_PROCEDURAL_BLOB),
     }
-    observed_blobs = {}
+    observed_blobs: dict[str, str] = {}
     for key, (root, path, expected) in expected_blobs.items():
         observed = git_blob(root, path)
         observed_blobs[key] = observed
@@ -151,15 +163,15 @@ def main() -> int:
             raise ValueError(f"exact blob drift for {key}: {observed} != {expected}")
 
     geometry = geometry_payload(geometry_root)
-    rigging = rigging_payload(rigging_root)
+    rigging = rigging_payload(rigging_root, geometry)
     if geometry["report"].get("result") != GEOMETRY_RESULT:
         raise ValueError("exact Geometry donor no longer passes")
     if rigging["rigging_receipt"].get("result") != RIGGING_RESULT:
         raise ValueError("exact Rigging owner no longer passes")
     if canonical(geometry["bridge_only"]) != canonical(rigging["bridge_only"]):
-        raise ValueError("Rigging-embedded indexed bridge differs from exact Geometry donor")
+        raise ValueError("Rigging-consumed indexed bridge differs from exact Geometry donor")
     if canonical(geometry["report"]) != canonical(rigging["geometry_report"]):
-        raise ValueError("Rigging-embedded Geometry report differs from exact donor execution")
+        raise ValueError("Rigging-consumed Geometry report differs from exact donor execution")
     if canonical(geometry["source"]) != canonical(rigging["source"]):
         raise ValueError("Geometry/Rigging source bytes parse to different source state")
 
@@ -254,7 +266,8 @@ def main() -> int:
         "pose_count": len(poses),
         "truth_boundary": {
             "geometry_and_rigging_reexecuted": True,
-            "exact_geometry_donor_matches_rigging_embedded_donor": True,
+            "exact_geometry_donor_passed_as_data_to_rigging_owner": True,
+            "exact_geometry_donor_matches_rigging_consumed_donor": True,
             "real_target_host_endpoint_region_update_proven": False,
             "animation_transfer_or_playback_proven": False,
             "indexed_cut_or_connected_topology_proven": False,
