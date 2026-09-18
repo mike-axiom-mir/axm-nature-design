@@ -51,8 +51,29 @@ jobs:
           assert north_top["exact_root_flex_zone_id"] == "north-top-branch-flex", north_top
           assert abs(north_top["exact_root_flex_zone_radius_m"] - 0.12) <= 1e-12, north_top
           assert north_top["exact_root_flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", north_top
+
+          assert readiness["trunk_flex_state"] == "PASS_DECLARED_TRUNK_FLEX_ENVELOPES_BOUND__DEFORMATION_UNTESTED", readiness
+          assert readiness["trunk_flex_zone_count"] == 2, readiness
+          assert readiness["checks"]["declared_trunk_flex_zones_present"], readiness
+          assert readiness["checks"]["all_declared_trunk_flex_zones_match_exact_trunk_point"], readiness
+          assert readiness["checks"]["all_declared_trunk_flex_zones_cover_authored_trunk_cross_section"], readiness
+          assert abs(readiness["minimum_trunk_flex_envelope_margin_m"] - 0.13) <= 1e-12, readiness
+          trunk_rows = {row["flex_zone_id"]: row for row in readiness["trunk_flex_zones"]}
+          lower = trunk_rows["trunk-lower-flex"]
+          upper = trunk_rows["trunk-upper-flex"]
+          assert lower["trunk_point_id"] == "lower", lower
+          assert abs(lower["flex_zone_radius_m"] - 0.28) <= 1e-12, lower
+          assert abs(lower["trunk_point_radius_m"] - 0.15) <= 1e-12, lower
+          assert abs(lower["neutral_cross_section_envelope_margin_m"] - 0.13) <= 1e-12, lower
+          assert upper["trunk_point_id"] == "upper", upper
+          assert abs(upper["flex_zone_radius_m"] - 0.22) <= 1e-12, upper
+          assert abs(upper["trunk_point_radius_m"] - 0.09) <= 1e-12, upper
+          assert abs(upper["neutral_cross_section_envelope_margin_m"] - 0.13) <= 1e-12, upper
+          assert lower["flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", lower
+          assert upper["flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", upper
           assert not readiness["truth_boundary"]["deformation_simulated"], readiness
           assert not readiness["truth_boundary"]["rigging_tested"], readiness
+          assert not readiness["truth_boundary"]["trunk_deformation_tested"], readiness
           print(json.dumps({"envelope": report, "deformation_readiness": readiness}, indent=2))
           PY
       - name: Upload exact rear-tree evidence
