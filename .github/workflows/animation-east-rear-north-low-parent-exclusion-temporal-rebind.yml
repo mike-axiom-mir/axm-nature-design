@@ -1,0 +1,132 @@
+name: Animation east rear north-low parent-exclusion temporal rebind
+
+on:
+  pull_request:
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py"
+      - "contracts/east-rear-north-low-parent-exclusion-animation-009.json"
+      - "tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py"
+      - "tests/test_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py"
+      - "docs/ANIMATION_EAST_REAR_NORTH_LOW_PARENT_EXCLUSION_TEMPORAL_REBIND_009.md"
+      - ".github/workflows/animation-east-rear-north-low-parent-exclusion-temporal-rebind.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin current Rigging and previous Animation identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          RIG=69640e558f0c1ac59d4d0e3155676e0967a03d04
+          RIG_SEM=061cf3235f177a2998bd5925d4e631d4d66cdf85
+          PREV_ANIM=e89db4cd53387a477fc98353caa1cdbd47b82ac6
+          GEO=d32a41558910d78595042fb638a785714f825806
+          git merge-base --is-ancestor "$RIG" HEAD
+          git merge-base --is-ancestor "$RIG_SEM" "$RIG"
+          for COMMIT in "$PREV_ANIM" "$GEO"; do
+            if ! git cat-file -e "$COMMIT^{commit}" 2>/dev/null; then
+              git fetch --no-tags origin "$COMMIT"
+            fi
+          done
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py)" = "de00694e103b975f9a25a72a50054821b469b528"
+          test "$(git rev-parse "$GEO:contracts/east-rear-north-low-attachment-topology-geometry-005.json")" = "127502ae50c7b442c88edd8454c9a74ba053da71"
+          PREV_FILE="$(git show "$PREV_ANIM:src/axm_nature_design/rear_tree_animation_shared_driver.py")"
+          grep -Fq 'DURATION_S = 1.0' <<<"$PREV_FILE"
+          grep -Fq 'SAMPLE_RATE_HZ = 40' <<<"$PREV_FILE"
+          grep -Fq 'SAMPLE_COUNT = 41' <<<"$PREV_FILE"
+          grep -Fq 'AMPLITUDE_DEG = 5.0' <<<"$PREV_FILE"
+          grep -Fq 'return AMPLITUDE_DEG * (math.sin(2.0 * math.pi * t) ** 3)' <<<"$PREV_FILE"
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact Animation evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          RIG=69640e558f0c1ac59d4d0e3155676e0967a03d04
+          RIG_SEM=061cf3235f177a2998bd5925d4e631d4d66cdf85
+          PREV_ANIM=e89db4cd53387a477fc98353caa1cdbd47b82ac6
+          GEO=d32a41558910d78595042fb638a785714f825806
+          OUT=evidence/north-low-parent-exclusion-animation-009
+          mkdir -p "$OUT"
+          git show "$GEO:contracts/east-rear-north-low-attachment-topology-geometry-005.json" > "$OUT/geometry-donor-contract.json"
+          python tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+            --geometry-contract "$OUT/geometry-donor-contract.json" \
+            --output "$OUT/evidence.json" \
+            | tee "$OUT/verifier.log"
+          cp contracts/east-rear-north-low-parent-exclusion-animation-009.json "$OUT/contract.json"
+          cp docs/ANIMATION_EAST_REAR_NORTH_LOW_PARENT_EXCLUSION_TEMPORAL_REBIND_009.md "$OUT/README.md"
+          cp src/axm_nature_design/rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py "$OUT/animation-receiver.py"
+          cp tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py "$OUT/verifier.py"
+          git show "$PREV_ANIM:src/axm_nature_design/rear_tree_animation_shared_driver.py" > "$OUT/previous-animation-owner.py"
+          git rev-parse "$PREV_ANIM:src/axm_nature_design/rear_tree_animation_shared_driver.py" > "$OUT/previous-animation-owner-blob.txt"
+          git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py > "$OUT/current-parent-exclusion-blob.txt"
+          git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py > "$OUT/current-attachment-gate-blob.txt"
+          git rev-parse HEAD > "$OUT/exact-head.txt"
+          printf '%s\n' "$RIG" > "$OUT/current-rigging-owner-head.txt"
+          printf '%s\n' "$RIG_SEM" > "$OUT/current-rigging-semantic-head.txt"
+          printf '%s\n' "$PREV_ANIM" > "$OUT/previous-animation-head.txt"
+          printf '%s\n' "$GEO" > "$OUT/geometry-donor-head.txt"
+
+      - name: Assert bounded truth boundary
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('evidence/north-low-parent-exclusion-animation-009/evidence.json').read_text())
+          assert report['result'] == 'PASS_NORTH_LOW_PARENT_EXCLUSION_TEMPORAL_REBIND_SAMPLED_DIAGNOSTIC_MOTION', report
+          assert report['measurements']['sample_count'] == 41, report
+          assert report['measurements']['maximum_parent_command_leak_m'] <= 1e-12, report
+          assert report['measurements']['endpoint_closure_m'] <= 1e-12, report
+          assert report['measurements']['repeat_seam_residual_m'] <= 1e-12, report
+          assert report['measurements']['maximum_counterfactual_inherited_parent_output_delta_m'] > 1e-6, report
+          assert report['motion_scope']['attachment_mode'] == 'DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY', report
+          assert report['motion_scope']['diagnostic_parent_weight'] == 0.0, report
+          assert report['all_failure_controls_rejected'] is True, report
+          truth = report['truth_boundary']
+          assert truth['target_engine_playback_claimed'] is False, truth
+          assert truth['runtime_controller_state_machine_input_or_device_claimed'] is False, truth
+          assert truth['physics_or_gameplay_claimed'] is False, truth
+          assert truth['canon_or_production_readiness_claimed'] is False, truth
+          PY
+
+      - name: Upload exact Animation evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-parent-exclusion-animation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-parent-exclusion-animation-009
+          if-no-files-found: error
