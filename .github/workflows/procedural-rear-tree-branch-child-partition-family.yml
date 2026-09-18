@@ -1,0 +1,84 @@
+name: Procedural Nature branch child-partition family
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact Organic owner head
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a
+          path: .studio-deps/organic-east-rear-current
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact branch partition family evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_branch_child_partition_family_evidence.py
+          evidence/nature-rear-tree-branch-child-partition-family-001
+          --organic-root .studio-deps/organic-east-rear-current
+
+      - name: Verify bounded family truth gate
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(
+              Path("evidence/nature-rear-tree-branch-child-partition-family-001/summary.json").read_text()
+          )
+          assert data["state"] == "PASS_BOUNDED_PRIMARY_BRANCH_CHILD_PARTITION_FAMILY"
+          assert data["decision"] == "PASS_DERIVED_REGION_PARTITIONS_ONLY__NO_SOURCE_OR_RIGGING_ADOPTION"
+          assert data["organic_provider_head"] == "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a"
+          assert data["organic_source_digest"] == "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61"
+          assert data["organic_generated_mesh_digest"] == "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48"
+          assert data["generated_vertices"] == 390
+          assert data["generated_triangles"] == 570
+          assert data["branch_count"] == 5
+          assert data["partition_count"] == 5
+          assert data["distinct_partition_digest_count"] == 5
+          assert data["distinct_vertex_index_digest_count"] == 5
+          assert data["pairwise_vertex_disjoint"] is True
+          assert data["family_digest"] == data["reverse_order_family_digest"]
+          assert all(row["vertex_count"] == 52 for row in data["partitions"])
+          assert all(row["triangle_count"] == 72 for row in data["partitions"])
+          assert all(row["fixed_vertex_count"] == 338 for row in data["partitions"])
+          assert all(row["deformation_tested"] is False for row in data["partitions"])
+          assert all(row["source_authorized"] is False for row in data["partitions"])
+          assert all(row["rigging_authorized"] is False for row in data["partitions"])
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 10
+          print("PASS_NATURE_PRIMARY_BRANCH_CHILD_PARTITION_FAMILY_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained partition evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-rear-tree-branch-child-partition-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-branch-child-partition-family-001
+          if-no-files-found: error

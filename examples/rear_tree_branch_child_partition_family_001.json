@@ -1,0 +1,47 @@
+{
+  "automatic_rigging_adoption": false,
+  "branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "deformation_semantics_authorized": false,
+  "expected_generated_mesh": {
+    "triangles": 570,
+    "vertices": 390
+  },
+  "expected_partition": {
+    "branch_regions": 2,
+    "fixed_vertices": 338,
+    "leaf_regions": 4,
+    "triangles": 72,
+    "vertices": 52
+  },
+  "failure_policy": "FAIL_CLOSED_ON_OWNER_HEAD_BLOB_OR_MESH_DRIFT_UNKNOWN_OR_DUPLICATE_BRANCH_REGION_DRIFT_FLEX_ROOT_OR_STATUS_DRIFT_OR_AUTHORITY_EXPANSION",
+  "family_id": "east-rear-tree-primary-branch-child-partition-family-001",
+  "organic_provider": {
+    "builder_blob": "d4d8462eefc8faef513163c9d20280ad46428917",
+    "builder_path": "src/axm_nature_design/organic_form.py",
+    "generated_mesh_digest": "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48",
+    "pr": 8,
+    "ref": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "source_path": "examples/east_rear_tree_neutral_001.json"
+  },
+  "relation": "DERIVED_REGION_PARTITION_REVIEW_ONLY_NOT_RIGGING_AUTHORITY",
+  "rigging_receiver_witness": {
+    "branch_id": "north-top",
+    "head": "87ce8b2ff10937abec4432e1c6d5a7114a076cdb",
+    "pr": 14,
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "selected_triangles": 72,
+    "selected_vertices": 52
+  },
+  "schema": "axm.nature-branch-child-partition-family/v0.1",
+  "source_mutation_authorized": false,
+  "truth_boundary": "This family derives only exact generated-region membership for each already-authored primary east-rear branch plus its matching leaf cluster. It does not move Organic source points, choose or change flex metadata, create joints or weights, test deformation, authorize Rigging adoption, establish wind response or biomechanics, alter Animation/Runtime/Map state, establish visual acceptance, CANON, production readiness, or Procedural mastery."
+}
