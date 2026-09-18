@@ -31,10 +31,13 @@ jobs:
           root = Path("evidence/east-rear-tree-neutral-001")
           report = json.loads((root / "evidence.json").read_text())
           readiness = json.loads((root / "deformation-readiness.json").read_text())
+          historical_mesh = "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48"
+          migrated_mesh = "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31"
           assert report["status"] == "PASS_REAR_SOURCE_ENVELOPE", report
           assert all(report["checks"].values()), report
           assert report["source_digest"] == "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61", report
-          assert report["mesh_digest"] == "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48", report
+          assert report["mesh_digest"] == migrated_mesh, report
+          assert report["mesh_digest"] != historical_mesh, report
           assert report["vertices"] == 390, report
           assert report["triangles"] == 570, report
           assert report["receiving_context"]["replacement_target"] == "proxy:nature-tree-east-a", report
