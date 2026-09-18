@@ -68,7 +68,8 @@ jobs:
           assert g['shared_driver_values_deg'] == [-5.0, -2.5, 0.0, 2.5, 5.0]
           assert g['continuous_interval_claimed'] is False
           assert g['simultaneous_motion_claimed'] is False
-          assert v['nature_rigging_owner']['head'] == '754797a815266a643c6b08f1606eb76ba95dd8c6'
+          assert v['rigging_owner']['head'] == '754797a815266a643c6b08f1606eb76ba95dd8c6'
+          assert v['pose_semantics'] == 'STATIC_SIMULTANEOUS_VISUAL_RESPONSE_REVIEW_NOT_MOTION'
           PY
 
       - name: Set up Python
