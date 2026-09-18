@@ -62,7 +62,7 @@ def validate_contract(contract: dict) -> None:
         if key not in consumer:
             raise ValueError(f"Rigging consumer provenance missing: {key}")
     per_branch = consumer["expected_per_branch_selected_vertices"]
-    if not isinstance(per_branch, dict) or list(per_branch) != branch_ids:
+    if not isinstance(per_branch, dict) or set(per_branch) != set(branch_ids):
         raise ValueError("expected per-branch support identity drift")
     if any(not isinstance(per_branch[branch_id], int) or per_branch[branch_id] <= 0 for branch_id in branch_ids):
         raise ValueError("expected per-branch support counts must be positive integers")
@@ -171,7 +171,7 @@ def assemble_rigging_composition_rebind(
         raise ValueError("Rigging composition fixed-receiver identity drift")
     per_branch = composition.get("per_branch_selected_vertices", {})
     expected_per_branch = consumer["expected_per_branch_selected_vertices"]
-    if list(per_branch) != expected_branches or per_branch != expected_per_branch:
+    if set(per_branch) != set(expected_branches) or per_branch != expected_per_branch:
         raise ValueError("Rigging composition per-branch support drift")
 
     certificate = composition_evidence.get("continuous_parameter_certificate", {})
