@@ -1,0 +1,273 @@
+name: Animation Nature shared-driver target replay
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_animation_shared_driver.py"
+      - "tools/build_animation_shared_driver_target_replay.py"
+      - "contracts/east-rear-shared-driver-animation-target-replay-005.json"
+      - "target-proof-animation/sample_bridge.gd"
+      - "target-proof-animation/observe_shared_driver_animationplayer.gd"
+      - "target-proof-animation/project.godot"
+      - ".github/workflows/animation-east-rear-shared-driver-target-replay.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-current-animation-over-ta-window:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Animation head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Animation and Rigging identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          ANIMATION_PREDECESSOR=bfb66da82bc358b14e52711bbdef7b58e4c943af
+          RIGGING_OWNER=b4b480b415047fea90b4740f7702ced0dba9142d
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+          git merge-base --is-ancestor "$ANIMATION_PREDECESSOR" HEAD
+          git merge-base --is-ancestor "$RIGGING_OWNER" HEAD
+          git diff --exit-code "$ANIMATION_PREDECESSOR" HEAD -- \
+            src/axm_nature_design/rear_tree_animation_shared_driver.py \
+            src/axm_nature_design/rear_tree_rigging_shared_driver_composition.py \
+            src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py \
+            src/axm_nature_design/rear_tree_rigging_primary_branch_family.py
+          mkdir -p evidence/nature-shared-driver-target-replay-005
+          git rev-parse HEAD > evidence/nature-shared-driver-target-replay-005/exact-animation-head.txt
+          printf '%s\n' "$RIGGING_OWNER" > evidence/nature-shared-driver-target-replay-005/exact-rigging-owner-head.txt
+
+      - name: Checkout exact Technical Art receiver donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da60cd491ac7f9ac04f918dd000f464a627b3316
+          path: .ta
+
+      - name: Checkout exact Runtime receiver donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          path: .runtime
+
+      - name: Checkout exact Universal Creation receiver donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4
+          path: .uc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile and run full Nature suite
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Rebuild exact Technical Art dynamic-window receiver
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .ta rev-parse HEAD)" = da60cd491ac7f9ac04f918dd000f464a627b3316
+          test "$(git -C .runtime rev-parse HEAD)" = 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          test "$(git -C .uc rev-parse HEAD)" = 5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4
+          rm -rf /tmp/ta-window-receiver
+          mkdir -p /tmp/ta-window-receiver
+          PYTHONPATH=.ta/src:.uc/src \
+            python .ta/tools/build_uc_dynamic_window_target_evidence.py \
+              --runtime-root .runtime \
+              --uc-root .uc \
+              --out /tmp/ta-window-receiver
+          cp /tmp/ta-window-receiver/nature-east-rear-dynamic-window-uc-target-receipt.json \
+            evidence/nature-shared-driver-target-replay-005/exact-ta-window-receipt.json
+          cp /tmp/ta-window-receiver/nature-east-rear-dynamic-window-target-oracle.json \
+            evidence/nature-shared-driver-target-replay-005/exact-ta-static-oracle.json
+          printf '%s\n' da60cd491ac7f9ac04f918dd000f464a627b3316 \
+            > evidence/nature-shared-driver-target-replay-005/exact-technical-art-donor-head.txt
+
+      - name: Build exact current Animation target replay oracle
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/build_animation_shared_driver_target_replay.py \
+            --ta-receipt /tmp/ta-window-receiver/nature-east-rear-dynamic-window-uc-target-receipt.json \
+            --ta-oracle /tmp/ta-window-receiver/nature-east-rear-dynamic-window-target-oracle.json \
+            --ta-glb /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb \
+            --output evidence/nature-shared-driver-target-replay-005/animation-shared-driver-target-oracle.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('evidence/nature-shared-driver-target-replay-005/animation-shared-driver-target-oracle.json').read_text())
+          assert p['result']=='PASS_CURRENT_ANIMATION_SHARED_DRIVER_PACKETS_MATCH_TA_DYNAMIC_WINDOW',p
+          assert p['receiver']['dynamic_window_vertices']==[110,370],p
+          assert p['receiver']['selected_union_exactly_matches_ta_window'] is True,p
+          assert len(p['samples'])==41,p
+          assert p['samples'][0]['dynamic_target_positions_m']==p['samples'][40]['dynamic_target_positions_m'],p
+          assert p['measurements']['maximum_dynamic_target_component_motion_m'] > 0.05,p
+          assert p['measurements']['maximum_representative_packet_residual_vs_ta_static_oracle_m'] <= 1e-12,p
+          assert p['truth_boundary']['technical_art_current_animation_rigging_pair_adoption_claimed'] is False,p
+          assert p['truth_boundary']['runtime_controller_state_machine_or_input_claimed'] is False,p
+          assert p['truth_boundary']['gameplay_acceptance_claimed'] is False,p
+          PY
+
+      - name: Fail closed on receiver drift and authority inflation
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            --ta-receipt /tmp/ta-window-receiver/nature-east-rear-dynamic-window-uc-target-receipt.json
+            --ta-oracle /tmp/ta-window-receiver/nature-east-rear-dynamic-window-target-oracle.json
+            --ta-glb /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb
+          )
+          must_fail() {
+            label="$1"; shift
+            if python tools/build_animation_shared_driver_target_replay.py \
+                "${args[@]}" --output "/tmp/${label}.json" "$@"; then
+              echo "negative control unexpectedly passed: $label" >&2
+              exit 1
+            fi
+          }
+          must_fail window-drift --mutate-window-end 371
+          must_fail ta-adoption --claim-technical-art-current-pair-adoption
+          must_fail runtime-promotion --claim-runtime-controller
+          must_fail gameplay-promotion --claim-gameplay-acceptance
+          printf '%s\n' 'PASS_REJECTED_WINDOW_DRIFT_TA_ADOPTION_RUNTIME_AND_GAMEPLAY_AUTHORITY_INFLATION' \
+            > evidence/nature-shared-driver-target-replay-005/negative-controls.txt
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Exercise exact current loop through real AnimationPlayer
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf target-proof-animation/generated
+          mkdir -p target-proof-animation/generated
+          cp evidence/nature-shared-driver-target-replay-005/animation-shared-driver-target-oracle.json \
+            target-proof-animation/generated/animation-shared-driver-target-oracle.json
+          cp /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb \
+            target-proof-animation/generated/nature-east-rear-dynamic-window.glb
+          rm -f target-proof-animation/animation-shared-driver-godot-target-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof-animation \
+            --script observe_shared_driver_animationplayer.gd
+          cp target-proof-animation/animation-shared-driver-godot-target-receipt.json \
+            evidence/nature-shared-driver-target-replay-005/
+
+      - name: Validate exact real-Godot Animation result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('evidence/nature-shared-driver-target-replay-005/animation-shared-driver-godot-target-receipt.json').read_text())
+          assert p['state']=='PASS_NATURE_SHARED_DRIVER_ANIMATIONPLAYER_OVER_TA_DYNAMIC_WINDOW_RECEIVER',p
+          assert p['receiver']['vertex_count']==390,p
+          assert p['receiver']['dynamic_window_vertices']==[110,370],p
+          assert p['receiver']['mutable_position_stride_bytes']==12,p
+          assert p['receiver']['dynamic_byte_offset']==1320,p
+          assert p['receiver']['technical_art_current_animation_rigging_pair_adoption'] is False,p
+          s=p['exact_seek']
+          assert s['visible_authored_samples_checked']==40,p
+          assert s['endpoint_sample_40_checked_as_exact_sample_0'] is True,p
+          assert s['maximum_dynamic_readback_component_delta_m'] <= 5e-6,p
+          assert s['maximum_static_readback_component_delta_m'] <= 5e-6,p
+          assert s['endpoint_dynamic_readback_component_delta_m'] <= 5e-6,p
+          assert s['maximum_dynamic_distance_from_imported_neutral_m'] > 0.05,p
+          n=p['natural_playback_observation']
+          assert n['observed_wraps'] >= 2,p
+          assert n['distinct_authored_sample_indices_observed'] >= 8,p
+          assert n['full_40hz_source_slot_delivery_claimed'] is False,p
+          assert n['target_device_or_display_cadence_claimed'] is False,p
+          t=p['truth_boundary']
+          assert t['real_godot_animationplayer_replay_exercised'] is True,p
+          assert t['technical_art_current_pair_adoption_claimed'] is False,p
+          assert t['runtime_controller_state_machine_or_input_claimed'] is False,p
+          assert t['gameplay_acceptance_claimed'] is False,p
+          PY
+
+      - name: Fail closed on wrong target byte offset
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f target-proof-animation/animation-shared-driver-godot-target-receipt.json
+          if AXM_ANIMATION_PACKET_OFFSET_DELTA_BYTES=12 \
+            xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+              .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+              --display-driver x11 \
+              --rendering-method gl_compatibility \
+              --path target-proof-animation \
+              --script observe_shared_driver_animationplayer.gd; then
+            echo "wrong target byte offset unexpectedly passed" >&2
+            exit 1
+          fi
+          cp target-proof-animation/animation-shared-driver-godot-target-receipt.json \
+            evidence/nature-shared-driver-target-replay-005/negative-wrong-offset-receipt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('evidence/nature-shared-driver-target-replay-005/negative-wrong-offset-receipt.json').read_text())
+          assert p['state']=='FAIL_NATURE_SHARED_DRIVER_ANIMATIONPLAYER_TARGET_REPLAY',p
+          PY
+
+      - name: Retain exact replay provenance
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/nature-shared-driver-target-replay-005
+          mkdir -p "$root"
+          cp contracts/east-rear-shared-driver-animation-target-replay-005.json "$root/" || true
+          cp tools/build_animation_shared_driver_target_replay.py "$root/" || true
+          cp target-proof-animation/sample_bridge.gd "$root/" || true
+          cp target-proof-animation/observe_shared_driver_animationplayer.gd "$root/" || true
+          cp /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb "$root/" || true
+          git rev-parse HEAD > "$root/exact-animation-head.txt"
+          git -C .ta rev-parse HEAD > "$root/exact-technical-art-donor-head.txt" || true
+          git -C .runtime rev-parse HEAD > "$root/exact-runtime-donor-head.txt" || true
+          git -C .uc rev-parse HEAD > "$root/exact-uc-donor-head.txt" || true
+
+      - name: Upload retained current shared-driver target replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-shared-driver-animation-target-replay-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-shared-driver-target-replay-005
+          if-no-files-found: warn
+          retention-days: 30
