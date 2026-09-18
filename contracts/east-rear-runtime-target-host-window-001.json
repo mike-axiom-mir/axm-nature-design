@@ -1,0 +1,42 @@
+{
+  "schema": "axm.nature-runtime-east-rear-target-host-window/v0.1",
+  "owner_chain": {
+    "runtime_predecessor_head": "6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f",
+    "technical_art_receiver_head": "b96f794325f825188b6fd9a920e3fb575e43e467",
+    "vfx_owner_head": "ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475",
+    "rigging_owner_head": "754797a815266a643c6b08f1606eb76ba95dd8c6",
+    "uc_head": "5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4"
+  },
+  "bounded_question": "Can Godot 4.7.2 update only the exact existing source-index position window [110,370) and reproduce the full-position control on the Technical Art current-UC receiver?",
+  "receiver": {
+    "vertex_count": 390,
+    "dynamic_window_vertices": [110, 370],
+    "dynamic_vertex_count": 260,
+    "position_stride_bytes_expected": 12,
+    "full_position_bytes": 4680,
+    "dynamic_byte_offset": 1320,
+    "dynamic_byte_length": 3120,
+    "target_host": "Godot 4.7.2-stable GL Compatibility",
+    "target_api": "ArrayMesh.surface_update_vertex_region"
+  },
+  "comparison": {
+    "control": "fresh neutral receiver clone + full 390-vertex position update",
+    "candidate": "fresh neutral receiver clone + only vertices [110,370) updated at byte offset 1320",
+    "driver_witnesses_deg": [-5.0, -2.5, 0.0, 2.5, 5.0],
+    "position_gate_m": 0.000005,
+    "visual_gate": "no pixels above 1 LSB between fixed-view control/candidate renders"
+  },
+  "authority": {
+    "source_or_geometry_reauthored": false,
+    "runtime_window_reauthored": false,
+    "technical_art_transport_reauthored": false,
+    "vfx_or_wind_semantics_reauthored": false,
+    "animation_timing_reauthored": false,
+    "normal_or_tangent_deformation_correctness_claimed": false,
+    "target_device_performance_claimed": false,
+    "art_or_visual_qa_acceptance_claimed": false,
+    "generic_vegetation_policy_claimed": false,
+    "automatic_downstream_adoption": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}
