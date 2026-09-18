@@ -1,0 +1,46 @@
+{
+  "schema": "axm.nature-animation-five-socket-shared-driver-loop/v0.1",
+  "contract_id": "east-rear-shared-driver-animation-loop-004",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "rigging_owner": {
+    "pull_request": 14,
+    "head": "b4b480b415047fea90b4740f7702ced0dba9142d",
+    "result": "PASS_FIVE_SOCKET_SHARED_DRIVER_RIG_COMPOSITION_CONTINUOUS_PARAMETER_MINUS5_TO_PLUS5"
+  },
+  "previous_animation": {
+    "pull_request": 15,
+    "head": "b0771b3319b783103c8e4677d062c00419df7559",
+    "result": "PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_INDEPENDENT_DIAGNOSTIC_PULSE_FAMILY_SAMPLED_MOTION",
+    "role": "TIMING_IDENTITY_DONOR_ONLY"
+  },
+  "clip_id": "east-rear-five-socket-shared-driver-diagnostic-loop-004",
+  "truth_label": "ANIMATION_SHARED_DRIVER_DIAGNOSTIC_LOOP_NOT_WIND_NOT_BIOLOGICAL_ROM_NOT_COLLISION_NOT_CONTROLLER",
+  "duration_s": 1.0,
+  "sample_rate_hz": 40,
+  "endpoint_inclusive_samples": 41,
+  "visible_repeating_samples": 40,
+  "curve": "shared_driver_deg = 5 * sin(2*pi*t)^3 with exact semantic landmarks clamped",
+  "shared_driver_interval_deg": [-5.0, 5.0],
+  "command_sign_multiplier_by_branch": {
+    "south-low": 1.0,
+    "north-low": -1.0,
+    "east-mid": 1.0,
+    "west-high": -1.0,
+    "north-top": 1.0
+  },
+  "selected_vertex_union": 260,
+  "globally_fixed_vertices": 130,
+  "sampled_simultaneous_motion_claimed": true,
+  "natural_vegetation_motion_claimed": false,
+  "source_or_biological_rom_claimed": false,
+  "physical_wind_claimed": false,
+  "continuous_collision_clearance_claimed": false,
+  "vfx_motion_adoption_claimed": false,
+  "target_engine_playback_claimed": false,
+  "wall_clock_or_display_delivery_claimed": false,
+  "runtime_acceptance_claimed": false,
+  "gameplay_acceptance_claimed": false,
+  "art_or_visual_qa_acceptance_claimed": false,
+  "automatic_adoption": false,
+  "canon_or_production_readiness_claimed": false
+}
