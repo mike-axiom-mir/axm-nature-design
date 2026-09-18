@@ -1,0 +1,52 @@
+{
+  "acceptance": {
+    "exact_animation_samples_per_branch": 41,
+    "one_branch_at_a_time_only": true,
+    "require_exact_current_uc_glb_import": true,
+    "require_unrelated_branch_neutrality": true,
+    "require_wrong_angle_sign_negative_control": true,
+    "target_engine": "Godot 4.7.2 GL Compatibility",
+    "target_position_tolerance_m": 5e-06
+  },
+  "exact_inputs": {
+    "animation_head": "b0771b3319b783103c8e4677d062c00419df7559",
+    "animation_pr": 15,
+    "geometry_migrated_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
+    "rigging_head": "898529f602893c8f6be179bd3e9b6821fc099904",
+    "rigging_pr": 14,
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "uc_head": "5c772b65eeba75abd0eb7a6c9c471b2d9975019d"
+  },
+  "receiver_contract": {
+    "branch_ids": [
+      "south-low",
+      "north-low",
+      "east-mid",
+      "west-high",
+      "north-top"
+    ],
+    "branch_receiver_strategy": "PARTITION_EXACT_RIGGING_SELECTED_REGIONS_INTO_PIVOT_LOCAL_UC_SURFACES",
+    "coordinate_transform_determinant": -1,
+    "foliage_parent_strategy": "BRANCH_FOLIAGE_CHILD_OF_BRANCH_WOODY_PARENT",
+    "neutral_geometry_must_equal_existing_static_ta_bridge": true,
+    "source_to_uc_coordinates": "[x,y,z] -> [x,z,y]",
+    "target_angle_rule": "target_angle_deg = -source_owner_angle_deg",
+    "uc_core_change_required": false,
+    "uc_may_infer_nature_semantics": false
+  },
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "schema": "axm.nature-primary-branch-animation-target-contract/v0.1",
+  "technical_art_lane": {
+    "branch": "studio/uc-nature-surface-bridge-001",
+    "pr": 3
+  },
+  "truth_boundary": {
+    "art_or_visual_qa_acceptance": false,
+    "canon_or_production_readiness": false,
+    "collision_gameplay_or_physics": false,
+    "runtime_controller_or_target_device": false,
+    "simultaneous_multi_branch_motion": false,
+    "source_or_biological_rom": false,
+    "wind_or_vfx_behavior": false
+  }
+}

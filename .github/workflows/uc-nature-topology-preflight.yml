@@ -1,0 +1,192 @@
+name: UC nature topology + target culling evidence
+
+on:
+  push:
+    branches: [studio/uc-nature-surface-bridge-001]
+    paths:
+      - "src/axm_nature_design/uc_surface_bridge.py"
+      - "tests/test_uc_topology_preflight.py"
+      - "tools/build_uc_topology_preflight_evidence.py"
+      - "target-proof/**"
+      - ".github/workflows/uc-nature-topology-preflight.yml"
+  pull_request:
+    paths:
+      - "src/axm_nature_design/uc_surface_bridge.py"
+      - "tests/test_uc_topology_preflight.py"
+      - "tools/build_uc_topology_preflight_evidence.py"
+      - "target-proof/**"
+      - ".github/workflows/uc-nature-topology-preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-topology-and-target-culling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact Technical Art PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Bind exact Technical Art head
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          OBSERVED="$(git rev-parse HEAD)"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > exact-head.txt
+
+      - name: Checkout exact Geometry donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: e2224d4bf88f7e68503072c884e5a726b8d0c53d
+          path: .geometry
+
+      - name: Checkout exact rear Organic source donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12
+          path: .rear-source
+
+      - name: Checkout exact current Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 4ad22937779d569b0b5f96ff23f597af2727db19
+          path: .uc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compile and test explicit mesh bridge
+        run: |
+          python -m compileall -q src tests tools
+          PYTHONPATH=src python -m unittest tests.test_uc_surface_bridge tests.test_uc_topology_preflight -v
+
+      - name: Build exact three-source Geometry -> current UC evidence
+        run: |
+          rm -rf evidence/nature-uc-topology-preflight-001
+          mkdir -p evidence/nature-uc-topology-preflight-001
+          PYTHONPATH=src:.uc/src python tools/build_uc_topology_preflight_evidence.py \
+            --geometry-root .geometry \
+            --rear-source-root .rear-source \
+            --uc-root .uc \
+            --out evidence/nature-uc-topology-preflight-001
+          cp exact-head.txt evidence/nature-uc-topology-preflight-001/exact-technical-art-head.txt
+          git -C .geometry rev-parse HEAD > evidence/nature-uc-topology-preflight-001/exact-geometry-head.txt
+          git -C .rear-source rev-parse HEAD > evidence/nature-uc-topology-preflight-001/exact-rear-source-head.txt
+          git -C .uc rev-parse HEAD > evidence/nature-uc-topology-preflight-001/exact-uc-head.txt
+
+      - name: Validate bounded topology-preflight decision
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-uc-topology-preflight-001')
+          r=json.loads((root/'uc-topology-preflight-overall.json').read_text())
+          head=(root/'exact-technical-art-head.txt').read_text().strip()
+          assert r['state']=='PASS_EXACT_THREE_SOURCE_NATURE_TOPOLOGY_PREFLIGHT_THROUGH_CURRENT_UC_GLB',r
+          assert r['receiving_head']==head,(r['receiving_head'],head)
+          assert r['geometry_commit']=='e2224d4bf88f7e68503072c884e5a726b8d0c53d',r
+          assert r['rear_source_commit']=='a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12',r
+          assert r['uc_commit']=='4ad22937779d569b0b5f96ff23f597af2727db19',r
+          assert len(r['studies'])==3,r
+          assert r['pipeline_decision']['uc_core_change_required'] is False,r
+          assert r['pipeline_decision']['nature_domain_semantics_moved_to_uc'] is False,r
+          rear=r['studies']['east-rear-tree-neutral-001']
+          assert rear['source_digest']=='0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307',rear
+          assert rear['baseline_mesh_digest']=='d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48',rear
+          assert rear['candidate_mesh_digest']=='aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31',rear
+          for study in r['studies'].values():
+              assert study['flipped_triangle_count']==260,study
+              assert study['uc_source_topology_preflight']['baseline']['orientation_conflict_edge_count']==260,study
+              assert study['uc_source_topology_preflight']['candidate']['orientation_conflict_edge_count']==0,study
+              assert study['uc_emitted_woody_topology_preflight']['baseline']['orientation_conflict_edge_count']==260,study
+              assert study['uc_emitted_woody_topology_preflight']['candidate']['orientation_conflict_edge_count']==0,study
+              assert study['uc_glb']['baseline']['verification']['geometry_validation']['winding_matches_vertex_normals'] is True,study
+              assert study['uc_glb']['candidate']['verification']['geometry_validation']['winding_matches_vertex_normals'] is True,study
+          assert r['truth_boundary']['target_engine_culling_rendered'] is False,r
+          print(json.dumps(r['pipeline_decision'],indent=2))
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Observe exact UC GLBs under target-host culling
+        run: |
+          set -euo pipefail
+          rm -rf target-proof/generated
+          mkdir -p target-proof/generated
+          cp evidence/nature-uc-topology-preflight-001/uc-topology-preflight-overall.json target-proof/generated/
+          cp evidence/nature-uc-topology-preflight-001/east-rear-tree-neutral-001-baseline.glb target-proof/generated/
+          cp evidence/nature-uc-topology-preflight-001/east-rear-tree-neutral-001-candidate.glb target-proof/generated/
+          rm -f target-proof/nature-rear-tree-target-culling-receipt.json target-proof/*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof \
+            --script observe.gd
+          cp target-proof/nature-rear-tree-target-culling-receipt.json evidence/nature-uc-topology-preflight-001/
+          cp target-proof/baseline-*.png evidence/nature-uc-topology-preflight-001/
+          cp target-proof/candidate-*.png evidence/nature-uc-topology-preflight-001/
+
+      - name: Validate exact target-host culling evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-uc-topology-preflight-001')
+          pre=json.loads((root/'uc-topology-preflight-overall.json').read_text())
+          r=json.loads((root/'nature-rear-tree-target-culling-receipt.json').read_text())
+          assert r['state']=='PASS_REAR_TREE_UC_GLB_TARGET_CULLING_OBSERVED',r
+          assert r['receiving_head']==pre['receiving_head'],(r,pre)
+          assert r['geometry_commit']==pre['geometry_commit'],(r,pre)
+          assert r['rear_source_commit']==pre['rear_source_commit'],(r,pre)
+          assert r['uc_commit']==pre['uc_commit'],(r,pre)
+          assert r['baseline_mesh_digest']=='d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48',r
+          assert r['candidate_mesh_digest']=='aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31',r
+          assert r['expected_triangles']==620,r
+          for context in ('ground_oblique','high_oblique'):
+              c=r['comparisons'][context]
+              assert c['culling_disabled_baseline_vs_candidate']['changed_pixels']==0,c
+              assert c['culling_back_baseline_vs_candidate']['changed_pixels']>0,c
+          assert r['truth_boundary']['exact_uc_glb_bytes_imported'] is True,r
+          assert r['truth_boundary']['backface_culling_consequence_observed'] is True,r
+          assert r['truth_boundary']['outward_normal_correctness_proved'] is False,r
+          assert r['truth_boundary']['source_migration_approved'] is False,r
+          print(json.dumps(r,indent=2))
+          PY
+
+      - name: Retain exact Technical Art topology + target-host evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-uc-topology-target-culling-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-uc-topology-preflight-001
+          if-no-files-found: warn
+          retention-days: 30

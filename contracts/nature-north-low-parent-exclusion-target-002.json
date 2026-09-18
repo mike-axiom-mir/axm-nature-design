@@ -1,0 +1,50 @@
+{
+  "schema": "axm.nature-north-low-parent-exclusion-target-contract/v0.1",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "technical_art_lane": {
+    "pr": 3,
+    "branch": "studio/uc-nature-surface-bridge-001"
+  },
+  "exact_inputs": {
+    "animation_pr": 26,
+    "animation_head": "5cacd61e22433b0c33f29111827283b81cc0ba0d",
+    "rigging_pr": 14,
+    "rigging_head": "69640e558f0c1ac59d4d0e3155676e0967a03d04",
+    "geometry_attachment_donor_head": "d32a41558910d78595042fb638a785714f825806",
+    "uc_head": "7ddefca57b153fab02c1f54f38de22148cb52c1b",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "geometry_migrated_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31"
+  },
+  "receiver_contract": {
+    "branch_id": "north-low",
+    "attachment_mode": "DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY",
+    "diagnostic_parent_weight": 0.0,
+    "upper_trunk_parent_influence_enabled": false,
+    "parent_stress_command_is_not_receiver_motion": true,
+    "coordinate_transform_determinant": -1,
+    "source_to_uc_coordinates": "[x,y,z] -> [x,z,y]",
+    "target_angle_rule": "target_angle_deg = -north_low_child_angle_deg",
+    "neutral_geometry_must_equal_existing_static_ta_bridge": true,
+    "uc_core_change_required": false,
+    "uc_may_infer_nature_semantics": false
+  },
+  "acceptance": {
+    "exact_animation_samples": 41,
+    "visible_repeat_samples": 40,
+    "require_exact_current_uc_glb_import": true,
+    "require_unrelated_branch_neutrality": true,
+    "require_parent_command_as_child_rotation_negative": true,
+    "target_engine": "Godot 4.7.2 GL Compatibility",
+    "target_position_tolerance_m": 0.000005
+  },
+  "truth_boundary": {
+    "connected_attachment_claimed": false,
+    "production_skinning_claimed": false,
+    "upper_trunk_deformation_receiver_claimed": false,
+    "wind_or_vfx_behavior_claimed": false,
+    "runtime_controller_or_target_device_claimed": false,
+    "collision_gameplay_or_physics_claimed": false,
+    "art_or_visual_qa_acceptance_claimed": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}

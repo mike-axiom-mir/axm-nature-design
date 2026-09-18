@@ -1,0 +1,241 @@
+name: UC Nature source migration rebind evidence
+
+on:
+  push:
+    branches: [studio/uc-nature-surface-bridge-001]
+    paths:
+      - "src/axm_nature_design/uc_surface_bridge.py"
+      - "tools/build_uc_source_migration_rebind_evidence.py"
+      - "target-proof/observe_source_migration.gd"
+      - "target-proof/project.godot"
+      - ".github/workflows/uc-nature-source-migration-rebind.yml"
+  pull_request:
+    paths:
+      - "src/axm_nature_design/uc_surface_bridge.py"
+      - "tools/build_uc_source_migration_rebind_evidence.py"
+      - "target-proof/observe_source_migration.gd"
+      - "target-proof/project.godot"
+      - ".github/workflows/uc-nature-source-migration-rebind.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-migration-current-uc-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact Technical Art PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Bind exact Technical Art head
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          OBSERVED="$(git rev-parse HEAD)"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > exact-head.txt
+
+      - name: Checkout exact current Nature source-migration donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 9b451ba1f65281f550a6754e18574f7ab2951e28
+          path: .source-migration
+
+      - name: Checkout exact historical rear donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12
+          path: .historical
+
+      - name: Checkout exact current Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: ce70d717e381df6ca8a27c0c9fabe9d48bb1b23c
+          path: .uc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compile Technical Art bridge and rebind builder
+        run: python -m compileall -q src tools/build_uc_source_migration_rebind_evidence.py
+
+      - name: Build exact current source successor -> current UC evidence
+        run: |
+          rm -rf evidence/nature-uc-source-migration-rebind-001
+          mkdir -p evidence/nature-uc-source-migration-rebind-001
+          PYTHONPATH=src:.uc/src python tools/build_uc_source_migration_rebind_evidence.py \
+            --source-migration-root .source-migration \
+            --historical-root .historical \
+            --uc-root .uc \
+            --out evidence/nature-uc-source-migration-rebind-001
+          cp exact-head.txt evidence/nature-uc-source-migration-rebind-001/exact-technical-art-head.txt
+          git -C .source-migration rev-parse HEAD > evidence/nature-uc-source-migration-rebind-001/exact-source-migration-head.txt
+          git -C .historical rev-parse HEAD > evidence/nature-uc-source-migration-rebind-001/exact-historical-rear-head.txt
+          git -C .uc rev-parse HEAD > evidence/nature-uc-source-migration-rebind-001/exact-uc-head.txt
+          git -C .uc rev-parse HEAD:src/axm_uc/mesh_topology.py > evidence/nature-uc-source-migration-rebind-001/exact-uc-mesh-topology-blob.txt
+          git -C .uc rev-parse HEAD:src/axm_uc/procedural_3d.py > evidence/nature-uc-source-migration-rebind-001/exact-uc-procedural-3d-blob.txt
+
+      - name: Validate bounded current source-successor rebind decision
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-uc-source-migration-rebind-001')
+          r=json.loads((root/'uc-source-migration-rebind-overall.json').read_text())
+          head=(root/'exact-technical-art-head.txt').read_text().strip()
+          assert r['state']=='PASS_SOURCE_GENERATED_MIGRATED_NATURE_THROUGH_CURRENT_UC_GLB',r
+          assert r['schema']=='axm.nature-uc-source-migration-rebind/v0.2',r
+          assert r['receiving_head']==head,(r['receiving_head'],head)
+          assert r['source_migration_commit']=='9b451ba1f65281f550a6754e18574f7ab2951e28',r
+          assert r['predecessor_source_migration_commit']=='4ddbe66e5c02d22407ef773d5346a2fe6f349a2d',r
+          assert r['historical_rear_commit']=='a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12',r
+          assert r['geometry_oracle_commit']=='e2224d4bf88f7e68503072c884e5a726b8d0c53d',r
+          assert r['uc_commit']=='ce70d717e381df6ca8a27c0c9fabe9d48bb1b23c',r
+          assert r['uc_executable_blobs']['src/axm_uc/mesh_topology.py']=='b82c812d9c98799d0ccefa416ba2bd8d813245ee',r
+          assert r['uc_executable_blobs']['src/axm_uc/procedural_3d.py']=='cdb654d4d0f68a4ca7539d98a985d7a70cf7ee36',r
+          assert len(r['studies'])==3,r
+          assert r['pipeline_decision']['uc_core_change_required'] is False,r
+          assert r['pipeline_decision']['nature_domain_semantics_moved_to_uc'] is False,r
+          assert r['pipeline_decision']['nature_flex_semantics_moved_to_uc'] is False,r
+          assert r['pipeline_decision']['source_generator_bytes_consumed_directly'] is True,r
+          assert r['pipeline_decision']['derived_geometry_repair_reapplied_by_technical_art'] is False,r
+          assert r['pipeline_decision']['automatic_downstream_adoption'] is False,r
+          expected={
+            'sapling-neutral-001':('a61207b23c441b2cc0becd165fa62289bb7e51065ae0d6fa56bf9f3cab036cc1','47dd4d82651138299d05071df3e8a410f21f673ab8d42b936d7222eb5351b862'),
+            'compact-east-tree-neutral-001':('9c87cf26f02f7adee832908652942218ec779c9029a0611aae1fb66eb0f62f54','420135f6effbadb1b344675948b9ddc471dcb83177702888f0b32327c5121c18'),
+            'east-rear-tree-neutral-001':('178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61','aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31'),
+          }
+          for study_id, (source_digest, mesh_digest) in expected.items():
+              study=r['studies'][study_id]
+              assert study['source_digest']==source_digest,study
+              assert study['source_generated_migrated_mesh_digest']==mesh_digest,study
+              assert study['geometry_oracle_digest_match'] is True,study
+              assert study['uc_source_topology']['orientation_conflict_edge_count']==0,study
+              assert study['uc_emitted_woody_topology']['orientation_conflict_edge_count']==0,study
+              assert study['uc_glb']['verification']['geometry_validation']['winding_matches_vertex_normals'] is True,study
+          relation=r['metadata_successor']
+          assert relation['state']=='PASS_NATURE_EAST_REAR_METADATA_SUCCESSOR_TRANSPORT_EQUIVALENCE',relation
+          assert relation['current_source_digest']=='178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61',relation
+          assert relation['predecessor_source_digest']=='0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307',relation
+          assert relation['added_declaration']=={
+              'id':'north-top-branch-flex',
+              'center':[0.01,0.0,3.16],
+              'radius':0.12,
+              'status':'DECLARED_NOT_DEFORMATION_TESTED',
+          },relation
+          assert relation['migrated_mesh_byte_equivalent'] is True,relation
+          assert relation['technical_art_surface_byte_equivalent'] is True,relation
+          assert relation['current_uc_glb_byte_equivalent'] is True,relation
+          assert relation['technical_art_interprets_flex_semantics'] is False,relation
+          assert relation['nature_flex_semantics_moved_to_uc'] is False,relation
+          assert relation['automatic_downstream_adoption'] is False,relation
+          assert r['historical_rear']['source_digest']=='0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307',r
+          assert r['historical_rear']['mesh_digest']=='d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48',r
+          assert r['historical_rear']['uc_source_topology']['orientation_conflict_edge_count']==260,r
+          print(json.dumps({'metadata_successor': relation, 'pipeline_decision': r['pipeline_decision']},indent=2))
+          PY
+
+      - name: Fail closed on owner metadata drift
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src:.uc/src python - <<'PY' | tee evidence/nature-uc-source-migration-rebind-001/metadata-successor-negative-control.txt
+          import copy
+          import json
+          from pathlib import Path
+          from tools.build_uc_source_migration_rebind_evidence import verify_east_rear_metadata_successor
+          source=json.loads(Path('.source-migration/examples/east_rear_tree_neutral_001.json').read_text())
+          mutated=copy.deepcopy(source)
+          for zone in mutated['flex_zones']:
+              if zone.get('id')=='north-top-branch-flex':
+                  zone['radius']=0.13
+                  break
+          try:
+              verify_east_rear_metadata_successor(mutated)
+          except ValueError as exc:
+              print('PASS_REJECTED_OWNER_METADATA_DRIFT',str(exc))
+          else:
+              raise SystemExit('metadata drift was incorrectly accepted')
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Observe exact current source-generated UC GLB under target-host culling
+        run: |
+          set -euo pipefail
+          rm -rf target-proof/generated
+          mkdir -p target-proof/generated
+          cp evidence/nature-uc-source-migration-rebind-001/uc-source-migration-rebind-overall.json target-proof/generated/
+          cp evidence/nature-uc-source-migration-rebind-001/east-rear-tree-neutral-001-historical.glb target-proof/generated/
+          cp evidence/nature-uc-source-migration-rebind-001/east-rear-tree-neutral-001-source-migrated.glb target-proof/generated/
+          rm -f target-proof/nature-rear-tree-source-migration-culling-receipt.json target-proof/source-migration-*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof \
+            --script observe_source_migration.gd
+          cp target-proof/nature-rear-tree-source-migration-culling-receipt.json evidence/nature-uc-source-migration-rebind-001/
+          cp target-proof/source-migration-*.png evidence/nature-uc-source-migration-rebind-001/
+
+      - name: Validate exact target-host source-migration culling evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-uc-source-migration-rebind-001')
+          pre=json.loads((root/'uc-source-migration-rebind-overall.json').read_text())
+          r=json.loads((root/'nature-rear-tree-source-migration-culling-receipt.json').read_text())
+          assert r['state']=='PASS_SOURCE_GENERATED_MIGRATION_TARGET_CULLING_REPRODUCED',r
+          assert r['receiving_head']==pre['receiving_head'],(r,pre)
+          assert r['source_migration_commit']==pre['source_migration_commit'],(r,pre)
+          assert r['historical_rear_commit']==pre['historical_rear_commit'],(r,pre)
+          assert r['uc_commit']==pre['uc_commit'],(r,pre)
+          assert r['historical_mesh_digest']=='d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48',r
+          assert r['source_generated_migrated_mesh_digest']=='aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31',r
+          for context in ('ground_oblique','high_oblique'):
+              c=r['comparisons'][context]
+              assert c['culling_disabled_historical_vs_source_migrated']['changed_pixels']==0,c
+              assert c['culling_back_historical_vs_source_migrated']['changed_pixels']>0,c
+              assert c['source_migrated_back_vs_disabled']['changed_pixels']==0,c
+              assert c['historical_back_vs_disabled']['changed_pixels']>0,c
+          assert r['truth_boundary']['exact_source_generated_migrated_bytes_consumed'] is True,r
+          assert r['truth_boundary']['exact_current_uc_glb_bytes_imported'] is True,r
+          assert r['truth_boundary']['map_receiving_scene_tested'] is False,r
+          print(json.dumps(r['truth_boundary'],indent=2))
+          PY
+
+      - name: Retain exact Technical Art source-migration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-uc-source-migration-rebind-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-uc-source-migration-rebind-001
+          if-no-files-found: warn
+          retention-days: 30

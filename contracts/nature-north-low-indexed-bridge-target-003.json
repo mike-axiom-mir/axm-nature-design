@@ -1,0 +1,30 @@
+{
+  "schema": "axm.nature-north-low-indexed-bridge-target-contract/v0.1",
+  "purpose": "Bind the exact Geometry indexed-surface diagnostic bridge and exact Rigging endpoint owner through generic current UC into a real target-host endpoint-region transport proof.",
+  "exact_owners": {
+    "geometry_head": "8ab552710df21567cfd601af99181918e2cfadb3",
+    "rigging_head": "5c0c06be96996bad464846071b2a55622be14620",
+    "uc_head": "f7434152295bc9a3d57c59767481b2ef042ec675"
+  },
+  "receiver": {
+    "vertices": 16,
+    "triangles": 16,
+    "moving_vertex_region": [0, 8],
+    "fixed_vertex_region": [8, 16],
+    "position_stride_bytes": 12,
+    "moving_byte_offset": 0,
+    "moving_byte_length": 96,
+    "full_position_bytes": 192
+  },
+  "representative_rigging_angles_deg": [-5.0, -2.5, 0.0, 2.5, 5.0],
+  "authority": {
+    "geometry_or_rigging_reauthored": false,
+    "indexed_cut_or_connected_topology_claimed": false,
+    "animation_transfer_or_playback_claimed": false,
+    "production_skinning_claimed": false,
+    "runtime_device_or_performance_claimed": false,
+    "art_or_visual_qa_acceptance_claimed": false,
+    "uc_domain_policy_added": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}

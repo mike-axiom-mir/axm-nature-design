@@ -1,0 +1,251 @@
+name: UC Nature primary branch Animation target receiver
+
+on:
+  push:
+    branches: [studio/uc-nature-surface-bridge-001]
+    paths:
+      - "src/axm_nature_design/uc_primary_branch_receiver.py"
+      - "tools/build_uc_primary_branch_animation_target_evidence.py"
+      - "contracts/nature-primary-branch-animation-target-001.json"
+      - "target-proof/observe_primary_branch_animation.gd"
+      - ".github/workflows/uc-nature-primary-branch-animation-target.yml"
+  pull_request:
+    paths:
+      - "src/axm_nature_design/uc_primary_branch_receiver.py"
+      - "tools/build_uc_primary_branch_animation_target_evidence.py"
+      - "contracts/nature-primary-branch-animation-target-001.json"
+      - "target-proof/observe_primary_branch_animation.gd"
+      - ".github/workflows/uc-nature-primary-branch-animation-target.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-animation-current-uc-godot-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Technical Art head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Technical Art head
+        run: |
+          set -euo pipefail
+          OBSERVED="$(git rev-parse HEAD)"
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > /tmp/exact-technical-art-head.txt
+
+      - name: Checkout exact Animation owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: b0771b3319b783103c8e4677d062c00419df7559
+          path: .animation
+
+      - name: Checkout exact Rigging owner pinned by Animation
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 898529f602893c8f6be179bd3e9b6821fc099904
+          path: .rigging
+
+      - name: Checkout exact current Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 5c772b65eeba75abd0eb7a6c9c471b2d9975019d
+          path: .uc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compile Technical Art receiver
+        run: |
+          python -m compileall -q \
+            src/axm_nature_design/uc_primary_branch_receiver.py \
+            tools/build_uc_primary_branch_animation_target_evidence.py
+
+      - name: Re-run exact Rigging family prerequisite
+        run: |
+          set -euo pipefail
+          PYTHONPATH=.rigging/src \
+            python .rigging/tools/verify_rear_tree_primary_branch_rigging_family.py \
+              --output /tmp/exact-rigging-family-evidence.json
+
+      - name: Re-run exact Animation family prerequisite
+        run: |
+          set -euo pipefail
+          python .animation/tools/verify_rear_tree_animation_primary_branch_family.py \
+            --rigging-worktree .rigging \
+            --output /tmp/exact-animation-family-evidence.json \
+            --svg-output /tmp/exact-animation-family-review.svg
+
+      - name: Build exact Animation to current UC target receiver evidence
+        run: |
+          set -euo pipefail
+          rm -rf evidence/nature-primary-branch-animation-target-001
+          mkdir -p evidence/nature-primary-branch-animation-target-001
+          PYTHONPATH=src:.uc/src \
+            python tools/build_uc_primary_branch_animation_target_evidence.py \
+              --animation-root .animation \
+              --rigging-root .rigging \
+              --uc-root .uc \
+              --animation-evidence /tmp/exact-animation-family-evidence.json \
+              --rigging-evidence /tmp/exact-rigging-family-evidence.json \
+              --out evidence/nature-primary-branch-animation-target-001
+          cp /tmp/exact-technical-art-head.txt evidence/nature-primary-branch-animation-target-001/exact-technical-art-head.txt
+          cp /tmp/exact-animation-family-evidence.json evidence/nature-primary-branch-animation-target-001/
+          cp /tmp/exact-animation-family-review.svg evidence/nature-primary-branch-animation-target-001/
+
+      - name: Validate bounded pre-target receiver evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-primary-branch-animation-target-001')
+          r=json.loads((root/'nature-primary-branch-animation-uc-target-receipt.json').read_text())
+          assert r['result']=='PASS_NATURE_FIVE_PRIMARY_BRANCH_ANIMATION_CURRENT_UC_TARGET_RECEIVER_READY',r
+          assert r['heads']=={
+              'animation':'b0771b3319b783103c8e4677d062c00419df7559',
+              'rigging':'898529f602893c8f6be179bd3e9b6821fc099904',
+              'uc':'5c772b65eeba75abd0eb7a6c9c471b2d9975019d',
+          },r
+          assert r['receiver']['surface_primitive_count']==12,r
+          assert r['receiver']['nodes_rebound']==12,r
+          assert r['receiver']['parent_edges']==5,r
+          assert r['receiver']['emitted_triangles']==r['receiver']['baseline_emitted_triangles'],r
+          assert r['receiver']['neutral_world_geometry_equivalent_to_static_bridge'] is True,r
+          assert set(r['receiver']['branch_front_triangle_counts'].values())=={72},r
+          assert r['animation']['branch_count']==5,r
+          assert r['animation']['samples_per_branch']==[41,41,41,41,41],r
+          assert r['handedness_transport']['determinant']==-1,r
+          assert r['handedness_transport']['target_angle_rule']=='target_angle_deg = -source_owner_angle_deg',r
+          assert r['handedness_transport']['maximum_analytic_transport_residual_m'] <= 1e-9,r
+          assert r['handedness_transport']['maximum_unnegated_angle_residual_m'] > 1e-3,r
+          assert r['uc']['product_code_modified_by_technical_art'] is False,r
+          assert r['uc']['nature_domain_semantics_moved_to_uc'] is False,r
+          assert r['truth_boundary']['target_host_import_proven'] is False,r
+          assert r['truth_boundary']['simultaneous_multi_branch_motion_proven'] is False,r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Fail closed on authority inflation and missing handedness flip
+        run: |
+          set -euo pipefail
+          if PYTHONPATH=src:.uc/src python tools/build_uc_primary_branch_animation_target_evidence.py \
+              --animation-root .animation \
+              --rigging-root .rigging \
+              --uc-root .uc \
+              --animation-evidence /tmp/exact-animation-family-evidence.json \
+              --rigging-evidence /tmp/exact-rigging-family-evidence.json \
+              --out /tmp/negative-simultaneous \
+              --claim-simultaneous-motion; then
+            echo "simultaneous-motion authority inflation unexpectedly passed" >&2
+            exit 1
+          fi
+          if PYTHONPATH=src:.uc/src python tools/build_uc_primary_branch_animation_target_evidence.py \
+              --animation-root .animation \
+              --rigging-root .rigging \
+              --uc-root .uc \
+              --animation-evidence /tmp/exact-animation-family-evidence.json \
+              --rigging-evidence /tmp/exact-rigging-family-evidence.json \
+              --out /tmp/negative-angle \
+              --disable-angle-negation 2>&1 | tee /tmp/unnegated-angle-negative.txt; then
+            echo "unnegated target-angle control unexpectedly passed" >&2
+            exit 1
+          fi
+          grep -q "PASS_REJECTED_UNNEGATED_TARGET_ANGLE" /tmp/unnegated-angle-negative.txt
+          cp /tmp/unnegated-angle-negative.txt evidence/nature-primary-branch-animation-target-001/
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Exercise all 205 exact Animation samples in real Godot receiver
+        run: |
+          set -euo pipefail
+          rm -rf target-proof/generated
+          mkdir -p target-proof/generated
+          cp evidence/nature-primary-branch-animation-target-001/nature-primary-branch-animation-uc-target-receipt.json target-proof/generated/
+          cp evidence/nature-primary-branch-animation-target-001/nature-primary-branch-animation-target-oracle.json target-proof/generated/
+          cp evidence/nature-primary-branch-animation-target-001/nature-primary-branch-receiver-rigid.glb target-proof/generated/
+          rm -f target-proof/nature-primary-branch-animation-godot-target-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof \
+            --script observe_primary_branch_animation.gd
+          cp target-proof/nature-primary-branch-animation-godot-target-receipt.json \
+            evidence/nature-primary-branch-animation-target-001/
+
+      - name: Validate exact Godot target receiver result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-primary-branch-animation-target-001')
+          r=json.loads((root/'nature-primary-branch-animation-godot-target-receipt.json').read_text())
+          assert r['state']=='PASS_NATURE_FIVE_PRIMARY_BRANCH_ANIMATION_CURRENT_UC_GODOT_TARGET_RECEIVER',r
+          assert r['receiver_nodes_verified']==12,r
+          assert r['branch_parent_edges_verified']==5,r
+          assert r['independent_branch_clips_verified']==5,r
+          assert r['samples_verified']==205,r
+          assert r['maximum_imported_local_witness_delta_m'] <= 5e-6,r
+          assert r['maximum_target_sample_position_residual_m'] <= 5e-6,r
+          assert r['truth_boundary']['exact_current_uc_receiver_imported'] is True,r
+          assert r['truth_boundary']['exact_animation_owner_samples_exercised'] is True,r
+          assert r['truth_boundary']['independent_one_branch_at_a_time_target_playback_proven'] is True,r
+          assert r['truth_boundary']['simultaneous_multi_branch_motion_proven'] is False,r
+          assert r['truth_boundary']['wind_or_vfx_behavior_proven'] is False,r
+          assert r['truth_boundary']['runtime_controller_or_target_device_proven'] is False,r
+          assert r['truth_boundary']['uc_inferred_nature_semantics'] is False,r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Retain exact source and contract provenance
+        if: always()
+        run: |
+          set -euo pipefail
+          root=evidence/nature-primary-branch-animation-target-001
+          mkdir -p "$root"
+          cp contracts/nature-primary-branch-animation-target-001.json "$root/" || true
+          cp src/axm_nature_design/uc_primary_branch_receiver.py "$root/" || true
+          cp tools/build_uc_primary_branch_animation_target_evidence.py "$root/" || true
+          cp target-proof/observe_primary_branch_animation.gd "$root/" || true
+          git rev-parse HEAD > "$root/exact-technical-art-head.txt"
+          git -C .animation rev-parse HEAD > "$root/exact-animation-head.txt"
+          git -C .rigging rev-parse HEAD > "$root/exact-rigging-head.txt"
+          git -C .uc rev-parse HEAD > "$root/exact-uc-head.txt"
+
+      - name: Upload retained Nature Animation target evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-primary-branch-animation-target-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-primary-branch-animation-target-001
+          if-no-files-found: warn
+          retention-days: 30

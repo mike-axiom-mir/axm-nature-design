@@ -1,0 +1,44 @@
+{
+  "schema": "axm.nature-east-rear-dynamic-window-target-contract/v0.1",
+  "owner_chain": {
+    "runtime_head": "6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f",
+    "vfx_head": "ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475",
+    "rigging_head": "754797a815266a643c6b08f1606eb76ba95dd8c6",
+    "uc_head": "5c5d2cfdc3aa4e9462fd4d5ec5bc7874f12674a4"
+  },
+  "source": {
+    "digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
+    "vertex_count": 390
+  },
+  "runtime_window": {
+    "source_vertex_indices": [110, 370],
+    "vertex_count": 260,
+    "source_reindexed": false,
+    "index_buffer_changed": false,
+    "position_stride_bytes": 12,
+    "full_position_bytes": 4680,
+    "dynamic_position_bytes": 3120
+  },
+  "technical_art_transport": {
+    "source_to_uc": "[x,y,z] -> [x,z,y]",
+    "determinant": -1,
+    "triangle_winding_reversed_exactly_once": true,
+    "source_vertex_to_uc_vertex_index_identity_required": true,
+    "target_host": "Godot 4.7.2 GL Compatibility",
+    "target_update_api": "ArrayMesh.surface_update_vertex_region",
+    "target_dynamic_byte_offset": 1320,
+    "target_dynamic_byte_length": 3120
+  },
+  "authority": {
+    "source_or_geometry_reauthored": false,
+    "runtime_window_reauthored": false,
+    "vfx_or_wind_semantics_reauthored": false,
+    "animation_timing_reauthored": false,
+    "uc_domain_policy_added": false,
+    "target_device_performance_claimed": false,
+    "art_or_visual_qa_acceptance_claimed": false,
+    "automatic_downstream_adoption": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}

@@ -1,0 +1,302 @@
+name: UC Nature north-low parent-exclusion target receiver
+
+on:
+  push:
+    branches: [studio/uc-nature-surface-bridge-001]
+    paths:
+      - "contracts/nature-north-low-parent-exclusion-target-002.json"
+      - "tools/build_uc_north_low_parent_exclusion_target_evidence.py"
+      - "target-proof/observe_north_low_parent_exclusion.gd"
+      - ".github/workflows/uc-nature-north-low-parent-exclusion-target.yml"
+  pull_request:
+    paths:
+      - "contracts/nature-north-low-parent-exclusion-target-002.json"
+      - "tools/build_uc_north_low_parent_exclusion_target_evidence.py"
+      - "target-proof/observe_north_low_parent_exclusion.gd"
+      - ".github/workflows/uc-nature-north-low-parent-exclusion-target.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-current-animation-current-uc-godot-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Technical Art head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Technical Art head
+        shell: bash
+        run: |
+          set -euo pipefail
+          OBSERVED="$(git rev-parse HEAD)"
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > /tmp/exact-technical-art-head.txt
+
+      - name: Checkout exact current Animation owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 5cacd61e22433b0c33f29111827283b81cc0ba0d
+          path: .animation
+          fetch-depth: 0
+
+      - name: Checkout exact current Rigging owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 69640e558f0c1ac59d4d0e3155676e0967a03d04
+          path: .rigging
+          fetch-depth: 0
+
+      - name: Checkout exact current Universal Creation donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 7ddefca57b153fab02c1f54f38de22148cb52c1b
+          path: .uc
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compile Technical Art integration
+        run: |
+          python -m compileall -q \
+            src/axm_nature_design/uc_primary_branch_receiver.py \
+            tools/build_uc_north_low_parent_exclusion_target_evidence.py
+
+      - name: Test receiving Technical Art branch
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v
+
+      - name: Re-run exact current Rigging family prerequisite
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=.rigging/src \
+            python .rigging/tools/verify_rear_tree_primary_branch_rigging_family.py \
+              --output /tmp/exact-current-rigging-family-evidence.json
+
+      - name: Re-run exact current Animation parent-exclusion prerequisite
+        shell: bash
+        run: |
+          set -euo pipefail
+          GEO=d32a41558910d78595042fb638a785714f825806
+          if ! git -C .animation cat-file -e "$GEO^{commit}" 2>/dev/null; then
+            git -C .animation fetch --no-tags origin "$GEO"
+          fi
+          git -C .animation show "$GEO:contracts/east-rear-north-low-attachment-topology-geometry-005.json" \
+            > /tmp/exact-geometry-attachment-contract.json
+          PYTHONPATH=.animation/src \
+            python .animation/tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+              --source .animation/examples/east_rear_tree_neutral_001.json \
+              --geometry-contract /tmp/exact-geometry-attachment-contract.json \
+              --output /tmp/exact-current-animation-evidence.json \
+              | tee /tmp/exact-current-animation-verifier.log
+
+      - name: Build exact current Animation to current UC target receiver evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-parent-exclusion-target-002
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          PYTHONPATH=src:.uc/src \
+            python tools/build_uc_north_low_parent_exclusion_target_evidence.py \
+              --animation-root .animation \
+              --rigging-root .rigging \
+              --uc-root .uc \
+              --animation-evidence /tmp/exact-current-animation-evidence.json \
+              --rigging-evidence /tmp/exact-current-rigging-family-evidence.json \
+              --out "$ROOT" \
+              | tee "$ROOT/pre-target-builder.log"
+          cp /tmp/exact-current-animation-evidence.json "$ROOT/"
+          cp /tmp/exact-current-rigging-family-evidence.json "$ROOT/"
+          cp /tmp/exact-current-animation-verifier.log "$ROOT/"
+          cp /tmp/exact-geometry-attachment-contract.json "$ROOT/"
+          cp /tmp/exact-technical-art-head.txt "$ROOT/"
+
+      - name: Validate bounded pre-target receiver evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-north-low-parent-exclusion-target-002')
+          r=json.loads((root/'nature-north-low-parent-exclusion-uc-target-receipt.json').read_text())
+          assert r['result']=='PASS_NATURE_NORTH_LOW_PARENT_EXCLUSION_CURRENT_UC_TARGET_RECEIVER_READY',r
+          assert r['heads']=={
+              'animation':'5cacd61e22433b0c33f29111827283b81cc0ba0d',
+              'rigging':'69640e558f0c1ac59d4d0e3155676e0967a03d04',
+              'uc':'7ddefca57b153fab02c1f54f38de22148cb52c1b',
+          },r
+          assert r['receiver']['surface_primitive_count']==12,r
+          assert r['receiver']['nodes_rebound']==12,r
+          assert r['receiver']['parent_edges']==5,r
+          assert r['receiver']['emitted_triangles']==r['receiver']['baseline_emitted_triangles'],r
+          assert r['receiver']['neutral_world_geometry_equivalent_to_static_bridge'] is True,r
+          assert r['animation']['branch_id']=='north-low',r
+          assert r['animation']['attachment_mode']=='DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY',r
+          assert r['animation']['diagnostic_parent_weight']==0.0,r
+          assert r['animation']['upper_trunk_parent_influence_enabled'] is False,r
+          assert r['animation']['sample_count']==41,r
+          assert r['animation']['visible_repeat_samples']==40,r
+          assert r['animation']['maximum_parent_command_leak_m'] <= 1e-12,r
+          assert r['animation']['maximum_counterfactual_inherited_parent_output_delta_m'] > 1e-6,r
+          assert r['handedness_transport']['determinant']==-1,r
+          assert r['handedness_transport']['maximum_analytic_transport_residual_m'] <= 1e-9,r
+          assert r['parent_exclusion_transport']['maximum_parent_stress_command_abs_deg'] >= 2.49,r
+          assert r['parent_exclusion_transport']['maximum_forbidden_parent_command_as_child_rotation_residual_m'] > 1e-3,r
+          assert r['uc']['product_code_modified_by_technical_art'] is False,r
+          assert r['uc']['nature_domain_semantics_moved_to_uc'] is False,r
+          assert r['truth_boundary']['target_host_import_proven'] is False,r
+          assert r['truth_boundary']['upper_trunk_deformation_receiver_proven'] is False,r
+          assert r['truth_boundary']['connected_attachment_or_production_skinning_proven'] is False,r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Fail closed on parent-command leak and attachment authority inflation
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-parent-exclusion-target-002
+          if PYTHONPATH=src:.uc/src python tools/build_uc_north_low_parent_exclusion_target_evidence.py \
+              --animation-root .animation \
+              --rigging-root .rigging \
+              --uc-root .uc \
+              --animation-evidence /tmp/exact-current-animation-evidence.json \
+              --rigging-evidence /tmp/exact-current-rigging-family-evidence.json \
+              --out /tmp/negative-parent-command \
+              --apply-parent-command-as-child-rotation 2>&1 | tee /tmp/negative-parent-command.log; then
+            echo "parent-command-as-child-rotation negative unexpectedly passed" >&2
+            exit 1
+          fi
+          grep -q "PASS_REJECTED_PARENT_COMMAND_AS_CHILD_ROTATION" /tmp/negative-parent-command.log
+          cp /tmp/negative-parent-command.log "$ROOT/"
+
+          python - <<'PY'
+          import json
+          p='/tmp/exact-current-animation-evidence.json'
+          value=json.load(open(p))
+          value['motion_scope']['attachment_mode']='CONNECTED_PRODUCTION_ATTACHMENT'
+          with open('/tmp/mutated-animation-authority.json','w') as f:
+              json.dump(value,f,sort_keys=True,separators=(',',':'))
+          PY
+          if PYTHONPATH=src:.uc/src python tools/build_uc_north_low_parent_exclusion_target_evidence.py \
+              --animation-root .animation \
+              --rigging-root .rigging \
+              --uc-root .uc \
+              --animation-evidence /tmp/mutated-animation-authority.json \
+              --rigging-evidence /tmp/exact-current-rigging-family-evidence.json \
+              --out /tmp/negative-attachment-authority 2>&1 | tee /tmp/negative-attachment-authority.log; then
+            echo "attachment authority inflation unexpectedly passed" >&2
+            exit 1
+          fi
+          grep -q "current detached attachment-mode gate drift" /tmp/negative-attachment-authority.log
+          cp /tmp/negative-attachment-authority.log "$ROOT/"
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Exercise all 41 exact current Animation samples in real Godot receiver
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-parent-exclusion-target-002
+          rm -rf target-proof/generated
+          mkdir -p target-proof/generated
+          cp "$ROOT/nature-north-low-parent-exclusion-uc-target-receipt.json" target-proof/generated/
+          cp "$ROOT/nature-north-low-parent-exclusion-target-oracle.json" target-proof/generated/
+          cp "$ROOT/nature-north-low-parent-exclusion-receiver-rigid.glb" target-proof/generated/
+          rm -f target-proof/nature-north-low-parent-exclusion-godot-target-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof \
+            --script observe_north_low_parent_exclusion.gd \
+            | tee "$ROOT/godot-target.log"
+          cp target-proof/nature-north-low-parent-exclusion-godot-target-receipt.json "$ROOT/"
+
+      - name: Validate exact Godot target receiver result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/nature-north-low-parent-exclusion-target-002')
+          r=json.loads((root/'nature-north-low-parent-exclusion-godot-target-receipt.json').read_text())
+          assert r['state']=='PASS_NATURE_NORTH_LOW_PARENT_EXCLUSION_CURRENT_UC_GODOT_TARGET',r
+          assert r['receiver_nodes_verified']==12,r
+          assert r['north_low_parent_edge_verified'] is True,r
+          assert r['samples_verified']==41,r
+          assert r['visible_repeat_samples']==40,r
+          assert r['maximum_imported_local_witness_delta_m'] <= 5e-6,r
+          assert r['maximum_target_sample_position_residual_m'] <= 5e-6,r
+          assert r['maximum_witness_motion_from_neutral_m'] > 1e-3,r
+          assert r['maximum_parent_stress_command_abs_deg'] >= 2.49,r
+          assert r['nonzero_parent_stress_samples'] > 0,r
+          assert r['forbidden_parent_command_as_child_rotation_max_residual_m'] > 1e-3,r
+          assert r['truth_boundary']['exact_current_uc_receiver_imported'] is True,r
+          assert r['truth_boundary']['exact_current_animation_samples_exercised'] is True,r
+          assert r['truth_boundary']['detached_child_target_transport_proven'] is True,r
+          assert r['truth_boundary']['parent_stress_command_applied_as_receiver_motion'] is False,r
+          assert r['truth_boundary']['upper_trunk_deformation_receiver_proven'] is False,r
+          assert r['truth_boundary']['connected_attachment_or_production_skinning_proven'] is False,r
+          assert r['truth_boundary']['runtime_controller_or_target_device_proven'] is False,r
+          assert r['truth_boundary']['uc_inferred_nature_semantics'] is False,r
+          print(json.dumps(r,indent=2,sort_keys=True))
+          PY
+
+      - name: Retain exact source and contract provenance
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/nature-north-low-parent-exclusion-target-002
+          mkdir -p "$ROOT"
+          cp contracts/nature-north-low-parent-exclusion-target-002.json "$ROOT/" || true
+          cp src/axm_nature_design/uc_primary_branch_receiver.py "$ROOT/" || true
+          cp tools/build_uc_north_low_parent_exclusion_target_evidence.py "$ROOT/" || true
+          cp target-proof/observe_north_low_parent_exclusion.gd "$ROOT/" || true
+          cp .github/workflows/uc-nature-north-low-parent-exclusion-target.yml "$ROOT/" || true
+          git rev-parse HEAD > "$ROOT/exact-technical-art-head.txt"
+          git -C .animation rev-parse HEAD > "$ROOT/exact-animation-head.txt"
+          git -C .rigging rev-parse HEAD > "$ROOT/exact-rigging-head.txt"
+          git -C .uc rev-parse HEAD > "$ROOT/exact-uc-head.txt"
+          git -C .uc rev-parse HEAD:src/axm_uc/procedural_3d.py > "$ROOT/uc-procedural-3d-blob.txt"
+          git -C .uc rev-parse HEAD:src/axm_uc/rigid_scene_graph.py > "$ROOT/uc-rigid-scene-graph-blob.txt"
+
+      - name: Upload retained current north-low target evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-parent-exclusion-target-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-north-low-parent-exclusion-target-002
+          if-no-files-found: warn
+          retention-days: 30
