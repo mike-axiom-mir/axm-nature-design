@@ -30,13 +30,21 @@ jobs:
           from pathlib import Path
           root = Path("evidence/east-rear-tree-neutral-001")
           report = json.loads((root / "evidence.json").read_text())
+          readiness = json.loads((root / "deformation-readiness.json").read_text())
           assert report["status"] == "PASS_REAR_SOURCE_ENVELOPE", report
           assert all(report["checks"].values()), report
           assert report["vertices"] == 390, report
           assert report["triangles"] == 570, report
           assert report["receiving_context"]["replacement_target"] == "proxy:nature-tree-east-a", report
           assert report["receiving_context"]["seed"] == 29, report
-          print(json.dumps(report, indent=2))
+          assert readiness["state"] == "HOLD_BRANCH_ROOT_FLEX_ZONE_COVERAGE", readiness
+          assert readiness["checks"]["all_branch_roots_have_neutral_trunk_support"], readiness
+          assert readiness["branch_count"] == 5, readiness
+          assert readiness["branch_roots_with_exact_flex_zone"] == 4, readiness
+          assert readiness["branch_roots_missing_exact_flex_zone"] == ["north-top"], readiness
+          assert readiness["minimum_neutral_support_margin_after_branch_radius_m"] > 0.0, readiness
+          assert not readiness["truth_boundary"]["deformation_simulated"], readiness
+          print(json.dumps({"envelope": report, "deformation_readiness": readiness}, indent=2))
           PY
       - name: Upload exact rear-tree evidence
         if: matrix.python == '3.11'
