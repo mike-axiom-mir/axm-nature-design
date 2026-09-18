@@ -331,7 +331,7 @@ def main() -> None:
     receiving_head = git_head(Path.cwd())
     overall = {
         "schema": "axm.nature-uc-source-migration-rebind/v0.2",
-        "state": "PASS_CURRENT_NATURE_SOURCE_SUCCESSOR_THROUGH_CURRENT_UC_GLB",
+        "state": "PASS_SOURCE_GENERATED_MIGRATED_NATURE_THROUGH_CURRENT_UC_GLB",
         "receiving_repository": "mike-axiom-mir/axm-nature-design",
         "receiving_head": receiving_head,
         "source_migration_repository": "mike-axiom-mir/axm-nature-design",
