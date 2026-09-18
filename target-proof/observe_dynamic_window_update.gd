@@ -58,7 +58,7 @@ func find_mesh(node: Node) -> MeshInstance3D:
     if node is MeshInstance3D:
         return node as MeshInstance3D
     for child in node.get_children():
-        var found := find_mesh(child, wanted) if false else find_mesh(child)
+        var found := find_mesh(child)
         if found != null:
             return found
     return null
