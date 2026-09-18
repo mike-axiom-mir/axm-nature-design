@@ -16,26 +16,53 @@ This extends the existing east/rear Runtime lane only after Technical Art suppli
 
 Can Godot 4.7.2 exercise `ArrayMesh.surface_update_vertex_region()` against the exact current-UC receiver, updating only the already-proven contiguous moving source-index window `[110,370)` while reproducing a full-position update control?
 
-The control and candidate both begin from fresh copies of the same neutral imported `ArrayMesh` for every retained witness:
+The control and candidate both begin from fresh copies of the same neutral receiver for every retained witness:
 
-- control: update all 390 positions (`4,680 B`);
+- control: update all 390 float32 positions (`4,680 B`);
 - candidate: update only vertices `[110,370)` (`260` positions / `3,120 B`) at byte offset `1,320`;
 - retained driver witnesses: `-5 / -2.5 / 0 / +2.5 / +5 deg`.
 
-The target observer measures the actual imported position-buffer stride/offset before updating. The contract requires Godot to report a 12-byte Vector3 vertex-position stride and zero position-buffer base offset for this exact receiver rather than assuming that layout from source code.
+## Measure-before target-host layout discovery
+
+The first target-host attempt deliberately measured the imported receiver instead of assuming the source-side 12-byte position layout. Godot 4.7.2 imports this exact GLB with compressed positions:
+
+- imported vertex-position stride: **8 B**;
+- imported position buffer: **3,120 B** for 390 vertices;
+- imported positions compressed: **true**.
+
+That means the pass-52 float32 packet cannot be applied directly to the imported buffer using source-side offsets. The first target-host workflow is retained as a failed predecessor rather than hidden.
+
+The bounded Runtime repair creates a dynamic-update `ArrayMesh` from the exact imported arrays. Godot then exposes the mutable float32 position path actually consumed by `surface_update_vertex_region()`:
+
+- mutable vertex-position stride: **12 B**;
+- mutable position-buffer size: **4,680 B**;
+- dynamic-update flag: **true**;
+- candidate byte offset: **1,320 B**;
+- candidate byte length: **3,120 B**.
+
+This conversion has a real storage tradeoff: mutable position storage is **1,560 B / 50% larger** than the imported compressed position buffer. Runtime records that cost explicitly; it is not described as a memory win.
+
+Within that mutable receiver, the partial update still saves **1,560 B / 33.3333% per position update** versus the full float32 control.
+
+## Exact target-host equivalence
+
+Across all five retained driver witnesses, Godot readback reports:
+
+- maximum control vs Runtime-expected component delta: **0.0 m**;
+- maximum candidate vs Runtime-expected component delta: **0.0 m**;
+- maximum control vs candidate component delta: **0.0 m**;
+- maximum static control vs candidate component delta: **0.0 m**.
+
+The exact offset matters. A negative control shifts the candidate update window by one Vector3 (`+12 B`) and must fail the readback gate.
 
 ## Visual comparison
 
-For each witness the workflow captures one fixed-view shaded control frame and one fixed-view candidate frame from the same proof material, camera and light. A follow-up pixel comparison is allowed to pass only when no pixel differs by more than 1 LSB. This is representation-equivalence evidence only.
+For each witness the workflow captures one fixed-view shaded control frame and one fixed-view candidate frame from the same proof material, camera and light. The retained five pairs are byte-identical in the green v2 evidence (`0` changed pixels, `0` LSB maximum channel delta). A neutral-vs-`+5 deg` control comparison changes thousands of pixels, so the observer is not passing on a static image.
 
-Normals/tangents are intentionally not updated in either path. Therefore a visual PASS compares the partial-position candidate to the full-position control under the same retained proof normals; it does not establish physically correct deformed normals/tangents, final Nature lookdev, final leaf sidedness or Art/Visual-QA acceptance.
-
-## Negative control
-
-The same Godot observer is rerun with the candidate byte offset shifted by exactly one Vector3 (`+12 B`). That run must fail the control/candidate readback gate. The negative control exists to prove the success path depends on the exact `[110,370)` target-buffer window rather than merely calling the partial-update API.
+Normals/tangents are intentionally not updated in either path. Therefore the visual PASS compares the partial-position candidate to the full-position control under the same retained proof normals; it does not establish physically correct deformed normals/tangents, final Nature lookdev, final leaf sidedness or Art/Visual-QA acceptance.
 
 ## Explicit non-claims
 
-A green result does not establish target-device CPU/GPU/FPS/VRAM/heap/thermal/battery improvement, continuous timed wind playback, physical wind semantics, arbitrary vegetation safety, generic importer policy, final visual acceptance, CANON or production/game readiness.
+A green result does not establish direct updates of Godot's compressed imported position buffer, target-device CPU/GPU/FPS/VRAM/heap/thermal/battery improvement, continuous timed wind playback, physical wind semantics, arbitrary vegetation safety, generic importer policy, final visual acceptance, CANON or production/game readiness.
 
 `axm-create-me` remains coordination-only. Truth, Agency / non-domination, Continuity and Wisdom before speed remain the merge gate.
