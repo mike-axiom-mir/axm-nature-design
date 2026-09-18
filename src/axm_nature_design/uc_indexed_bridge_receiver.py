@@ -46,6 +46,15 @@ def _normalize(v: list[float]) -> list[float]:
 
 
 def _vertex_normals(vertices: list[list[float]], triangles: list[list[int]]) -> list[list[float]]:
+    """Build neutral proof normals without changing owner geometry.
+
+    The diagnostic bridge contains intentionally uneven triangle areas around the
+    indexed projection. Area-weighted accumulation can let one large face overpower
+    an adjacent face at a shared vertex and violate UC's fail-closed winding/normal
+    contract. Equal-weight unit face normals preserve the exact owner topology while
+    keeping every incident face in the same positive normal hemisphere. These remain
+    Technical Art proof normals only; they are not Nature's final shading authority.
+    """
     accum = [[0.0, 0.0, 0.0] for _ in vertices]
     for face in triangles:
         if len(face) != 3:
@@ -54,12 +63,17 @@ def _vertex_normals(vertices: list[list[float]], triangles: list[list[int]]) -> 
         if min(a, b, c) < 0 or max(a, b, c) >= len(vertices):
             raise ValueError("indexed bridge triangle index drift")
         raw = _cross(_sub(vertices[b], vertices[a]), _sub(vertices[c], vertices[a]))
-        if math.sqrt(sum(value * value for value in raw)) <= 1e-12:
-            raise ValueError("indexed bridge contains a degenerate neutral triangle")
+        face_normal = _normalize(raw)
         for index in (a, b, c):
             for axis in range(3):
-                accum[index][axis] += raw[axis]
-    return [_normalize(row) for row in accum]
+                accum[index][axis] += face_normal[axis]
+    normals = [_normalize(row) for row in accum]
+    for triangle_index, face in enumerate(triangles):
+        a, b, c = [int(value) for value in face]
+        raw = _cross(_sub(vertices[b], vertices[a]), _sub(vertices[c], vertices[a]))
+        if any(sum(raw[axis] * normals[index][axis] for axis in range(3)) <= 0.0 for index in (a, b, c)):
+            raise ValueError(f"indexed bridge proof normal disagrees with owner winding at triangle {triangle_index}")
+    return normals
 
 
 def build_indexed_bridge_surface(
@@ -135,7 +149,7 @@ def build_indexed_bridge_surface(
         "target_full_position_bytes": EXPECTED_VERTICES * POSITION_STRIDE_BYTES,
         "coordinate_handedness_determinant": -1,
         "triangle_winding_reversed_exactly_once": True,
-        "normal_scope": "TECHNICAL_ART_NEUTRAL_PROOF_NORMALS_ONLY_NOT_FINAL_NATURE_NORMAL_AUTHORITY",
+        "normal_scope": "TECHNICAL_ART_EQUAL_WEIGHT_FACE_AVERAGE_NEUTRAL_PROOF_NORMALS_ONLY_NOT_FINAL_NATURE_NORMAL_AUTHORITY",
         "material_scope": "TECHNICAL_ART_RECEIVER_PROOF_ONLY_NOT_NATURE_LOOKDEV",
         "truth_boundary": {
             "geometry_or_rigging_reauthored": False,
