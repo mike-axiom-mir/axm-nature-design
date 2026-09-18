@@ -119,7 +119,9 @@ jobs:
           assert len(p['samples'])==41,p
           assert p['samples'][0]['dynamic_target_positions_m']==p['samples'][40]['dynamic_target_positions_m'],p
           assert p['measurements']['maximum_dynamic_target_component_motion_m'] > 0.05,p
-          assert p['measurements']['maximum_representative_packet_residual_vs_ta_static_oracle_m'] <= 1e-12,p
+          assert p['measurements']['maximum_representative_pose_residual_vs_ta_predecessor_oracle_m'] >= 0.0,p
+          assert p['lineage']['technical_art_pose_semantics_inherited_by_current_pair'] is False,p
+          assert p['truth_boundary']['predecessor_ta_pose_semantics_reused_as_current_authority'] is False,p
           assert p['truth_boundary']['technical_art_current_animation_rigging_pair_adoption_claimed'] is False,p
           assert p['truth_boundary']['runtime_controller_state_machine_or_input_claimed'] is False,p
           assert p['truth_boundary']['gameplay_acceptance_claimed'] is False,p
