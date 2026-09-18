@@ -1,0 +1,36 @@
+{
+  "schema": "axm.nature-visual-wind-response-transfer-study/v0.1",
+  "study_id": "compact-east-tree-wind-candidate-001",
+  "source_provenance": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "source_study": "compact-east-tree-neutral-001",
+    "source_head": "64116d63fc76daa1623b5fd5046a4e6074100bda",
+    "source_digest": "9c87cf26f02f7adee832908652942218ec779c9029a0611aae1fb66eb0f62f54",
+    "migrated_mesh_digest": "420135f6effbadb1b344675948b9ddc471dcb83177702888f0b32327c5121c18",
+    "migration_head": "4ddbe66e5c02d22407ef773d5346a2fe6f349a2d"
+  },
+  "mechanism_provenance": {
+    "donor_head": "cee14f5b3feea78b0adcd044bad2ea3c97657fc6",
+    "donor_profile": "HIERARCHICAL_TRUNK_BRANCH_LEAF_HALF_SINE_VISUAL_SWAY",
+    "relationship": "TRANSFER_MECHANISM_ONLY_WITH_SOURCE_LOCAL_BOUNDED_AMPLITUDE"
+  },
+  "weather_provenance": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pr": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "visual_wind_xy": [1.0, 0.35],
+    "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "response": {
+    "profile": "HIERARCHICAL_TRUNK_BRANCH_LEAF_HALF_SINE_VISUAL_SWAY",
+    "duration_s": 0.5,
+    "phase_count": 16,
+    "anchor_z_m": 1.42,
+    "max_displacement_ceiling_m": 0.135,
+    "primary_height_offset_m": 0.09,
+    "branch_tip_secondary_offset_m": 0.034,
+    "leaf_tip_secondary_offset_m": 0.011,
+    "purpose": "Test one compact-tree visual-only response candidate using the already-proven hierarchical mechanism, with a smaller source-local displacement envelope and the exact existing Weather visual direction. The compact source JSON, migrated topology, branch layout and declared flex-zone truth state remain unchanged."
+  },
+  "truth_boundary": "PASS means only that the exact migrated compact-east source can receive this deterministic bounded visual-only hierarchical response across the retained source phases, preserve its lower anchor/topology/support continuity, stay within the declared 0.135 m ceiling, return exactly to neutral, and render as distinct neutral/peak states in the pinned target host. It does not establish physical wind, biomechanics, flex-zone validation, continuous playback quality, Map acceptance, final materials or leaf sidedness, target-device performance, collision, gameplay, Art Direction acceptance, CANON, production readiness, or VFX mastery."
+}

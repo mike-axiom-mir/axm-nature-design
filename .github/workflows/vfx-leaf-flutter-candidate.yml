@@ -1,0 +1,235 @@
+name: Nature VFX bounded leaf flutter Godot candidate
+
+on:
+  push:
+    branches: [studio/vfx-sapling-wind-response-migrated-001]
+    paths:
+      - "src/axm_nature_design/wind_response.py"
+      - "src/axm_nature_design/wind_response_migrated.py"
+      - "examples/sapling_neutral_001.json"
+      - "examples/sapling_wind_response_migrated_001.json"
+      - "tools/build_sapling_leaf_flutter_candidate.py"
+      - "tools/build_sapling_leaf_flutter_review.py"
+      - "target-proof-vfx/observe_leaf_flutter_candidate.gd"
+      - "target-proof-vfx/project.godot"
+      - ".github/workflows/vfx-leaf-flutter-candidate.yml"
+  pull_request:
+    paths:
+      - "src/axm_nature_design/wind_response.py"
+      - "src/axm_nature_design/wind_response_migrated.py"
+      - "examples/sapling_neutral_001.json"
+      - "examples/sapling_wind_response_migrated_001.json"
+      - "tools/build_sapling_leaf_flutter_candidate.py"
+      - "tools/build_sapling_leaf_flutter_review.py"
+      - "target-proof-vfx/observe_leaf_flutter_candidate.gd"
+      - "target-proof-vfx/project.godot"
+      - ".github/workflows/vfx-leaf-flutter-candidate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-leaf-flutter-godot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact VFX PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact VFX head and migration ancestry
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          OBSERVED="$(git rev-parse HEAD)"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > exact-head.txt
+          git merge-base --is-ancestor 4ddbe66e5c02d22407ef773d5346a2fe6f349a2d HEAD
+
+      - name: Checkout exact Geometry explicit-leaf donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da3adbef4de8cddb8f3ebe841d39bb31a8936f5f
+          path: geometry-leaf-donor
+          fetch-depth: 1
+
+      - name: Verify exact Geometry donor
+        run: |
+          set -euo pipefail
+          OBSERVED="$(git -C geometry-leaf-donor rev-parse HEAD)"
+          test "$OBSERVED" = "da3adbef4de8cddb8f3ebe841d39bb31a8936f5f"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build bounded deterministic leaf flutter source candidate
+        run: |
+          set -euo pipefail
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -v
+          rm -rf geometry-leaf-evidence evidence/sapling-leaf-flutter-candidate-001
+          python geometry-leaf-donor/tools/build_leaf_backface_candidate_evidence.py geometry-leaf-evidence
+          git -C geometry-leaf-donor rev-parse HEAD > geometry-leaf-evidence/exact-head.txt
+          python tools/build_sapling_leaf_flutter_candidate.py \
+            geometry-leaf-evidence \
+            evidence/sapling-leaf-flutter-candidate-001
+          cp exact-head.txt evidence/sapling-leaf-flutter-candidate-001/exact-head.txt
+          cp geometry-leaf-evidence/exact-head.txt evidence/sapling-leaf-flutter-candidate-001/geometry-leaf-head.txt
+          cp geometry-leaf-evidence/summary.json evidence/sapling-leaf-flutter-candidate-001/geometry-leaf-summary.json
+          cp geometry-leaf-evidence/sapling-neutral-001-report.json evidence/sapling-leaf-flutter-candidate-001/geometry-leaf-sapling-report.json
+          rm -rf target-proof-vfx/generated-flutter
+          mkdir -p target-proof-vfx/generated-flutter
+          cp evidence/sapling-leaf-flutter-candidate-001/leaf-flutter-summary.json target-proof-vfx/generated-flutter/
+          cp evidence/sapling-leaf-flutter-candidate-001/phase_*_candidate_mesh.json target-proof-vfx/generated-flutter/
+          cp exact-head.txt target-proof-vfx/generated-flutter/
+
+      - name: Validate source candidate truth boundary before render
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('evidence/sapling-leaf-flutter-candidate-001')
+          s = json.loads((root/'leaf-flutter-summary.json').read_text())
+          assert s['state'] == 'PASS_BOUNDED_DETERMINISTIC_LEAF_FLUTTER_SOURCE_CANDIDATE', s
+          assert s['geometry_leaf_head'] == 'da3adbef4de8cddb8f3ebe841d39bb31a8936f5f', s
+          assert s['geometry_leaf_candidate_digest'] == 'e0b423bd4ff20251a960655441f97e36277da2f5b88a832ecfc5ccfe404bbbea', s
+          assert s['migrated_neutral_mesh_digest'] == '47dd4d82651138299d05071df3e8a410f21f673ab8d42b936d7222eb5351b862', s
+          assert s['leaf_count'] == 25, s
+          assert len(s['samples']) == 17, s
+          assert s['max_observed_flutter_vertex_delta_m'] <= s['effect']['max_allowed_flutter_vertex_delta_m'] + 1e-12, s
+          assert s['max_observed_non_leaf_vertex_delta_m'] <= 1e-12, s
+          assert s['max_observed_duplicate_position_gap_m'] <= 1e-12, s
+          assert s['max_observed_abs_twist_deg'] <= s['effect']['max_twist_deg'] + 1e-12, s
+          assert s['negative_control_duplicate_detachment_rejected'] is True, s
+          assert s['samples'][0]['baseline_candidate_digest'] == s['samples'][0]['flutter_candidate_digest'], s
+          assert s['samples'][-1]['baseline_candidate_digest'] == s['samples'][-1]['flutter_candidate_digest'], s
+          assert any(row['baseline_candidate_digest'] != row['flutter_candidate_digest'] for row in s['samples'][1:-1]), s
+          truth = s['truth_boundary']
+          assert truth['existing_wind_response_reauthored'] is False, truth
+          assert truth['geometry_leaf_candidate_reauthored'] is False, truth
+          assert truth['weather_semantics_changed'] is False, truth
+          assert truth['deterministic_visual_leaf_flutter_candidate_added'] is True, truth
+          assert truth['physical_wind_or_biomechanics'] is False, truth
+          assert truth['gameplay_or_collision'] is False, truth
+          assert truth['wall_clock_timing_or_target_performance'] is False, truth
+          print(json.dumps({'state': s['state'], 'phase_count': len(s['samples']), 'max_observed_flutter_vertex_delta_m': s['max_observed_flutter_vertex_delta_m'], 'max_observed_abs_twist_deg': s['max_observed_abs_twist_deg']}, indent=2))
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Observe bounded leaf flutter in real Godot
+        run: |
+          set -euo pipefail
+          rm -f target-proof-vfx/vfx-leaf-flutter-godot-receipt.json target-proof-vfx/flutter-*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof-vfx \
+            --script observe_leaf_flutter_candidate.gd \
+            2>&1 | tee evidence/sapling-leaf-flutter-candidate-001/godot-target-host.log
+          cp target-proof-vfx/vfx-leaf-flutter-godot-receipt.json evidence/sapling-leaf-flutter-candidate-001/
+          cp target-proof-vfx/flutter-*.png evidence/sapling-leaf-flutter-candidate-001/
+
+      - name: Validate bounded real-Godot visual result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('evidence/sapling-leaf-flutter-candidate-001')
+          r = json.loads((root/'vfx-leaf-flutter-godot-receipt.json').read_text())
+          head = (root/'exact-head.txt').read_text().strip()
+          assert r['state'] == 'PASS_BOUNDED_DETERMINISTIC_LEAF_FLUTTER_GODOT_VISUAL_CANDIDATE', r
+          assert r['vfx_head'] == head, (r['vfx_head'], head)
+          assert r['geometry_leaf_head'] == 'da3adbef4de8cddb8f3ebe841d39bb31a8936f5f', r
+          assert r['phase_count'] == 17, r
+          assert set(r['contexts']) == {'ground_oblique','crown_overhead'}, r
+          assert len(r['captures']) == 68, len(r['captures'])
+          for context in r['contexts']:
+              assert r['effect_delta_baseline_vs_flutter'][f'{context}/00']['changed_pixels'] == 0, r
+              assert r['effect_delta_baseline_vs_flutter'][f'{context}/16']['changed_pixels'] == 0, r
+              assert r['effect_delta_baseline_vs_flutter'][f'{context}/08']['changed_pixels'] > 0, r
+              assert r['neutral_return'][context]['changed_pixels'] == 0, r
+              assert r['interior_renderer_visible_phase_counts'][context] > 0, r
+              assert r['max_changed_pixels_baseline_vs_flutter'][context] > 0, r
+          assert all(v['changed_pixels'] > 0 for v in r['adjacent_flutter_phase_delta'].values()), r
+          truth = r['truth_boundary']
+          assert truth['real_godot_renderer_visibility_tested'] is True, truth
+          assert truth['bounded_leaf_local_twist_renderer_visible'] is True, truth
+          assert truth['shaded_leaf_material_or_translucency_tested'] is False, truth
+          assert truth['perceptual_naturalness_or_final_art_acceptance'] is False, truth
+          assert truth['continuous_interpolation_or_wall_clock_timing_tested'] is False, truth
+          assert truth['physical_wind_or_biomechanics'] is False, truth
+          assert truth['gameplay_or_collision'] is False, truth
+          assert truth['runtime_cost_or_target_device_performance'] is False, truth
+          assert truth['map_receiving_scene_equivalence'] is False, truth
+          print(json.dumps({'state': r['state'], 'interior_renderer_visible_phase_counts': r['interior_renderer_visible_phase_counts'], 'max_changed_pixels_baseline_vs_flutter': r['max_changed_pixels_baseline_vs_flutter'], 'max_mean_abs_rgb_baseline_vs_flutter': r['max_mean_abs_rgb_baseline_vs_flutter']}, indent=2))
+          PY
+
+      - name: Build exact sampled review surface from retained Godot frames
+        run: |
+          set -euo pipefail
+          python tools/build_sapling_leaf_flutter_review.py evidence/sapling-leaf-flutter-candidate-001
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('evidence/sapling-leaf-flutter-candidate-001')
+          s = json.loads((root/'leaf-flutter-sampled-review-summary.json').read_text())
+          head = (root/'exact-head.txt').read_text().strip()
+          assert s['state'] == 'PASS_BOUNDED_LEAF_FLUTTER_SAMPLED_REVIEW_SURFACE', s
+          assert s['vfx_head'] == head, (s['vfx_head'], head)
+          assert s['capture_hashes_verified'] == 68, s
+          assert s['displayed_unique_phase_count_per_loop'] == 16, s
+          assert s['endpoint_witness_phase'] == 16, s
+          assert s['source_phase_step_s'] == 0.03125, s
+          assert s['neutral_endpoint_seam']['ground_oblique']['changed_pixels'] == 0, s
+          assert s['neutral_endpoint_seam']['crown_overhead']['changed_pixels'] == 0, s
+          assert s['interior_twist_direction_balance']['min_positive_twist_leaves'] >= 1, s
+          assert s['interior_twist_direction_balance']['min_negative_twist_leaves'] >= 1, s
+          truth = s['truth_boundary']
+          assert truth['effect_or_source_reauthored'] is False, truth
+          assert truth['real_godot_frames_reused_exactly'] is True, truth
+          assert truth['browser_playback_is_review_ui_only'] is True, truth
+          assert truth['wall_clock_frame_pacing_proven'] is False, truth
+          assert truth['continuous_interpolation_proven'] is False, truth
+          assert truth['perceptual_naturalness_or_aesthetic_acceptance'] is False, truth
+          assert truth['physical_wind_or_biomechanics'] is False, truth
+          assert truth['gameplay_or_collision'] is False, truth
+          assert truth['target_device_performance'] is False, truth
+          assert truth['current_world_map_receiving_equivalence'] is False, truth
+          assert truth['final_art_or_canon'] is False, truth
+          assert (root/'leaf-flutter-sampled-review.html').stat().st_size > 100000
+          print(json.dumps({'state': s['state'], 'capture_hashes_verified': s['capture_hashes_verified'], 'displayed_unique_phase_count_per_loop': s['displayed_unique_phase_count_per_loop'], 'twist_direction_balance': s['interior_twist_direction_balance']}, indent=2))
+          PY
+
+      - name: Retain exact bounded leaf flutter VFX evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sapling-leaf-flutter-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/sapling-leaf-flutter-candidate-001
+          if-no-files-found: warn
+          retention-days: 30

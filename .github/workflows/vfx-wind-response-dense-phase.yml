@@ -1,0 +1,163 @@
+name: Nature VFX migrated wind dense phase evidence
+
+on:
+  push:
+    branches: [studio/vfx-sapling-wind-response-migrated-001]
+    paths:
+      - "src/axm_nature_design/wind_response.py"
+      - "src/axm_nature_design/wind_response_migrated.py"
+      - "examples/sapling_wind_response_migrated_001.json"
+      - "tools/build_sapling_wind_response_dense_phase.py"
+      - "target-proof-vfx/observe_migrated_wind_dense_phase.gd"
+      - "target-proof-vfx/project.godot"
+      - ".github/workflows/vfx-wind-response-dense-phase.yml"
+  pull_request:
+    paths:
+      - "src/axm_nature_design/wind_response.py"
+      - "src/axm_nature_design/wind_response_migrated.py"
+      - "examples/sapling_wind_response_migrated_001.json"
+      - "tools/build_sapling_wind_response_dense_phase.py"
+      - "target-proof-vfx/observe_migrated_wind_dense_phase.gd"
+      - "target-proof-vfx/project.godot"
+      - ".github/workflows/vfx-wind-response-dense-phase.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-migrated-wind-dense-phase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact VFX PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact VFX head
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          OBSERVED="$(git rev-parse HEAD)"
+          test "$OBSERVED" = "$EXPECTED"
+          printf '%s\n' "$OBSERVED" > exact-head.txt
+          git merge-base --is-ancestor 4ddbe66e5c02d22407ef773d5346a2fe6f349a2d HEAD
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build exact dense source phases
+        run: |
+          set -euo pipefail
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -v
+          rm -rf evidence/sapling-wind-response-dense-phase-001
+          python tools/build_sapling_wind_response_dense_phase.py evidence/sapling-wind-response-dense-phase-001
+          cp exact-head.txt evidence/sapling-wind-response-dense-phase-001/exact-head.txt
+          rm -rf target-proof-vfx/generated-dense
+          mkdir -p target-proof-vfx/generated-dense
+          cp evidence/sapling-wind-response-dense-phase-001/dense-summary.json target-proof-vfx/generated-dense/
+          cp evidence/sapling-wind-response-dense-phase-001/phase_*_mesh.json target-proof-vfx/generated-dense/
+          cp exact-head.txt target-proof-vfx/generated-dense/
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Observe dense migrated woody response through one receiver
+        run: |
+          set -euo pipefail
+          rm -f target-proof-vfx/vfx-migrated-wind-dense-phase-receipt.json target-proof-vfx/dense-*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof-vfx \
+            --script observe_migrated_wind_dense_phase.gd \
+            2>&1 | tee evidence/sapling-wind-response-dense-phase-001/godot-target-host.log
+          cp target-proof-vfx/vfx-migrated-wind-dense-phase-receipt.json evidence/sapling-wind-response-dense-phase-001/
+          cp target-proof-vfx/dense-*.png evidence/sapling-wind-response-dense-phase-001/
+
+      - name: Validate bounded dense receiving result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('evidence/sapling-wind-response-dense-phase-001')
+          source = json.loads((root/'dense-summary.json').read_text())
+          receipt = json.loads((root/'vfx-migrated-wind-dense-phase-receipt.json').read_text())
+          head = (root/'exact-head.txt').read_text().strip()
+          assert source['state'] == 'PASS_MIGRATED_WOODY_WIND_RESPONSE_DENSE_SOURCE_PHASES', source
+          assert source['dense_phase_count'] == 17, source
+          assert source['retained_anchor_indices'] == [0,4,8,12,16], source
+          assert all(item['exact_digest_match'] for item in source['retained_anchor_checks']), source
+          assert source['max_half_sine_symmetry_residual_m'] <= 1e-12, source
+          assert source['min_adjacent_vertex_step_m'] > 0.0, source
+          assert receipt['state'] == 'PASS_MIGRATED_WOODY_WIND_RESPONSE_DENSE_PHASE_GODOT_RECEIVER', receipt
+          assert receipt['vfx_head'] == head, (receipt['vfx_head'], head)
+          assert receipt['migrated_neutral_mesh_digest'] == '47dd4d82651138299d05071df3e8a410f21f673ab8d42b936d7222eb5351b862', receipt
+          assert receipt['dense_phase_count'] == 17, receipt
+          assert receipt['retained_anchor_indices'] == [0,4,8,12,16], receipt
+          assert set(receipt['contexts']) == {'ground_oblique','high_oblique'}, receipt
+          for context, result in receipt['contexts'].items():
+              assert len(result['records']) == 17, (context, result)
+              assert len(result['adjacent_deltas']) == 16, (context, result)
+              assert all(item['changed_pixels'] > 0 for item in result['adjacent_deltas']), (context, result)
+              assert all(item['changed_pixels'] == 0 for item in result['half_sine_symmetry']), (context, result)
+              assert result['neutral_return']['changed_pixels'] == 0, (context, result)
+              assert result['neutral_to_peak']['changed_pixels'] > 0, (context, result)
+              assert result['woody_triangle_count'] > 0, (context, result)
+              assert result['excluded_leaf_triangle_count'] > 0, (context, result)
+              assert len({item['receiver_instance_id'] for item in result['records']}) == 1, (context, result)
+          truth = receipt['truth_boundary']
+          assert truth['one_persistent_receiver_instance_per_context'] is True, truth
+          assert truth['leaf_geometry_included'] is False, truth
+          assert truth['dense_discrete_phase_application_tested'] is True, truth
+          assert truth['wall_clock_pacing_tested'] is False, truth
+          assert truth['continuous_mathematical_interpolation_claimed'] is False, truth
+          assert truth['perceptual_smoothness_claimed'] is False, truth
+          assert truth['shaded_lookdev_tested'] is False, truth
+          assert truth['physical_wind_or_biomechanics'] is False, truth
+          assert truth['gameplay_or_collision'] is False, truth
+          assert truth['target_device_performance'] is False, truth
+          print(json.dumps({
+              'state': receipt['state'],
+              'phase_step_s': receipt['phase_step_s'],
+              'contexts': {
+                  key: {
+                      'adjacent_changed_pixels': [item['changed_pixels'] for item in value['adjacent_deltas']],
+                      'neutral_to_peak': value['neutral_to_peak'],
+                      'receiver_instance_id': value['receiver_instance_id'],
+                  }
+                  for key, value in receipt['contexts'].items()
+              },
+          }, indent=2))
+          PY
+
+      - name: Retain exact dense-phase VFX evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sapling-wind-response-dense-phase-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/sapling-wind-response-dense-phase-001
+          if-no-files-found: warn
+          retention-days: 30
