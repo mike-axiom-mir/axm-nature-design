@@ -1,0 +1,118 @@
+name: Geometry east rear north-low analytic trunk bridge
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py"
+      - "tests/test_rear_tree_geometry_north_low_trunk_bridge_candidate.py"
+      - "tools/verify_rear_tree_geometry_north_low_trunk_bridge_candidate.py"
+      - "contracts/east-rear-north-low-analytic-trunk-bridge-geometry-007.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_ANALYTIC_TRUNK_BRIDGE_007.md"
+      - ".github/workflows/geometry-east-rear-north-low-analytic-trunk-bridge.yml"
+  push:
+    branches:
+      - "studio/geometry-east-rear-simultaneous-socket-001"
+    paths:
+      - "src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py"
+      - "tests/test_rear_tree_geometry_north_low_trunk_bridge_candidate.py"
+      - "tools/verify_rear_tree_geometry_north_low_trunk_bridge_candidate.py"
+      - "contracts/east-rear-north-low-analytic-trunk-bridge-geometry-007.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_ANALYTIC_TRUNK_BRIDGE_007.md"
+      - ".github/workflows/geometry-east-rear-north-low-analytic-trunk-bridge.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Geometry head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Geometry Organic Rigging and source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          geometry_predecessor=a7164ce18e309c3cd548c89380639bdfa2b46ebf
+          organic_exit_frame_owner=7f3b937b440e9870d07f7c356c5a3cbb779d0cd7
+          rigging_owner=69640e558f0c1ac59d4d0e3155676e0967a03d04
+
+          git merge-base --is-ancestor "$geometry_predecessor" HEAD
+          git merge-base --is-ancestor "$organic_exit_frame_owner" HEAD
+          git merge-base --is-ancestor "$rigging_owner" HEAD
+
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_transition_exit_frames.py)" = "406c169963c34aed394e269f0dff2c91bb035cb8"
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py)" = "de00694e103b975f9a25a72a50054821b469b528"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Geometry bridge evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-geometry-head.txt
+          printf '%s\n' 'a7164ce18e309c3cd548c89380639bdfa2b46ebf' > evidence/exact-geometry-predecessor-head.txt
+          printf '%s\n' '7f3b937b440e9870d07f7c356c5a3cbb779d0cd7' > evidence/exact-organic-exit-frame-owner-head.txt
+          printf '%s\n' '69640e558f0c1ac59d4d0e3155676e0967a03d04' > evidence/exact-rigging-owner-head.txt
+
+          python tools/verify_rear_tree_geometry_north_low_trunk_bridge_candidate.py \
+            --output evidence/east-rear-north-low-analytic-trunk-bridge-geometry-007.json \
+            | tee evidence/verifier.log
+
+          cp contracts/east-rear-north-low-analytic-trunk-bridge-geometry-007.json \
+            evidence/east-rear-north-low-analytic-trunk-bridge-geometry-contract-007.json
+          cp docs/GEOMETRY_EAST_REAR_NORTH_LOW_ANALYTIC_TRUNK_BRIDGE_007.md evidence/
+          cp src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py evidence/
+          cp src/axm_nature_design/rear_tree_transition_exit_frames.py evidence/
+          cp tests/test_rear_tree_geometry_north_low_trunk_bridge_candidate.py evidence/
+          cp tools/verify_rear_tree_geometry_north_low_trunk_bridge_candidate.py evidence/
+          cp .github/workflows/geometry-east-rear-north-low-analytic-trunk-bridge.yml evidence/
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path("evidence/east-rear-north-low-analytic-trunk-bridge-geometry-007.json").read_text())
+          assert p["result"] == "PASS_NORTH_LOW_ANALYTIC_TRUNK_SURFACE_LOOP_AND_BRIDGE_PATCH__HOLD_INDEXED_TRUNK_CUT_CONNECTED_JUNCTION"
+          c = p["combined_candidate_topology"]
+          b = p["bridge_patch_topology"]
+          assert (c["vertices"], c["triangles"], c["edges"]) == (25, 40, 64)
+          assert c["boundary_cycles"] == 1 and c["boundary_cycle_lengths"] == [8]
+          assert (b["vertices"], b["triangles"], b["edges"]) == (16, 16, 32)
+          assert b["boundary_cycles"] == 2 and b["boundary_cycle_lengths"] == [8, 8]
+          assert p["all_failure_controls_rejected"] is True
+          assert p["truth_boundary"]["indexed_trunk_mesh_cut_or_mutated"] is False
+          assert p["truth_boundary"]["connected_branch_trunk_indexed_topology_proven"] is False
+          PY
+
+      - name: Upload retained Geometry evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-analytic-trunk-bridge-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 90
