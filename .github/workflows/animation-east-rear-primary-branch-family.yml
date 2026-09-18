@@ -1,0 +1,157 @@
+name: Animation east rear primary branch family
+
+on:
+  pull_request:
+    paths:
+      - "tools/verify_rear_tree_animation_primary_branch_family.py"
+      - "contracts/east-rear-primary-branch-animation-family-002.json"
+      - "docs/ANIMATION_EAST_REAR_PRIMARY_BRANCH_FAMILY_002.md"
+      - ".github/workflows/animation-east-rear-primary-branch-family.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Animation head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Preserve prior single-socket Animation identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREVIOUS_ANIMATION_HEAD=74354ff851538d4d8aba9332900ae40218415eaf
+          git merge-base --is-ancestor "$PREVIOUS_ANIMATION_HEAD" HEAD
+          git diff --exit-code "$PREVIOUS_ANIMATION_HEAD" HEAD -- \
+            src/axm_nature_design/rear_tree_animation.py \
+            contracts/east-rear-root-socket-animation-001.json \
+            tools/verify_rear_tree_animation.py \
+            tests/test_rear_tree_animation.py
+
+      - name: Compile current Animation branch
+        run: python -m compileall -q src tools tests
+
+      - name: Full current repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Fetch exact Rigging family owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          RIGGING_HEAD=898529f602893c8f6be179bd3e9b6821fc099904
+          git fetch --no-tags origin studio/rigging-east-rear-root-socket-001
+          git cat-file -e "$RIGGING_HEAD^{commit}"
+          rm -rf /tmp/axm-rigging-owner
+          git worktree add --detach /tmp/axm-rigging-owner "$RIGGING_HEAD"
+          test "$(git -C /tmp/axm-rigging-owner rev-parse HEAD)" = "$RIGGING_HEAD"
+
+      - name: Re-run exact Rigging family prerequisite
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=/tmp/axm-rigging-owner/src \
+            python /tmp/axm-rigging-owner/tools/verify_rear_tree_primary_branch_rigging_family.py \
+            --output /tmp/exact-rigging-family-evidence.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/exact-rigging-family-evidence.json').read_text())
+          assert payload['result'] == 'PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_RIGID_CHILD_FAMILY_GEOMETRY_RECEIVER_DIAGNOSTIC_MINUS5_TO_PLUS5'
+          assert payload['rigging_family']['branch_count'] == 5
+          assert payload['rigging_family']['pairwise_child_vertex_disjoint'] is True
+          assert payload['truth_boundary']['animation_timing_interpolation_or_playback_claimed'] is False
+          PY
+
+      - name: Execute five independent Animation clips
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/animation-family
+          python tools/verify_rear_tree_animation_primary_branch_family.py \
+            --rigging-worktree /tmp/axm-rigging-owner \
+            --output /tmp/animation-family/evidence.json \
+            --svg-output /tmp/animation-family/review.svg
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/animation-family/evidence.json').read_text())
+          assert payload['result'] == 'PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_INDEPENDENT_DIAGNOSTIC_PULSE_FAMILY_SAMPLED_MOTION'
+          assert payload['owner']['exact_head'] == '898529f602893c8f6be179bd3e9b6821fc099904'
+          assert [row['branch_id'] for row in payload['branches']] == ['south-low', 'north-low', 'east-mid', 'west-high', 'north-top']
+          assert len(payload['branches']) == 5
+          assert all(len(row['samples']) == 41 for row in payload['branches'])
+          assert payload['family_measurements']['maximum_fixed_vertex_drift_m'] <= 1e-12
+          assert payload['family_measurements']['maximum_pivot_vertex_drift_m'] <= 1e-12
+          assert payload['family_measurements']['maximum_selected_pairwise_distance_drift_m'] <= 1e-12
+          assert payload['family_measurements']['maximum_selected_axis_projection_drift_m'] <= 1e-12
+          assert payload['family_measurements']['maximum_endpoint_closure_m'] <= 1e-12
+          assert payload['family_measurements']['maximum_wrap_step_residual_m'] <= 1e-12
+          assert payload['family_measurements']['maximum_owner_witness_metric_residual'] <= 1e-12
+          assert payload['truth_boundary']['simultaneous_multi_branch_motion_acceptance_claimed'] is False
+          assert payload['truth_boundary']['runtime_controller_or_state_machine_claimed'] is False
+          assert payload['truth_boundary']['gameplay_input_collision_claimed'] is False
+          ET.parse('/tmp/animation-family/review.svg')
+          PY
+
+      - name: Fail closed on authority and motion inflation
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_must_fail() {
+            label="$1"; shift
+            if python tools/verify_rear_tree_animation_primary_branch_family.py \
+              --rigging-worktree /tmp/axm-rigging-owner \
+              --output "/tmp/${label}.json" \
+              --svg-output "/tmp/${label}.svg" "$@"; then
+              echo "negative control unexpectedly passed: $label" >&2
+              exit 1
+            fi
+          }
+          run_must_fail widened-amplitude --amplitude-deg 5.25
+          run_must_fail retimed --duration-s 1.1
+          run_must_fail wind-promotion --claim-wind-motion
+          run_must_fail simultaneous-promotion --claim-simultaneous-motion-acceptance
+          run_must_fail runtime-promotion --claim-runtime-controller
+          run_must_fail gameplay-promotion --claim-gameplay-acceptance
+
+      - name: Retain exact Animation family evidence
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-animation-head.txt
+          printf '%s\n' 74354ff851538d4d8aba9332900ae40218415eaf > evidence/previous-animation-head.txt
+          printf '%s\n' 898529f602893c8f6be179bd3e9b6821fc099904 > evidence/exact-rigging-family-owner-head.txt
+          cp /tmp/exact-rigging-family-evidence.json evidence/
+          cp /tmp/animation-family/evidence.json evidence/east-rear-primary-branch-animation-family-evidence-002.json
+          cp /tmp/animation-family/review.svg evidence/east-rear-primary-branch-animation-family-review-002.svg
+          cp contracts/east-rear-primary-branch-animation-family-002.json evidence/
+          cp docs/ANIMATION_EAST_REAR_PRIMARY_BRANCH_FAMILY_002.md evidence/
+          cp tools/verify_rear_tree_animation_primary_branch_family.py evidence/
+
+      - name: Upload retained Animation family evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-primary-branch-animation-family-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
