@@ -96,7 +96,8 @@ jobs:
           verifier_status=$?
           set -e
           cat evidence/verifier.log
-          cp contracts/east-rear-shared-driver-continuous-clearance-003.json evidence/
+          cp contracts/east-rear-shared-driver-continuous-clearance-003.json \
+            evidence/east-rear-shared-driver-continuous-clearance-contract-003.json
           cp docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_CONTINUOUS_CLEARANCE_003.md evidence/
           cp src/axm_nature_design/rear_tree_geometry_shared_driver_continuous_clearance.py evidence/
           cp tests/test_rear_tree_geometry_shared_driver_continuous_clearance.py evidence/
