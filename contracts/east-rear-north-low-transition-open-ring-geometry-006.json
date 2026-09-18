@@ -1,0 +1,58 @@
+{
+  "branch_id": "north-low",
+  "candidate_expected": {
+    "boundary_cycle_lengths": [
+      8
+    ],
+    "boundary_cycles": 1,
+    "boundary_edges": 8,
+    "edges": 40,
+    "euler_characteristic": 1,
+    "nonmanifold_edges": 0,
+    "triangle_components": 1,
+    "triangles": 24,
+    "vertices": 17,
+    "winding_conflicts": 0
+  },
+  "geometry_predecessor_head": "d5ebbf26afd466faad259621b60fa33f1126ef3c",
+  "organic_transition_owner": {
+    "head": "4b5c291d6b044dafeadd6eeaf4849a6f3d4f4148",
+    "observer_blob": "1e8323b9bf6495a9f19704c217808300f3b46757",
+    "observer_path": "src/axm_nature_design/rear_tree_root_transition_readiness.py"
+  },
+  "owner_transition": {
+    "length_along_first_segment_m": 0.0645372173379806,
+    "u": 0.14801958337760968
+  },
+  "procedural_transition_owner": {
+    "contract_blob": "08df5c1eb79a596a05b37a3187b5fa010e8d658d",
+    "contract_path": "examples/rear_tree_branch_transition_parameter_family_001.json",
+    "family_digest": "d742e72e2a5f8be868465d91c286ca8fd6509789936c14a595b4cc18a57fb096",
+    "head": "b3283e255bfffb2979889fd542a93e35be2a4b03"
+  },
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "reusable_rule": "OWNER_TRANSITION_EXIT_MAY_SEED_A_BRANCH_SIDE_OPEN_BOUNDARY_RING_ONLY_AFTER_TOPOLOGY_PRESERVING_LONGITUDINAL_EDGE_SPLIT__TRUNK_OPENING_BRIDGE_AND_CONNECTED_JUNCTION_REMAIN_SEPARATE_GEOMETRY_GATES",
+  "rigging_owner": {
+    "attachment_mode": "DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY",
+    "head": "69640e558f0c1ac59d4d0e3155676e0967a03d04",
+    "result": "PASS_NORTH_LOW_DETACHED_CHILD_SOCKET_ATTACHMENT_REPRESENTATION_GATE_DIAGNOSTIC"
+  },
+  "schema": "axm.nature-north-low-owner-transition-open-ring-geometry-contract/v0.1",
+  "source": {
+    "blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a"
+  },
+  "study_id": "east-rear-tree-neutral-001",
+  "truth_boundary": {
+    "branch_trunk_bridge_proven": false,
+    "canon_or_production_readiness_authorized": false,
+    "collision_or_gameplay_authorized": false,
+    "connected_topology_proven": false,
+    "production_topology_adopted": false,
+    "rigging_rebind_authorized": false,
+    "source_mutation_authorized": false,
+    "target_host_or_runtime_authorized": false,
+    "trunk_opening_proven": false
+  }
+}

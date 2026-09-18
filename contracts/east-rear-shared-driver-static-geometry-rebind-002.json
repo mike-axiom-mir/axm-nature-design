@@ -1,0 +1,41 @@
+{
+  "schema": "axm.nature-geometry-shared-driver-static-rebind/v0.1",
+  "audit_id": "east-rear-shared-driver-static-geometry-rebind-002",
+  "reusable_rule": "DOWNSTREAM_STATIC_SHARED_DRIVER_INTERIOR_WITNESSES_REQUIRE_EXACT_GEOMETRY_REBIND_BEFORE_INTERSECTION_PASS_TRANSFER",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "existing_geometry_lane": {
+    "pull_request": 18,
+    "prior_head": "76c89348d63fd3523f81287767fc37527d6a8fcb",
+    "prior_result": "PASS_33_WITNESSES_NO_CROSS_BRANCH_NONADJACENT_TRIANGLE_INTERSECTION"
+  },
+  "rigging_donor": {
+    "pull_request": 14,
+    "head": "754797a815266a643c6b08f1606eb76ba95dd8c6",
+    "contract_path": "contracts/east-rear-primary-branch-shared-driver-polarity-rigging-004.json",
+    "semantics": "COMMAND_SIGN_BINDING_ONLY_NOT_SIMULTANEOUS_MOTION"
+  },
+  "vfx_donor": {
+    "pull_request": 19,
+    "head": "ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475",
+    "contract_path": "contracts/east-rear-shared-driver-vfx-response-envelope-003.json",
+    "pose_semantics": "STATIC_SIMULTANEOUS_VISUAL_RESPONSE_REVIEW_NOT_MOTION"
+  },
+  "shared_driver_values_deg": [-5.0, -2.5, 0.0, 2.5, 5.0],
+  "command_sign_multiplier_by_branch": {
+    "south-low": 1.0,
+    "north-low": -1.0,
+    "east-mid": 1.0,
+    "west-high": -1.0,
+    "north-top": 1.0
+  },
+  "expected_overlap_with_prior_geometry_witnesses": 3,
+  "expected_new_interior_witnesses": 2,
+  "observer_scope": "EXACT_CHILD_CHILD_NONADJACENT_TRIANGLE_INTERSECTION_AT_FIVE_STATIC_SHARED_DRIVER_POSES",
+  "continuous_interval_claimed": false,
+  "simultaneous_motion_claimed": false,
+  "child_fixed_receiver_clearance_claimed": false,
+  "adjacent_foldover_or_contact_claimed": false,
+  "physical_collision_claimed": false,
+  "automatic_adoption": false,
+  "canon_or_production_readiness_claimed": false
+}

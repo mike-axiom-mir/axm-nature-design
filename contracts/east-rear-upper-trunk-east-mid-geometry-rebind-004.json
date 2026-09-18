@@ -1,0 +1,25 @@
+{
+  "schema": "axm.nature-geometry-upper-trunk-east-mid-hierarchy-rebind-contract/v0.1",
+  "study_id": "east-rear-upper-trunk-east-mid-geometry-rebind-004",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "geometry_pr": 18,
+  "exact_rigging_owner_head": "6cf64925f0ea00737e4d3f2d4f15979c773f309d",
+  "geometry_predecessor_head": "f4e8d408480ccb81f559fc56d915e5b4a935851d",
+  "child_branch_id": "east-mid",
+  "expected_selected_vertices": 52,
+  "expected_owned_triangles": 72,
+  "expected_receiver_vertices": 390,
+  "expected_receiver_triangles": 570,
+  "reusable_rule": "RIGID_HIERARCHICAL_FRAME_REBASE_PRESERVES_CHILD_TOPOLOGY_ONLY_AFTER_EXACT_OWNER_REBIND__NO_PARENT_MESH_DEFORMATION_OR_CLEARANCE_TRANSFER",
+  "required_truth_boundaries": {
+    "predecessor_five_child_continuous_clearance_transferred": false,
+    "simultaneous_parent_plus_five_branch_motion_proven": false,
+    "trunk_mesh_deformation_proven": false,
+    "branch_trunk_surface_attachment_proven": false,
+    "collision_or_self_intersection_proven": false,
+    "automatic_adoption": false,
+    "canon_or_production_readiness": false,
+    "game_readiness": false,
+    "geometry_mastery": false
+  }
+}

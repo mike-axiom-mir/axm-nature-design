@@ -1,0 +1,38 @@
+{
+  "schema": "axm.nature-north-low-attachment-topology-geometry-contract/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "geometry_predecessor_head": "200ab4b60b8a54460f1265b0ee52eb111f1b280a",
+  "rigging_owner_head": "975931b11555d156e04e2ab12e9756fc6c9598a3",
+  "source_owner_head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+  "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+  "geometry_receiver_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
+  "branch_id": "north-low",
+  "expected": {
+    "selected_vertices": 52,
+    "selected_triangles": 72,
+    "edge_connected_components": 6,
+    "closed_edge_manifold_components": 2,
+    "open_components": 4,
+    "shared_indexed_vertices_with_trunk": 0,
+    "root_branch_segment": {
+      "vertices": 18,
+      "triangles": 32,
+      "edges": 48,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "closed_edge_manifold": true
+    }
+  },
+  "reusable_rule": "SPATIAL_OR_RIGGING_ATTACHMENT_EVIDENCE_MUST_DECLARE_INDEXED_CONNECTIVITY_CLASS_BEFORE_CONNECTED_TOPOLOGY_PASS_TRANSFER",
+  "truth_boundary": {
+    "mutates_source": false,
+    "mutates_rigging": false,
+    "proves_connected_branch_trunk_attachment": false,
+    "proves_production_topology": false,
+    "proves_skinning": false,
+    "proves_target_host_or_runtime": false,
+    "proves_collision_or_gameplay": false,
+    "claims_canon_or_production_readiness": false
+  }
+}

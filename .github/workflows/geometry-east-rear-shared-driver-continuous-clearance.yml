@@ -1,0 +1,208 @@
+name: Geometry east rear shared-driver continuous clearance
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_geometry_shared_driver_continuous_clearance.py"
+      - "tests/test_rear_tree_geometry_shared_driver_continuous_clearance.py"
+      - "tools/verify_rear_tree_geometry_shared_driver_continuous_clearance.py"
+      - "contracts/east-rear-shared-driver-continuous-clearance-003.json"
+      - "docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_CONTINUOUS_CLEARANCE_003.md"
+      - ".github/workflows/geometry-east-rear-shared-driver-continuous-clearance.yml"
+      - ".github/workflows/geometry-east-rear-shared-driver-static-rebind.yml"
+      - ".github/workflows/geometry-east-rear-simultaneous-socket-audit.yml"
+      - "src/axm_nature_design/rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "tests/test_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "tools/verify_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "contracts/east-rear-upper-trunk-east-mid-geometry-rebind-004.json"
+      - "docs/GEOMETRY_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_REBIND_004.md"
+      - ".github/workflows/geometry-east-rear-upper-trunk-east-mid-hierarchy-rebind.yml"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "tests/test_rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "tools/verify_rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "contracts/east-rear-north-low-upper-trunk-parent-influence-gate-rigging-007.json"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_PARENT_INFLUENCE_GATE_007.md"
+      - ".github/workflows/rigging-east-rear-north-low-parent-influence-gate.yml"
+      - "src/axm_nature_design/rear_tree_geometry_north_low_attachment_topology.py"
+      - "tests/test_rear_tree_geometry_north_low_attachment_topology.py"
+      - "tools/verify_rear_tree_geometry_north_low_attachment_topology.py"
+      - "contracts/east-rear-north-low-attachment-topology-geometry-005.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_ATTACHMENT_TOPOLOGY_005.md"
+      - ".github/workflows/geometry-east-rear-north-low-attachment-topology.yml"
+      - "src/axm_nature_design/rear_tree_geometry_north_low_transition_open_ring.py"
+      - "tests/test_rear_tree_geometry_north_low_transition_open_ring.py"
+      - "tools/verify_rear_tree_geometry_north_low_transition_open_ring.py"
+      - "contracts/east-rear-north-low-transition-open-ring-geometry-006.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_TRANSITION_OPEN_RING_006.md"
+      - ".github/workflows/geometry-east-rear-north-low-transition-open-ring.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Geometry branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind continuous Rigging owner and Geometry successor delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          rigging=b4b480b415047fea90b4740f7702ced0dba9142d
+          hierarchy_rigging=6cf64925f0ea00737e4d3f2d4f15979c773f309d
+          attachment_rigging=69640e558f0c1ac59d4d0e3155676e0967a03d04
+          prior_geometry=3197eba862a6b7e6e93098a5b98d2c91bf48d32a
+          git merge-base --is-ancestor "$rigging" HEAD
+          git merge-base --is-ancestor "$hierarchy_rigging" HEAD
+          git merge-base --is-ancestor "$attachment_rigging" HEAD
+          git merge-base --is-ancestor "$prior_geometry" HEAD
+          cat > /tmp/expected-geometry-files <<'EOF'
+          .github/workflows/geometry-east-rear-north-low-attachment-topology.yml
+          .github/workflows/geometry-east-rear-north-low-transition-open-ring.yml
+          .github/workflows/geometry-east-rear-shared-driver-continuous-clearance.yml
+          .github/workflows/geometry-east-rear-shared-driver-static-rebind.yml
+          .github/workflows/geometry-east-rear-simultaneous-socket-audit.yml
+          .github/workflows/geometry-east-rear-upper-trunk-east-mid-hierarchy-rebind.yml
+          .github/workflows/rigging-east-rear-north-low-attachment-representation.yml
+          .github/workflows/rigging-east-rear-north-low-parent-influence-gate.yml
+          .github/workflows/rigging-east-rear-upper-trunk-east-mid-hierarchy.yml
+          contracts/east-rear-north-low-attachment-representation-rigging-008.json
+          contracts/east-rear-north-low-attachment-topology-geometry-005.json
+          contracts/east-rear-north-low-transition-open-ring-geometry-006.json
+          contracts/east-rear-north-low-upper-trunk-parent-influence-gate-rigging-007.json
+          contracts/east-rear-shared-driver-continuous-clearance-003.json
+          contracts/east-rear-shared-driver-static-geometry-rebind-002.json
+          contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json
+          contracts/east-rear-upper-trunk-east-mid-geometry-rebind-004.json
+          contracts/east-rear-upper-trunk-east-mid-hierarchy-rigging-006.json
+          docs/GEOMETRY_EAST_REAR_NORTH_LOW_ATTACHMENT_TOPOLOGY_005.md
+          docs/GEOMETRY_EAST_REAR_NORTH_LOW_TRANSITION_OPEN_RING_006.md
+          docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_CONTINUOUS_CLEARANCE_003.md
+          docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md
+          docs/GEOMETRY_EAST_REAR_SIMULTANEOUS_PRIMARY_BRANCH_AUDIT_001.md
+          docs/GEOMETRY_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_REBIND_004.md
+          docs/RIGGING_EAST_REAR_NORTH_LOW_ATTACHMENT_REPRESENTATION_GATE_008.md
+          docs/RIGGING_EAST_REAR_NORTH_LOW_PARENT_INFLUENCE_GATE_007.md
+          docs/RIGGING_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_006.md
+          src/axm_nature_design/rear_tree_geometry_north_low_attachment_topology.py
+          src/axm_nature_design/rear_tree_geometry_north_low_transition_open_ring.py
+          src/axm_nature_design/rear_tree_geometry_shared_driver_continuous_clearance.py
+          src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py
+          src/axm_nature_design/rear_tree_geometry_simultaneous_socket_audit.py
+          src/axm_nature_design/rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
+          src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py
+          src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py
+          src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
+          tests/test_rear_tree_geometry_north_low_attachment_topology.py
+          tests/test_rear_tree_geometry_north_low_transition_open_ring.py
+          tests/test_rear_tree_geometry_shared_driver_continuous_clearance.py
+          tests/test_rear_tree_geometry_shared_driver_static_rebind.py
+          tests/test_rear_tree_geometry_simultaneous_socket_audit.py
+          tests/test_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
+          tests/test_rear_tree_rigging_north_low_attachment_representation_gate.py
+          tests/test_rear_tree_rigging_north_low_parent_influence_gate.py
+          tests/test_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
+          tools/verify_rear_tree_geometry_north_low_attachment_topology.py
+          tools/verify_rear_tree_geometry_north_low_transition_open_ring.py
+          tools/verify_rear_tree_geometry_shared_driver_continuous_clearance.py
+          tools/verify_rear_tree_geometry_shared_driver_static_rebind.py
+          tools/verify_rear_tree_geometry_simultaneous_socket_audit.py
+          tools/verify_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
+          tools/verify_rear_tree_rigging_north_low_attachment_representation_gate.py
+          tools/verify_rear_tree_rigging_north_low_parent_influence_gate.py
+          tools/verify_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
+          EOF
+          git diff --name-only "$rigging"...HEAD | sort > /tmp/actual-geometry-files
+          diff -u /tmp/expected-geometry-files /tmp/actual-geometry-files
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git rev-parse HEAD:src/axm_nature_design/organic_form.py)" = "82753ccd91e0ed377dc4649381cd61cb80a56bec"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_shared_driver_composition.py)" = "a51a545e2ac4d46baaec7eca09e4c49d923c3dbd"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py)" = "33934c6352f56baa3690f8fdaffde775d85f8f4c"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_simultaneous_socket_audit.py)" = "4f3f1eb881aaebf876a72a0442ebd059610f6203"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact continuous Geometry evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-geometry-head.txt
+          printf '%s\n' '3197eba862a6b7e6e93098a5b98d2c91bf48d32a' > evidence/prior-geometry-head.txt
+          printf '%s\n' 'b4b480b415047fea90b4740f7702ced0dba9142d' > evidence/exact-continuous-rigging-head.txt
+          set +e
+          python tools/verify_rear_tree_geometry_shared_driver_continuous_clearance.py \
+            --output evidence/east-rear-shared-driver-continuous-clearance-003.json \
+            > evidence/verifier.log 2>&1
+          verifier_status=$?
+          set -e
+          cat evidence/verifier.log
+          cp contracts/east-rear-shared-driver-continuous-clearance-003.json \
+            evidence/east-rear-shared-driver-continuous-clearance-contract-003.json
+          cp docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_CONTINUOUS_CLEARANCE_003.md evidence/
+          cp src/axm_nature_design/rear_tree_geometry_shared_driver_continuous_clearance.py evidence/
+          cp tests/test_rear_tree_geometry_shared_driver_continuous_clearance.py evidence/
+          cp tools/verify_rear_tree_geometry_shared_driver_continuous_clearance.py evidence/
+          if [ "$verifier_status" -ne 0 ]; then
+            printf '%s\n' "$verifier_status" > evidence/verifier-exit-status.txt
+            exit "$verifier_status"
+          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('evidence/east-rear-shared-driver-continuous-clearance-003.json').read_text())
+          assert p['result'] == 'PASS_CONTINUOUS_SHARED_DRIVER_CROSS_BRANCH_TRIANGLE_SEPARATION_CERTIFIED', p
+          assert p['scope']['shared_driver_interval_deg'] == [-5.0, 5.0], p
+          assert p['scope']['branch_pair_count'] == 10, p
+          assert p['scope']['triangles_per_child'] == 72, p
+          assert p['scope']['cross_branch_triangle_pair_trajectories'] == 51840, p
+          assert p['measurements']['triangle_pair_certificates_performed'] == 51840, p
+          assert p['measurements']['uncertified_triangle_pair_count'] == 0, p
+          assert p['measurements']['minimum_certified_slack_m'] > 0.02, p
+          assert p['budget_hold_control']['result'] == 'HOLD_CONTINUOUS_CLEARANCE_CERTIFICATE_WORK_BUDGET', p
+          assert p['budget_hold_control']['work']['triangle_pair_certificates_performed'] == 0, p
+          assert p['budget_hold_control']['work']['partial_clearance_verdict_exposed'] is False, p
+          assert p['prior_evidence']['finite_static_witnesses_promoted_to_continuous'] is False, p
+          assert p['truth_boundary']['continuous_cross_branch_separation_proven'] is True, p
+          assert p['truth_boundary']['child_fixed_receiver_clearance_checked'] is False, p
+          assert p['truth_boundary']['physics_or_gameplay_claimed'] is False, p
+          assert p['all_failure_controls_rejected'] is True, p
+          print(json.dumps({
+              'result': p['result'],
+              'triangle_pair_trajectories': p['scope']['cross_branch_triangle_pair_trajectories'],
+              'minimum_certified_slack_m': p['measurements']['minimum_certified_slack_m'],
+              'maximum_full_interval_combined_motion_bound_m': p['measurements']['maximum_full_interval_combined_motion_bound_m'],
+              'tightest_pair': p['measurements']['tightest_pair'],
+          }, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload retained Geometry evidence
+        if: always() && matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-continuous-geometry-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error

@@ -1,0 +1,37 @@
+{
+  "schema": "axm.nature-north-low-attachment-representation-rigging-contract/v0.1",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "study_id": "east-rear-tree-neutral-001",
+  "rigging_predecessor_head": "975931b11555d156e04e2ab12e9756fc6c9598a3",
+  "geometry_attachment_donor_head": "d32a41558910d78595042fb638a785714f825806",
+  "geometry_attachment_contract_blob": "127502ae50c7b442c88edd8454c9a74ba053da71",
+  "geometry_attachment_observer_blob": "279bd95a80208f346bd654e300e4b02aff34cf47",
+  "source_owner_head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+  "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+  "geometry_receiver_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
+  "branch_id": "north-low",
+  "constraint": {
+    "mode": "DETACHED_DIAGNOSTIC_CHILD_SOCKET_ONLY",
+    "upper_trunk_parent_influence_enabled": false,
+    "diagnostic_parent_weight": 0.0,
+    "connected_branch_trunk_skinning_allowed": false
+  },
+  "geometry_class_expected": {
+    "selected_vertices": 52,
+    "selected_triangles": 72,
+    "edge_connected_components": 6,
+    "closed_edge_manifold_components": 2,
+    "open_components": 4,
+    "shared_indexed_vertices_with_trunk": 0
+  },
+  "truth_boundary": {
+    "mutates_source_or_geometry": false,
+    "changes_socket_pivot_axis_or_angle_domain": false,
+    "proves_connected_surface_attachment": false,
+    "proves_production_skinning": false,
+    "proves_animation": false,
+    "proves_technical_art_target_host": false,
+    "proves_runtime_or_device": false,
+    "claims_canon_or_production_readiness": false
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "schema": "axm.nature-north-low-analytic-trunk-bridge-geometry-contract/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "branch_id": "north-low",
+  "result": "PASS_NORTH_LOW_ANALYTIC_TRUNK_SURFACE_LOOP_AND_BRIDGE_PATCH__HOLD_INDEXED_TRUNK_CUT_CONNECTED_JUNCTION",
+  "reusable_geometry_rule": "ANALYTIC_TRUNK_ENVELOPE_PROJECTION_CAN_DEFINE_MATCHED_BOUNDARY_LOOP_AND_BRIDGE_PATCH__INDEXED_TRUNK_CUT_AND_CONNECTED_JUNCTION_REMAIN_SEPARATE_GATES",
+  "exact_provenance": {
+    "geometry_predecessor_head": "a7164ce18e309c3cd548c89380639bdfa2b46ebf",
+    "organic_exit_frame_owner_head": "7f3b937b440e9870d07f7c356c5a3cbb779d0cd7",
+    "organic_exit_frame_blob": "406c169963c34aed394e269f0dff2c91bb035cb8",
+    "rigging_owner_head": "69640e558f0c1ac59d4d0e3155676e0967a03d04",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61"
+  },
+  "expected_geometry": {
+    "branch_side_ring_vertices": 8,
+    "analytic_trunk_loop_vertices": 8,
+    "bridge_patch_vertices": 16,
+    "bridge_patch_triangles": 16,
+    "bridge_patch_edges": 32,
+    "bridge_patch_boundary_cycles": 2,
+    "bridge_patch_boundary_cycle_lengths": [8, 8],
+    "combined_vertices": 25,
+    "combined_triangles": 40,
+    "combined_edges": 64,
+    "combined_boundary_edges": 8,
+    "combined_boundary_cycles": 1,
+    "combined_boundary_cycle_lengths": [8],
+    "combined_euler_characteristic": 1,
+    "nonmanifold_edges": 0,
+    "winding_conflicts": 0,
+    "degenerate_triangles": 0,
+    "isolated_vertices": 0
+  },
+  "required_holds": {
+    "indexed_trunk_mesh_cut_or_mutated": false,
+    "connected_branch_trunk_indexed_topology_proven": false,
+    "bridge_self_intersection_freedom_proven": false,
+    "deformation_or_skinning_proven": false,
+    "target_host_or_runtime_proven": false,
+    "source_or_default_adopted": false,
+    "game_or_production_readiness_claimed": false
+  }
+}

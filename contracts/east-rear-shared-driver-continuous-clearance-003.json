@@ -1,0 +1,60 @@
+{
+  "schema": "axm.nature-geometry-shared-driver-continuous-cross-branch-clearance/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "owner": "AXM 3D Studio Geometry & Topology",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "prior_geometry_head": "3197eba862a6b7e6e93098a5b98d2c91bf48d32a",
+  "rigging_continuous_owner_head": "b4b480b415047fea90b4740f7702ced0dba9142d",
+  "rigging_result": "PASS_FIVE_SOCKET_SHARED_DRIVER_RIG_COMPOSITION_CONTINUOUS_PARAMETER_MINUS5_TO_PLUS5",
+  "shared_driver_interval_deg": [
+    -5.0,
+    5.0
+  ],
+  "branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "receiver_identity": {
+    "vertices": 390,
+    "triangles": 570,
+    "triangles_per_child": 72,
+    "branch_pair_count": 10,
+    "cross_branch_triangle_pair_trajectories": 51840,
+    "migrated_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31"
+  },
+  "certificate": {
+    "method": "NEUTRAL_FIXED_SEPARATING_AXIS_MARGIN_GT_SUM_OF_FULL_INTERVAL_RIGID_ROTATION_DISPLACEMENT_BOUNDS",
+    "motion_bound_formula": "delta_triangle <= 2 * max_vertex_radius_to_axis * sin(max_abs_angle_rad / 2)",
+    "acceptance": "EVERY_CROSS_BRANCH_TRIANGLE_PAIR_REQUIRES_POSITIVE_MARGIN_AFTER_FULL_INTERVAL_MOTION_BOUND",
+    "separation_epsilon_m": 1e-10,
+    "finite_static_witnesses_promoted": false,
+    "repair_or_adoption_authorized": false
+  },
+  "truth_boundary": {
+    "scope": "CONTINUOUS_SOURCE_SPACE_CROSS_BRANCH_TRIANGLE_SEPARATION_ONLY",
+    "child_internal_self_intersection_checked": false,
+    "child_fixed_receiver_clearance_checked": false,
+    "adjacent_attachment_contact_or_foldover_checked": false,
+    "physical_collision_checked": false,
+    "source_or_biological_rom_claimed": false,
+    "animation_timing_or_playback_claimed": false,
+    "physical_wind_claimed": false,
+    "target_host_or_runtime_claimed": false,
+    "physics_or_gameplay_claimed": false,
+    "automatic_adoption": false,
+    "canon_or_production_readiness_claimed": false,
+    "game_readiness_or_geometry_mastery_claimed": false
+  },
+  "coordination": {
+    "axm_create_me": "COORDINATION_ONLY",
+    "merge_gate_roots": [
+      "Truth",
+      "Agency / non-domination",
+      "Continuity",
+      "Wisdom before speed"
+    ]
+  }
+}

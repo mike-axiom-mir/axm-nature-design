@@ -1,0 +1,57 @@
+{
+  "schema": "axm.nature-five-socket-shared-driver-polarity-binding/v0.1",
+  "study_id": "east-rear-primary-branch-shared-driver-polarity-rigging-004",
+  "rigging_predecessor": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pull_request": 14,
+    "head": "898529f602893c8f6be179bd3e9b6821fc099904",
+    "result": "PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_RIGID_CHILD_FAMILY_GEOMETRY_RECEIVER_DIAGNOSTIC_MINUS5_TO_PLUS5"
+  },
+  "vfx_sign_map_handoff": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pull_request": 17,
+    "head": "ef7b35af27d5ca98a6447c1e33be07863e387305",
+    "result": "PASS_FIVE_SOCKET_WEATHER_VISUAL_DIRECTION_SIGN_MAP",
+    "contract_path": "contracts/east-rear-primary-branch-weather-direction-vfx-sign-family-002.json",
+    "contract_blob": "b06b5f6862c6c88ec5642e3bdbccfe0d3e65655f",
+    "module_path": "src/axm_nature_design/rear_tree_vfx_weather_sign_family.py",
+    "module_blob": "ae674ee8f6109d478446fbcd5348bcbee04b01e7",
+    "semantics": "REVIEW_ONLY_VISUAL_DIRECTION_SIGN_MAP_NO_MOTION_ADOPTION"
+  },
+  "branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "shared_driver_interval_deg": [-5.0, 5.0],
+  "representative_shared_driver_deg": [-5.0, -2.5, 0.0, 2.5, 5.0],
+  "vfx_review_only_preferred_local_angle_deg_by_branch": {
+    "south-low": 5.0,
+    "north-low": -5.0,
+    "east-mid": 5.0,
+    "west-high": -5.0,
+    "north-top": 5.0
+  },
+  "command_sign_multiplier_by_branch": {
+    "south-low": 1.0,
+    "north-low": -1.0,
+    "east-mid": 1.0,
+    "west-high": -1.0,
+    "north-top": 1.0
+  },
+  "mapping": "local_angle_deg = command_sign_multiplier * shared_driver_deg",
+  "axis_direction_rewritten": false,
+  "joint_pivot_rewritten": false,
+  "child_partition_rewritten": false,
+  "diagnostic_interval_widened": false,
+  "source_or_geometry_mutated": false,
+  "automatic_vfx_motion_adoption": false,
+  "automatic_animation_adoption": false,
+  "automatic_runtime_adoption": false,
+  "simultaneous_multi_branch_motion_claimed": false,
+  "physical_wind_claimed": false,
+  "source_or_biological_rom_claimed": false,
+  "truth_boundary": "This contract normalizes only shared command sign across five unchanged Rigging sockets using one exact VFX review-only sign-map handoff. It does not author wind, timing, cadence, amplitude, simultaneous multi-branch motion, Animation, Technical-Art target-host adoption, Runtime/controller/device behavior, collision, gameplay, Art/QA acceptance, CANON or production readiness."
+}

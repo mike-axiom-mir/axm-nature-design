@@ -1,0 +1,55 @@
+{
+  "schema": "axm.nature-north-low-upper-trunk-parent-influence-gate-rigging-contract/v0.1",
+  "study_id": "east-rear-tree-neutral-001",
+  "result": "PASS_NORTH_LOW_UPPER_TRUNK_PARENT_INFLUENCE_EXCLUSION_GATE_DIAGNOSTIC",
+  "exact_identity": {
+    "source_owner_head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "geometry_receiver_head": "9b451ba1f65281f550a6754e18574f7ab2951e28",
+    "geometry_receiver_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
+    "rigging_predecessor_head": "6cf64925f0ea00737e4d3f2d4f15979c773f309d",
+    "organic_interaction_donor_head": "925715d2f0491e2bcbc493b93dc6d14ab3dcb2a6",
+    "organic_source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "organic_interaction_module_blob": "be31e22283d43dcb4e6e8bda870760fa67ab1628"
+  },
+  "parent": {
+    "trunk_point_id": "upper",
+    "flex_zone_id": "trunk-upper-flex",
+    "flex_radius_m": 0.22,
+    "diagnostic_interval_deg": [-2.5, 2.5],
+    "representative_angles_deg": [-2.5, 0.0, 2.5]
+  },
+  "child": {
+    "branch_id": "north-low",
+    "flex_zone_id": "north-low-branch-flex",
+    "flex_radius_m": 0.14,
+    "existing_child_diagnostic_interval_deg": [-5.0, 5.0],
+    "representative_angles_deg": [-5.0, 0.0, 5.0]
+  },
+  "source_relation": {
+    "interaction_class": "FLEX_ENVELOPE_OVERLAP_ONLY",
+    "declared_flex_envelope_overlap_margin_m": 0.028488310914984383,
+    "neutral_attachment_cross_section_to_trunk_flex_boundary_signed_m": 0.009079537802862594,
+    "trunk_flex_intersects_neutral_attachment_cross_section": false
+  },
+  "rigging_constraint": {
+    "mode": "INTERSECTION_GATED_DIAGNOSTIC_ONLY",
+    "upper_trunk_parent_influence_enabled_for_north_low": false,
+    "diagnostic_parent_weight": 0.0,
+    "production_skin_weight": false,
+    "automatic_hierarchy_adoption": false,
+    "reopen_on_source_or_weighting_evidence_change": true
+  },
+  "authority": {
+    "source_geometry_changed": false,
+    "existing_child_socket_changed": false,
+    "production_weighting_claimed": false,
+    "surface_attachment_claimed": false,
+    "animation_acceptance": false,
+    "technical_art_acceptance": false,
+    "runtime_acceptance": false,
+    "visual_acceptance": false,
+    "canon": false,
+    "production_ready": false
+  }
+}
