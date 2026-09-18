@@ -3,9 +3,11 @@
 through the already-proven Nature Technical-Art dynamic-window receiver.
 
 This tool deliberately does not grant Technical Art adoption of the current
-Animation/Rigging owner pair.  It proves only that the exact current Animation
+Animation/Rigging owner pair. It proves only that the exact current Animation
 samples address the same 260-vertex receiver window and emits target-coordinate
-packets for a proof-local Godot AnimationPlayer observer.
+packets for a proof-local Godot AnimationPlayer observer. The older Technical-Art
+pose oracle is retained as a predecessor comparison, not treated as semantic
+pose authority for the newer Rigging/Animation pair.
 """
 from __future__ import annotations
 
@@ -35,7 +37,6 @@ WINDOW_START = 110
 WINDOW_END = 370
 EXPECTED_VERTICES = 390
 POSITION_STRIDE_BYTES = 12
-TOL = 1e-12
 
 
 def _canonical(value: Any) -> bytes:
@@ -176,23 +177,27 @@ def build(
     if max_dynamic_motion <= 0.05:
         raise ValueError("current Animation packet family is not motion-discriminating")
 
+    # The Technical-Art donor predates the current continuous Rigging owner. Its
+    # five pose packets are retained only as an explicit semantic-divergence
+    # witness. The transport boundary we reuse is source/mesh identity + exact
+    # vertex-index window + float32 byte layout, not predecessor pose equality.
     ta_static_witness_by_driver = {
         float(row["shared_driver_deg"]): row for row in ta_oracle.get("poses", [])
     }
-    static_witness_residual = 0.0
+    predecessor_pose_residual = 0.0
     for witness_index in (0, 10, 20, 30, 40):
         row = samples[witness_index]
         driver = float(row["shared_driver_deg"])
         donor = ta_static_witness_by_driver.get(driver)
         if donor is None:
             raise ValueError(f"Technical Art static target oracle missing driver witness {driver}")
-        residual = _max_component_delta(
-            row["dynamic_target_positions_m"],
-            donor.get("candidate_dynamic_target_positions_m", []),
+        predecessor_pose_residual = max(
+            predecessor_pose_residual,
+            _max_component_delta(
+                row["dynamic_target_positions_m"],
+                donor.get("candidate_dynamic_target_positions_m", []),
+            ),
         )
-        static_witness_residual = max(static_witness_residual, residual)
-    if static_witness_residual > TOL:
-        raise ValueError("current Animation representative packets diverge from exact TA predecessor transport")
 
     payload: dict[str, Any] = {
         "schema": SCHEMA,
@@ -202,6 +207,7 @@ def build(
             "rigging_owner_head": RIGGING_OWNER_HEAD,
             "technical_art_receiver_donor_head": TECHNICAL_ART_DONOR_HEAD,
             "technical_art_receiver_donor_is_current_pair_adoption": False,
+            "technical_art_pose_semantics_inherited_by_current_pair": False,
             "runtime_receiver_donor_head": RUNTIME_DONOR_HEAD,
             "uc_receiver_donor_head": UC_DONOR_HEAD,
         },
@@ -230,11 +236,12 @@ def build(
         },
         "measurements": {
             "maximum_dynamic_target_component_motion_m": max_dynamic_motion,
-            "maximum_representative_packet_residual_vs_ta_static_oracle_m": static_witness_residual,
+            "maximum_representative_pose_residual_vs_ta_predecessor_oracle_m": predecessor_pose_residual,
         },
         "samples": samples,
         "truth_boundary": {
             "current_animation_sample_packets_proven_against_ta_window_identity": True,
+            "predecessor_ta_pose_semantics_reused_as_current_authority": False,
             "technical_art_current_animation_rigging_pair_adoption_claimed": False,
             "runtime_controller_state_machine_or_input_claimed": False,
             "wall_clock_full_40hz_slot_delivery_claimed": False,
