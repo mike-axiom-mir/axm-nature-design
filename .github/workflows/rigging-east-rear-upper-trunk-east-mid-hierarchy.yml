@@ -1,0 +1,143 @@
+name: Rigging east rear upper-trunk east-mid hierarchy
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py"
+      - "tests/test_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py"
+      - "tools/verify_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py"
+      - "contracts/east-rear-upper-trunk-east-mid-hierarchy-rigging-006.json"
+      - "docs/RIGGING_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_006.md"
+      - ".github/workflows/rigging-east-rear-upper-trunk-east-mid-hierarchy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Rigging head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Preserve exact Rigging predecessor
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor b4b480b415047fea90b4740f7702ced0dba9142d HEAD
+          test "$(git rev-parse b4b480b415047fea90b4740f7702ced0dba9142d:src/axm_nature_design/rear_tree_rigging_shared_driver_composition.py)" = "a51a545e2ac4d46baaec7eca09e4c49d923c3dbd"
+          test "$(git rev-parse b4b480b415047fea90b4740f7702ced0dba9142d:contracts/east-rear-primary-branch-shared-driver-rigging-composition-005.json)" = "42e9c2d2e12d10e60b1971ad8f43b94da35fbbcb"
+
+      - name: Checkout exact Organic readiness donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: f8d103a9f0a1e457539919a45c605c1edb8b9a7f
+          path: _organic
+          fetch-depth: 1
+
+      - name: Bind exact Organic interaction identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _organic rev-parse HEAD)" = "f8d103a9f0a1e457539919a45c605c1edb8b9a7f"
+          test "$(git -C _organic rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git -C _organic rev-parse HEAD:src/axm_nature_design/rear_tree_deformation_readiness.py)" = "0e787e5724c29878a86a425b43a39d5120bf1086"
+          test "$(git -C _organic rev-parse HEAD:docs/ORGANIC_EAST_REAR_FLEX_INTERACTION_READINESS_004.md)" = "d103856df817d1b3c3ea7938fe8ac4067d7de0c9"
+          PYTHONPATH=_organic/src python - <<'PY'
+          import json
+          from pathlib import Path
+          from axm_nature_design.rear_tree_deformation_readiness import evaluate
+
+          source = json.loads(Path("_organic/examples/east_rear_tree_neutral_001.json").read_text())
+          report = evaluate(source)
+          assert report["trunk_branch_flex_interaction_state"] == "PASS_DECLARED_TRUNK_BRANCH_FLEX_INTERACTION_MAP__DEFORMATION_UNTESTED"
+          pairs = report["trunk_branch_flex_interactions"]["pairs"]
+          row = next(
+              item for item in pairs
+              if item["trunk_flex_zone_id"] == "trunk-upper-flex"
+              and item["branch_id"] == "east-mid"
+          )
+          assert abs(row["center_distance_m"] - 0.10630145812734658) <= 1e-12
+          assert row["branch_root_center_inside_trunk_flex_zone"] is True
+          assert abs(row["branch_root_center_containment_margin_m"] - 0.11369854187265342) <= 1e-12
+          assert abs(row["declared_flex_envelope_overlap_margin_m"] - 0.23369854187265338) <= 1e-12
+          north = next(
+              item for item in pairs
+              if item["trunk_flex_zone_id"] == "trunk-upper-flex"
+              and item["branch_id"] == "north-low"
+          )
+          assert north["branch_root_center_inside_trunk_flex_zone"] is False
+          assert north["declared_flex_envelopes_overlap"] is True
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile and run full repository suite
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Rigging hierarchy evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-rigging-head.txt
+          printf '%s\n' 'b4b480b415047fea90b4740f7702ced0dba9142d' > evidence/exact-rigging-predecessor-head.txt
+          printf '%s\n' 'f8d103a9f0a1e457539919a45c605c1edb8b9a7f' > evidence/exact-organic-readiness-donor-head.txt
+          python tools/verify_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py \
+            --output evidence/east-rear-upper-trunk-east-mid-hierarchy-rigging-evidence-006.json \
+            | tee evidence/verifier.log
+          cp contracts/east-rear-upper-trunk-east-mid-hierarchy-rigging-006.json evidence/
+          cp docs/RIGGING_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_006.md evidence/
+          cp _organic/docs/ORGANIC_EAST_REAR_FLEX_INTERACTION_READINESS_004.md \
+            evidence/exact-organic-flex-interaction-readiness-004.md
+          cp _organic/examples/east_rear_tree_neutral_001.json \
+            evidence/exact-organic-east-rear-source.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(
+              Path("evidence/east-rear-upper-trunk-east-mid-hierarchy-rigging-evidence-006.json").read_text()
+          )
+          assert report["result"] == "PASS_UPPER_TRUNK_EAST_MID_PARENT_CHILD_SOCKET_REBASE_CONTINUOUS_PRODUCT_DOMAIN_DIAGNOSTIC"
+          assert report["lineage"]["rigging_predecessor_head"] == "b4b480b415047fea90b4740f7702ced0dba9142d"
+          assert report["lineage"]["organic_readiness_donor_head"] == "f8d103a9f0a1e457539919a45c605c1edb8b9a7f"
+          assert report["organic_interaction_consumed"]["child_branch_id"] == "east-mid"
+          assert report["organic_interaction_consumed"]["north_low_overlap_policy_resolved"] is False
+          assert report["measurements"]["representative_parent_child_pose_count"] == 9
+          assert report["measurements"]["maximum_stale_neutral_child_frame_error_m"] > 1e-6
+          certificate = report["continuous_product_domain_certificate"]
+          assert certificate["continuous_for_every_real_parent_child_pair_in_closed_product_domain"] is True
+          assert certificate["trunk_mesh_deformation_or_skin_weights_proven"] is False
+          assert certificate["surface_attachment_proven"] is False
+          assert certificate["north_low_overlap_policy_proven"] is False
+          assert report["all_failure_controls_rejected"] is True
+          assert report["truth_boundary"]["animation_timing_interpolation_or_playback_claimed"] is False
+          assert report["truth_boundary"]["runtime_controller_or_device_claimed"] is False
+          PY
+
+      - name: Upload retained Rigging hierarchy evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-rigging-upper-trunk-east-mid-hierarchy-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
