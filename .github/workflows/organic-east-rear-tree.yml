@@ -33,17 +33,26 @@ jobs:
           readiness = json.loads((root / "deformation-readiness.json").read_text())
           assert report["status"] == "PASS_REAR_SOURCE_ENVELOPE", report
           assert all(report["checks"].values()), report
+          assert report["source_digest"] == "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61", report
+          assert report["mesh_digest"] == "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48", report
           assert report["vertices"] == 390, report
           assert report["triangles"] == 570, report
           assert report["receiving_context"]["replacement_target"] == "proxy:nature-tree-east-a", report
           assert report["receiving_context"]["seed"] == 29, report
-          assert readiness["state"] == "HOLD_BRANCH_ROOT_FLEX_ZONE_COVERAGE", readiness
+          assert readiness["state"] == "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED", readiness
           assert readiness["checks"]["all_branch_roots_have_neutral_trunk_support"], readiness
+          assert readiness["checks"]["all_declared_flex_zones_remain_unproven"], readiness
+          assert readiness["checks"]["all_primary_branch_roots_have_exact_declared_flex_zone"], readiness
           assert readiness["branch_count"] == 5, readiness
-          assert readiness["branch_roots_with_exact_flex_zone"] == 4, readiness
-          assert readiness["branch_roots_missing_exact_flex_zone"] == ["north-top"], readiness
+          assert readiness["branch_roots_with_exact_flex_zone"] == 5, readiness
+          assert readiness["branch_roots_missing_exact_flex_zone"] == [], readiness
           assert readiness["minimum_neutral_support_margin_after_branch_radius_m"] > 0.0, readiness
+          north_top = next(row for row in readiness["branch_roots"] if row["branch_id"] == "north-top")
+          assert north_top["exact_root_flex_zone_id"] == "north-top-branch-flex", north_top
+          assert abs(north_top["exact_root_flex_zone_radius_m"] - 0.12) <= 1e-12, north_top
+          assert north_top["exact_root_flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", north_top
           assert not readiness["truth_boundary"]["deformation_simulated"], readiness
+          assert not readiness["truth_boundary"]["rigging_tested"], readiness
           print(json.dumps({"envelope": report, "deformation_readiness": readiness}, indent=2))
           PY
       - name: Upload exact rear-tree evidence
