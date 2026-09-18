@@ -214,10 +214,12 @@ jobs:
           s=p['exact_seek']
           assert s['visible_authored_samples_checked']==40,p
           assert s['endpoint_sample_40_checked_as_exact_sample_0'] is True,p
-          assert s['maximum_dynamic_readback_component_delta_m'] <= 5e-6,p
-          assert s['maximum_static_readback_component_delta_m'] <= 5e-6,p
-          assert s['endpoint_dynamic_readback_component_delta_m'] <= 5e-6,p
-          assert s['maximum_dynamic_distance_from_imported_neutral_m'] > 0.05,p
+          assert s['animationplayer_bridge_index_mismatches']==0,p
+          assert s['representative_render_checks']==5,p
+          assert s['representative_full_vs_partial_render_changed_pixels_max']==0,p
+          assert s['positive_peak_vs_neutral_render_delta']['changed_pixels'] > 100,p
+          assert s['negative_peak_vs_neutral_render_delta']['changed_pixels'] > 100,p
+          assert all(row['full_vs_partial_render_delta']['byte_identical'] for row in s['representative_rows']),p
           n=p['natural_playback_observation']
           assert n['observed_wraps'] >= 2,p
           assert n['distinct_authored_sample_indices_observed'] >= 8,p
@@ -225,9 +227,16 @@ jobs:
           assert n['target_device_or_display_cadence_claimed'] is False,p
           t=p['truth_boundary']
           assert t['real_godot_animationplayer_replay_exercised'] is True,p
+          assert t['current_pair_target_correspondence_observed_by_render_identity'] is True,p
+          assert t['unsupported_post_update_cpu_array_readback_used'] is False,p
           assert t['technical_art_current_pair_adoption_claimed'] is False,p
           assert t['runtime_controller_state_machine_or_input_claimed'] is False,p
+          assert t['full_40hz_wall_clock_slot_delivery_claimed'] is False,p
+          assert t['physical_wind_or_biological_motion_claimed'] is False,p
+          assert t['continuous_collision_or_physics_claimed'] is False,p
           assert t['gameplay_acceptance_claimed'] is False,p
+          assert t['art_or_visual_qa_acceptance_claimed'] is False,p
+          assert t['canon_or_production_readiness_claimed'] is False,p
           PY
 
       - name: Fail closed on wrong target byte offset
