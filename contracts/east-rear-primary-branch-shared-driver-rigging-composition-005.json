@@ -1,0 +1,50 @@
+{
+  "schema": "axm.nature-five-socket-shared-driver-rig-composition/v0.1",
+  "contract_id": "east-rear-primary-branch-shared-driver-rigging-composition-005",
+  "repository": "mike-axiom-mir/axm-nature-design",
+  "rigging_predecessor": {
+    "pull_request": 14,
+    "head": "754797a815266a643c6b08f1606eb76ba95dd8c6",
+    "result": "PASS_FIVE_SOCKET_SHARED_DRIVER_POLARITY_BINDING_DIAGNOSTIC_MINUS5_TO_PLUS5"
+  },
+  "geometry_static_receiver_donor": {
+    "pull_request": 18,
+    "head": "75b7556b4dae7137411f4948e2e673a39de5467c",
+    "contract_path": "contracts/east-rear-shared-driver-static-geometry-rebind-002.json",
+    "contract_blob": "7056bb9b2160f536b88bf4827a81dec27af3f137",
+    "module_path": "src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py",
+    "module_blob": "33934c6352f56baa3690f8fdaffde775d85f8f4c",
+    "authority": "STATIC_RECEIVER_STRUCTURE_AND_FINITE_CHILD_CHILD_OBSERVATIONS_ONLY"
+  },
+  "vfx_static_response_donor": {
+    "pull_request": 19,
+    "head": "ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475",
+    "authority": "STATIC_VISUAL_RESPONSE_REVIEW_ONLY_NOT_MOTION"
+  },
+  "branch_ids": ["south-low", "north-low", "east-mid", "west-high", "north-top"],
+  "command_sign_multiplier_by_branch": {
+    "south-low": 1.0,
+    "north-low": -1.0,
+    "east-mid": 1.0,
+    "west-high": -1.0,
+    "north-top": 1.0
+  },
+  "shared_driver_interval_deg": [-5.0, 5.0],
+  "representative_shared_driver_deg": [-5.0, -2.5, 0.0, 2.5, 5.0],
+  "selected_vertex_union": 260,
+  "globally_fixed_vertices": 130,
+  "per_branch_selected_vertices": 52,
+  "per_branch_selected_triangles": 72,
+  "kinematic_formula": "p_i(u) = pivot_i + R(axis_i, command_sign_multiplier_i*u) * (p_i0 - pivot_i)",
+  "continuous_parameter_mapping_claimed": true,
+  "timing_or_playback_defined": false,
+  "continuous_collision_clearance_claimed": false,
+  "physical_wind_claimed": false,
+  "source_or_biological_rom_claimed": false,
+  "animation_acceptance_claimed": false,
+  "technical_art_target_host_acceptance_claimed": false,
+  "runtime_acceptance_claimed": false,
+  "physics_or_gameplay_acceptance_claimed": false,
+  "automatic_adoption": false,
+  "canon_or_production_readiness_claimed": false
+}
