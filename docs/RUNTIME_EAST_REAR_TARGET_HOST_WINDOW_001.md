@@ -61,6 +61,10 @@ For each witness the workflow captures one fixed-view shaded control frame and o
 
 Normals/tangents are intentionally not updated in either path. Therefore the visual PASS compares the partial-position candidate to the full-position control under the same retained proof normals; it does not establish physically correct deformed normals/tangents, final Nature lookdev, final leaf sidedness or Art/Visual-QA acceptance.
 
+## Workflow lineage
+
+The original auto-running target-host workflow is preserved in Git history as the failed v1 predecessor. It assumed the source-side 12-byte float32 position layout could be applied directly to the imported receiver and was correctly falsified by the measured 8-byte compressed Godot import layout. The active automatic verifier is `runtime-east-rear-target-host-window-v2.yml`; the v1 workflow is now manual-only so a known-invalid assumption does not keep new Runtime heads red.
+
 ## Explicit non-claims
 
 A green result does not establish direct updates of Godot's compressed imported position buffer, target-device CPU/GPU/FPS/VRAM/heap/thermal/battery improvement, continuous timed wind playback, physical wind semantics, arbitrary vegetation safety, generic importer policy, final visual acceptance, CANON or production/game readiness.
