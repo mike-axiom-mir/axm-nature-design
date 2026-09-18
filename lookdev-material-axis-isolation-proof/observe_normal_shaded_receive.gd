@@ -109,7 +109,7 @@ func _pbr_shader_code(path: String) -> String:
     if code.count(marker) != 1:
         _fail("Materials shaded receiver marker drift: %s" % path)
         return ""
-    code = code.replace(marker, marker + uniforms, 1)
+    code = code.replace(marker, marker + uniforms)
     code += (
         "void fragment() {\n"
         + "    ALBEDO = material_albedo.rgb;\n"
