@@ -124,7 +124,7 @@ func _image_delta(left: Image, right: Image) -> Dictionary:
             var channels_b := [b.r8, b.g8, b.b8, b.a8]
             var pixel_max := 0
             for channel in range(4):
-                var delta := abs(int(channels_a[channel]) - int(channels_b[channel]))
+                var delta: int = abs(int(channels_a[channel]) - int(channels_b[channel]))
                 pixel_max = max(pixel_max, delta)
                 absolute_sum += delta
             if pixel_max > 0:
