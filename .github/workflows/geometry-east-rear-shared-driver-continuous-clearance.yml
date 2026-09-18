@@ -11,6 +11,12 @@ on:
       - ".github/workflows/geometry-east-rear-shared-driver-continuous-clearance.yml"
       - ".github/workflows/geometry-east-rear-shared-driver-static-rebind.yml"
       - ".github/workflows/geometry-east-rear-simultaneous-socket-audit.yml"
+      - "src/axm_nature_design/rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "tests/test_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "tools/verify_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py"
+      - "contracts/east-rear-upper-trunk-east-mid-geometry-rebind-004.json"
+      - "docs/GEOMETRY_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_REBIND_004.md"
+      - ".github/workflows/geometry-east-rear-upper-trunk-east-mid-hierarchy-rebind.yml"
   workflow_dispatch:
 
 permissions:
@@ -29,33 +35,47 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
-      - name: Bind continuous Rigging owner and Geometry-only successor delta
+      - name: Bind continuous Rigging owner and Geometry successor delta
         shell: bash
         run: |
           set -euo pipefail
           rigging=b4b480b415047fea90b4740f7702ced0dba9142d
+          hierarchy_rigging=6cf64925f0ea00737e4d3f2d4f15979c773f309d
           prior_geometry=3197eba862a6b7e6e93098a5b98d2c91bf48d32a
           git merge-base --is-ancestor "$rigging" HEAD
+          git merge-base --is-ancestor "$hierarchy_rigging" HEAD
           git merge-base --is-ancestor "$prior_geometry" HEAD
           cat > /tmp/expected-geometry-files <<'EOF'
           .github/workflows/geometry-east-rear-shared-driver-continuous-clearance.yml
           .github/workflows/geometry-east-rear-shared-driver-static-rebind.yml
           .github/workflows/geometry-east-rear-simultaneous-socket-audit.yml
+          .github/workflows/geometry-east-rear-upper-trunk-east-mid-hierarchy-rebind.yml
+          .github/workflows/rigging-east-rear-upper-trunk-east-mid-hierarchy.yml
           contracts/east-rear-shared-driver-continuous-clearance-003.json
           contracts/east-rear-shared-driver-static-geometry-rebind-002.json
           contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json
+          contracts/east-rear-upper-trunk-east-mid-geometry-rebind-004.json
+          contracts/east-rear-upper-trunk-east-mid-hierarchy-rigging-006.json
           docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_CONTINUOUS_CLEARANCE_003.md
           docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md
           docs/GEOMETRY_EAST_REAR_SIMULTANEOUS_PRIMARY_BRANCH_AUDIT_001.md
+          docs/GEOMETRY_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_REBIND_004.md
+          docs/RIGGING_EAST_REAR_UPPER_TRUNK_EAST_MID_HIERARCHY_006.md
           src/axm_nature_design/rear_tree_geometry_shared_driver_continuous_clearance.py
           src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py
           src/axm_nature_design/rear_tree_geometry_simultaneous_socket_audit.py
+          src/axm_nature_design/rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
+          src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
           tests/test_rear_tree_geometry_shared_driver_continuous_clearance.py
           tests/test_rear_tree_geometry_shared_driver_static_rebind.py
           tests/test_rear_tree_geometry_simultaneous_socket_audit.py
+          tests/test_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
+          tests/test_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
           tools/verify_rear_tree_geometry_shared_driver_continuous_clearance.py
           tools/verify_rear_tree_geometry_shared_driver_static_rebind.py
           tools/verify_rear_tree_geometry_simultaneous_socket_audit.py
+          tools/verify_rear_tree_geometry_upper_trunk_east_mid_hierarchy.py
+          tools/verify_rear_tree_rigging_upper_trunk_east_mid_hierarchy.py
           EOF
           git diff --name-only "$rigging"...HEAD | sort > /tmp/actual-geometry-files
           diff -u /tmp/expected-geometry-files /tmp/actual-geometry-files
