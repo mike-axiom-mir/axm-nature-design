@@ -1,0 +1,82 @@
+name: Procedural Nature root flex-zone review family
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact Organic owner evidence head
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: b681b8beb0f91c6cedb6067aa8a79ae9feea6482
+          path: .studio-deps/organic-east-rear-current
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact root-flex review family evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_root_flex_zone_review_family_evidence.py
+          evidence/nature-rear-tree-root-flex-zone-review-family-001
+          --organic-root .studio-deps/organic-east-rear-current
+
+      - name: Verify bounded family truth gate
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(
+              Path("evidence/nature-rear-tree-root-flex-zone-review-family-001/summary.json").read_text()
+          )
+          assert data["state"] == "PASS_BOUNDED_ROOT_FLEX_ZONE_REVIEW_FAMILY"
+          assert data["decision"] == "PASS_ROOT_CENTERED_FLEX_METADATA_REVIEW_ONLY__NO_SOURCE_DEFORMATION_OR_DOWNSTREAM_ADOPTION"
+          assert data["organic_provider_head"] == "b681b8beb0f91c6cedb6067aa8a79ae9feea6482"
+          assert data["source_digest"] == "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307"
+          assert data["baseline_state"] == "HOLD_BRANCH_ROOT_FLEX_ZONE_COVERAGE"
+          assert data["baseline_branch_roots_with_exact_flex_zone"] == 4
+          assert data["baseline_branch_count"] == 5
+          assert data["baseline_missing_branch_ids"] == ["north-top"]
+          assert data["owner_example_count"] == 4
+          assert data["allowed_review_radius_classes_m"] == [0.12, 0.14]
+          assert data["variant_count"] == 3
+          assert data["distinct_variant_source_digest_count"] == 3
+          assert len(data["candidate_results"]) == 2
+          assert all(row["organic_observer_state"] == "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED" for row in data["candidate_results"])
+          assert all(row["deformation_tested"] is False for row in data["candidate_results"])
+          assert all(row["source_authorized"] is False for row in data["candidate_results"])
+          assert data["family_digest"] == data["reverse_order_family_digest"]
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 7
+          print("PASS_NATURE_ROOT_FLEX_ZONE_REVIEW_FAMILY_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained review evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-rear-tree-root-flex-zone-review-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-root-flex-zone-review-family-001
+          if-no-files-found: error
