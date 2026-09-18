@@ -183,15 +183,21 @@ jobs:
             target-proof-animation/generated/animation-shared-driver-target-oracle.json
           cp /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb \
             target-proof-animation/generated/nature-east-rear-dynamic-window.glb
-          rm -f target-proof-animation/animation-shared-driver-godot-target-receipt.json
+          rm -f target-proof-animation/animation-shared-driver-godot-target-receipt.json \
+                target-proof-animation/godot-target-replay.log
+          set +e
           xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
             .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
             --display-driver x11 \
             --rendering-method gl_compatibility \
             --path target-proof-animation \
-            --script observe_shared_driver_animationplayer.gd
+            --script observe_shared_driver_animationplayer.gd \
+            2>&1 | tee target-proof-animation/godot-target-replay.log
+          status=${PIPESTATUS[0]}
+          set -e
           cp target-proof-animation/animation-shared-driver-godot-target-receipt.json \
-            evidence/nature-shared-driver-target-replay-005/
+            evidence/nature-shared-driver-target-replay-005/ 2>/dev/null || true
+          exit "$status"
 
       - name: Validate exact real-Godot Animation result
         run: |
@@ -260,6 +266,7 @@ jobs:
           cp target-proof-animation/sample_bridge.gd "$root/" || true
           cp target-proof-animation/observe_shared_driver_animationplayer.gd "$root/" || true
           cp target-proof-animation/animation-shared-driver-godot-target-receipt.json "$root/" || true
+          cp target-proof-animation/godot-target-replay.log "$root/" || true
           cp /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb "$root/" || true
           git rev-parse HEAD > "$root/exact-animation-head.txt"
           git -C .ta rev-parse HEAD > "$root/exact-technical-art-donor-head.txt" || true
