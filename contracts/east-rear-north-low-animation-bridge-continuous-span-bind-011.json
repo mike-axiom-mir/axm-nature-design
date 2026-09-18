@@ -1,0 +1,50 @@
+{
+  "schema": "axm.nature-animation-north-low-bridge-continuous-span-bind/v0.1",
+  "owner": "3D Animation & Motion",
+  "branch_id": "north-low",
+  "animation_lane_predecessor_head": "20d04d70845c51455cedfb8541e2eb4e4784b433",
+  "animation_semantic_owner_head": "5cacd61e22433b0c33f29111827283b81cc0ba0d",
+  "animation_parent_rigging_head": "69640e558f0c1ac59d4d0e3155676e0967a03d04",
+  "current_rigging_continuous_span_head": "efe99261459858636dbe65b16cbe1d5ad2b93a56",
+  "frozen_animation": {
+    "duration_s": 1.0,
+    "authored_hz": 40,
+    "endpoint_inclusive_samples": 41,
+    "visible_repeat_samples": 40,
+    "curve": "sin(2*pi*t)^3",
+    "north_low_child_range_deg": [-5.0, 5.0],
+    "upper_trunk_parent_stress_range_deg": [-2.5, 2.5],
+    "parent_stress_is_command_only": true,
+    "retimed_or_reauthored": false
+  },
+  "current_rigging_constraint": {
+    "constraint": "ANALYTIC_BRIDGE_PAIRED_SPAN_CONTINUOUS_NONCOLLAPSE_CERTIFICATE",
+    "closed_child_domain_deg": [-5.0, 5.0],
+    "paired_span_count": 8,
+    "continuous_for_every_real_child_command_in_domain": true
+  },
+  "required_evidence": [
+    "rerun frozen Animation source-mesh receipt",
+    "reconstruct frozen Animation north-low socket identity",
+    "rerun exact current Rigging continuous paired-span receipt",
+    "match source, branch, pivot, axis and diagnostic interval identities",
+    "directly replay all 41 authored Animation child angles over current analytic bridge endpoints",
+    "compare direct endpoint spans with Rigging closed form",
+    "prove exact continuous Animation scalar range is contained in Rigging closed domain",
+    "reject verifier-only +5.01 degree widening",
+    "reject verifier-only socket pivot mismatch"
+  ],
+  "explicit_nonclaims": [
+    "continuous bridge triangle orientation or nondegeneracy",
+    "foldover collision or self-intersection clearance",
+    "indexed connected branch-trunk topology",
+    "production skinning or blended weights",
+    "physical wind or botanical mechanics",
+    "Technical Art target-host playback for this current pair",
+    "wall-clock 40 Hz delivery",
+    "Runtime controller state-machine input or device behavior",
+    "gameplay collision or physics acceptance",
+    "Art Direction or Visual QA acceptance",
+    "CANON game readiness or production readiness"
+  ]
+}
