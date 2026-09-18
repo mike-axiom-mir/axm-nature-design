@@ -9,6 +9,7 @@ on:
       - "contracts/east-rear-shared-driver-static-geometry-rebind-002.json"
       - "docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md"
       - ".github/workflows/geometry-east-rear-shared-driver-static-rebind.yml"
+      - ".github/workflows/geometry-east-rear-simultaneous-socket-audit.yml"
   workflow_dispatch:
 
 permissions:
@@ -35,6 +36,7 @@ jobs:
           git merge-base --is-ancestor "$prior" HEAD
           cat > /tmp/expected-new-files <<'EOF'
           .github/workflows/geometry-east-rear-shared-driver-static-rebind.yml
+          .github/workflows/geometry-east-rear-simultaneous-socket-audit.yml
           contracts/east-rear-shared-driver-static-geometry-rebind-002.json
           docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md
           src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py

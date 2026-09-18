@@ -9,6 +9,12 @@ on:
       - "contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json"
       - "docs/GEOMETRY_EAST_REAR_SIMULTANEOUS_PRIMARY_BRANCH_AUDIT_001.md"
       - ".github/workflows/geometry-east-rear-simultaneous-socket-audit.yml"
+      - "src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py"
+      - "tests/test_rear_tree_geometry_shared_driver_static_rebind.py"
+      - "tools/verify_rear_tree_geometry_shared_driver_static_rebind.py"
+      - "contracts/east-rear-shared-driver-static-geometry-rebind-002.json"
+      - "docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md"
+      - ".github/workflows/geometry-east-rear-shared-driver-static-rebind.yml"
   workflow_dispatch:
 
 permissions:
@@ -34,11 +40,17 @@ jobs:
           parent=898529f602893c8f6be179bd3e9b6821fc099904
           git merge-base --is-ancestor "$parent" HEAD
           cat > /tmp/expected-geometry-files <<'EOF'
+          .github/workflows/geometry-east-rear-shared-driver-static-rebind.yml
           .github/workflows/geometry-east-rear-simultaneous-socket-audit.yml
+          contracts/east-rear-shared-driver-static-geometry-rebind-002.json
           contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json
+          docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md
           docs/GEOMETRY_EAST_REAR_SIMULTANEOUS_PRIMARY_BRANCH_AUDIT_001.md
+          src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py
           src/axm_nature_design/rear_tree_geometry_simultaneous_socket_audit.py
+          tests/test_rear_tree_geometry_shared_driver_static_rebind.py
           tests/test_rear_tree_geometry_simultaneous_socket_audit.py
+          tools/verify_rear_tree_geometry_shared_driver_static_rebind.py
           tools/verify_rear_tree_geometry_simultaneous_socket_audit.py
           EOF
           git diff --name-only "$parent"...HEAD | sort > /tmp/actual-geometry-files
