@@ -127,9 +127,9 @@ func _mesh_layout(instance: MeshInstance3D) -> Dictionary:
         var arrays := instance.mesh.surface_get_arrays(surface_index)
         var vertices = arrays[Mesh.ARRAY_VERTEX]
         var count := int(vertices.size()) if vertices != null else 0
-        var format := instance.mesh.surface_get_format(surface_index)
-        var stride := RenderingServer.mesh_surface_get_format_vertex_stride(format, count)
-        var compressed := (format & Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES) != 0
+        var format: int = int(instance.mesh.surface_get_format(surface_index))
+        var stride: int = RenderingServer.mesh_surface_get_format_vertex_stride(format, count)
+        var compressed: bool = (format & int(Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES)) != 0
         all_compressed = all_compressed and compressed
         position_storage_bytes += count * stride
         rows.append({"surface": surface_index, "vertices": count, "position_stride_bytes": stride, "compressed_attributes": compressed})
