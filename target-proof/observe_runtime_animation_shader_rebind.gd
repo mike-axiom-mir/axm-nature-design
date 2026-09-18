@@ -237,6 +237,7 @@ func _run() -> void:
             "vertex_count": EXPECTED_VERTICES,
             "surface_count": neutral_mesh.get_surface_count(),
             "candidate_imported_vertex_stride_bytes": imported_stride,
+            "candidate_imported_position_stride_bytes": imported_stride,
             "candidate_imported_positions_compressed": imported_compressed,
             "candidate_position_storage_bytes": EXPECTED_VERTICES * imported_stride,
             "control_mutable_position_storage_bytes": EXPECTED_VERTICES * mutable_stride,
