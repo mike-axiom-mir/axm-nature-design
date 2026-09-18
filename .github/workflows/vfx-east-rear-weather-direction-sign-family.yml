@@ -1,0 +1,112 @@
+name: VFX east rear Weather-direction five-socket sign family
+
+on:
+  pull_request:
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/source_topology_migration.py"
+      - "src/axm_nature_design/rear_tree_rigging.py"
+      - "src/axm_nature_design/rear_tree_rigging_geometry_rebind.py"
+      - "src/axm_nature_design/rear_tree_rigging_primary_branch_family.py"
+      - "src/axm_nature_design/rear_tree_vfx_weather_sign_family.py"
+      - "contracts/east-rear-primary-branch-root-socket-rigging-family-003.json"
+      - "contracts/east-rear-primary-branch-weather-direction-vfx-sign-family-002.json"
+      - "tools/verify_rear_tree_vfx_weather_sign_family.py"
+      - "tests/test_rear_tree_vfx_weather_sign_family.py"
+      - "docs/VFX_EAST_REAR_WEATHER_DIRECTION_SIGN_FAMILY_002.md"
+      - ".github/workflows/vfx-east-rear-weather-direction-sign-family.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin exact Rigging owner bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          RIGGING_HEAD=898529f602893c8f6be179bd3e9b6821fc099904
+          git merge-base --is-ancestor "$RIGGING_HEAD" HEAD
+          git diff --exit-code "$RIGGING_HEAD" HEAD -- \
+            examples/east_rear_tree_neutral_001.json \
+            src/axm_nature_design/organic_form.py \
+            src/axm_nature_design/source_topology_migration.py \
+            src/axm_nature_design/rear_tree_rigging.py \
+            src/axm_nature_design/rear_tree_rigging_geometry_rebind.py \
+            src/axm_nature_design/rear_tree_rigging_primary_branch_family.py \
+            contracts/east-rear-primary-branch-root-socket-rigging-family-003.json
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full receiving repository tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact VFX sign-family evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/east-rear-weather-direction-vfx-sign-family-002
+          git rev-parse HEAD > evidence/east-rear-weather-direction-vfx-sign-family-002/exact-head.txt
+          printf '%s\n' 898529f602893c8f6be179bd3e9b6821fc099904 > evidence/east-rear-weather-direction-vfx-sign-family-002/exact-rigging-owner-head.txt
+          printf '%s\n' 1976c5a4ff0a51b5f3ee4bfd323dbb6f89c34787 > evidence/east-rear-weather-direction-vfx-sign-family-002/exact-vfx-predecessor-head.txt
+          printf '%s\n' ca2eaba519e8449835b0ea6ef944b7080c3caa6a > evidence/east-rear-weather-direction-vfx-sign-family-002/exact-weather-donor-head.txt
+          printf '%s\n' 11298d447f262da8a78e43e2df68bc0346c99a2c > evidence/east-rear-weather-direction-vfx-sign-family-002/exact-weather-source-blob.txt
+          python tools/verify_rear_tree_vfx_weather_sign_family.py \
+            --output evidence/east-rear-weather-direction-vfx-sign-family-002/evidence.json \
+            --svg-output evidence/east-rear-weather-direction-vfx-sign-family-002/review.svg
+          cp contracts/east-rear-primary-branch-weather-direction-vfx-sign-family-002.json evidence/east-rear-weather-direction-vfx-sign-family-002/
+          cp docs/VFX_EAST_REAR_WEATHER_DIRECTION_SIGN_FAMILY_002.md evidence/east-rear-weather-direction-vfx-sign-family-002/
+
+      - name: Assert retained evidence truth boundary
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          root = Path("evidence/east-rear-weather-direction-vfx-sign-family-002")
+          payload = json.loads((root / "evidence.json").read_text())
+          assert payload["result"] == "PASS_FIVE_SOCKET_WEATHER_VISUAL_DIRECTION_SIGN_MAP", payload
+          assert all(payload["checks"].values()), payload
+          assert payload["weather_visual_direction_donor"]["wind_xy"] == [1.0, 0.35], payload
+          assert payload["weather_visual_direction_donor"]["wind_semantics"] == "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED", payload
+          assert payload["vfx_predecessor"]["reproduced"] is True, payload
+          assert len(payload["measurements"]["branch_signs"]) == 5, payload
+          assert not any(payload["truth_boundary"].values()), payload
+          assert payload["all_failure_controls_rejected"] is True, payload
+          ET.parse(root / "review.svg")
+          PY
+
+      - name: Upload retained VFX sign-family evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-weather-direction-vfx-sign-family-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/east-rear-weather-direction-vfx-sign-family-002/
+          if-no-files-found: error
