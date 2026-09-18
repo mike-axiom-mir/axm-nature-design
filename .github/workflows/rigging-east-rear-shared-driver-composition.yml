@@ -1,0 +1,131 @@
+name: Rigging east rear shared-driver composition
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_rigging_shared_driver_composition.py"
+      - "tests/test_rear_tree_rigging_shared_driver_composition.py"
+      - "tools/verify_rear_tree_rigging_shared_driver_composition.py"
+      - "contracts/east-rear-primary-branch-shared-driver-rigging-composition-005.json"
+      - "docs/RIGGING_EAST_REAR_SHARED_DRIVER_COMPOSITION_005.md"
+      - ".github/workflows/rigging-east-rear-shared-driver-composition.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Rigging head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Preserve exact Rigging predecessor
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 754797a815266a643c6b08f1606eb76ba95dd8c6 HEAD
+          test "$(git rev-parse 754797a815266a643c6b08f1606eb76ba95dd8c6:src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py)" = "dd17527ba58034da8b25e36033f187ef4601e4b8"
+          test "$(git rev-parse 754797a815266a643c6b08f1606eb76ba95dd8c6:tests/test_rear_tree_rigging_shared_driver_polarity.py)" = "64140fdb66e65eca09bd5e6ddbb337f6e7fe1435"
+
+      - name: Checkout exact Geometry static receiver donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 75b7556b4dae7137411f4948e2e673a39de5467c
+          path: _geometry
+          fetch-depth: 1
+
+      - name: Checkout exact VFX static response donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475
+          path: _vfx
+          fetch-depth: 1
+
+      - name: Bind donor identities and truth boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _geometry rev-parse HEAD)" = "75b7556b4dae7137411f4948e2e673a39de5467c"
+          test "$(git -C _vfx rev-parse HEAD)" = "ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475"
+          test "$(git -C _geometry rev-parse HEAD:contracts/east-rear-shared-driver-static-geometry-rebind-002.json)" = "7056bb9b2160f536b88bf4827a81dec27af3f137"
+          test "$(git -C _geometry rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_shared_driver_static_rebind.py)" = "33934c6352f56baa3690f8fdaffde775d85f8f4c"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          g = json.loads(Path('_geometry/contracts/east-rear-shared-driver-static-geometry-rebind-002.json').read_text())
+          v = json.loads(Path('_vfx/contracts/east-rear-shared-driver-vfx-response-envelope-003.json').read_text())
+          assert g['rigging_donor']['head'] == '754797a815266a643c6b08f1606eb76ba95dd8c6'
+          assert g['shared_driver_values_deg'] == [-5.0, -2.5, 0.0, 2.5, 5.0]
+          assert g['continuous_interval_claimed'] is False
+          assert g['simultaneous_motion_claimed'] is False
+          assert v['nature_rigging_owner']['head'] == '754797a815266a643c6b08f1606eb76ba95dd8c6'
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile and run full repository suite
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Rigging composition evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-rigging-head.txt
+          printf '%s\n' '754797a815266a643c6b08f1606eb76ba95dd8c6' > evidence/exact-rigging-predecessor-head.txt
+          printf '%s\n' '75b7556b4dae7137411f4948e2e673a39de5467c' > evidence/exact-geometry-donor-head.txt
+          printf '%s\n' 'ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475' > evidence/exact-vfx-static-donor-head.txt
+          python tools/verify_rear_tree_rigging_shared_driver_composition.py \
+            --output evidence/east-rear-primary-branch-shared-driver-rigging-composition-evidence-005.json \
+            | tee evidence/verifier.log
+          cp contracts/east-rear-primary-branch-shared-driver-rigging-composition-005.json evidence/
+          cp docs/RIGGING_EAST_REAR_SHARED_DRIVER_COMPOSITION_005.md evidence/
+          cp _geometry/contracts/east-rear-shared-driver-static-geometry-rebind-002.json \
+            evidence/exact-geometry-shared-driver-static-contract.json
+          cp _vfx/contracts/east-rear-shared-driver-vfx-response-envelope-003.json \
+            evidence/exact-vfx-static-response-contract.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('evidence/east-rear-primary-branch-shared-driver-rigging-composition-evidence-005.json').read_text())
+          assert p['result'] == 'PASS_FIVE_SOCKET_SHARED_DRIVER_RIG_COMPOSITION_CONTINUOUS_PARAMETER_MINUS5_TO_PLUS5'
+          assert p['lineage']['rigging_predecessor_head'] == '754797a815266a643c6b08f1606eb76ba95dd8c6'
+          assert p['lineage']['geometry_donor_head'] == '75b7556b4dae7137411f4948e2e673a39de5467c'
+          assert p['lineage']['vfx_static_response_head'] == 'ba1c12dd527f1ecc6a0eb4bc0b4322f15ccad475'
+          assert p['composition']['selected_vertex_union'] == 260
+          assert p['composition']['globally_fixed_vertices'] == 130
+          assert p['continuous_parameter_certificate']['continuous_for_every_real_parameter_in_closed_interval'] is True
+          assert p['continuous_parameter_certificate']['composition_order_independent_for_every_real_parameter'] is True
+          assert p['continuous_parameter_certificate']['continuous_collision_clearance_proven'] is False
+          assert p['all_failure_controls_rejected'] is True
+          assert p['truth_boundary']['animation_timing_interpolation_or_playback_claimed'] is False
+          assert p['truth_boundary']['runtime_controller_or_device_claimed'] is False
+          PY
+
+      - name: Upload retained Rigging composition evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-rigging-shared-driver-composition-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
