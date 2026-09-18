@@ -1,0 +1,111 @@
+name: Rigging east rear north-low parent influence gate
+
+on:
+  pull_request:
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/rear_tree_deformation_readiness.py"
+      - "src/axm_nature_design/rear_tree_rigging.py"
+      - "src/axm_nature_design/rear_tree_rigging_primary_branch_family.py"
+      - "src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "contracts/east-rear-north-low-upper-trunk-parent-influence-gate-rigging-007.json"
+      - "tools/verify_rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "tests/test_rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_PARENT_INFLUENCE_GATE_007.md"
+      - ".github/workflows/rigging-east-rear-north-low-parent-influence-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin exact source Rigging and Organic donor identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          git merge-base --is-ancestor 6cf64925f0ea00737e4d3f2d4f15979c773f309d HEAD
+          if ! git cat-file -e 925715d2f0491e2bcbc493b93dc6d14ab3dcb2a6^{commit} 2>/dev/null; then
+            git fetch --no-tags origin 925715d2f0491e2bcbc493b93dc6d14ab3dcb2a6
+          fi
+          test "$(git rev-parse 925715d2f0491e2bcbc493b93dc6d14ab3dcb2a6:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git rev-parse 925715d2f0491e2bcbc493b93dc6d14ab3dcb2a6:src/axm_nature_design/rear_tree_flex_interaction_classification.py)" = "be31e22283d43dcb4e6e8bda870760fa67ab1628"
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact north-low parent-influence evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/north-low-parent-influence-gate-007
+          python tools/verify_rear_tree_rigging_north_low_parent_influence_gate.py \
+            --output evidence/north-low-parent-influence-gate-007/evidence.json \
+            | tee evidence/north-low-parent-influence-gate-007/verifier.log
+          cp contracts/east-rear-north-low-upper-trunk-parent-influence-gate-rigging-007.json evidence/north-low-parent-influence-gate-007/contract.json
+          cp docs/RIGGING_EAST_REAR_NORTH_LOW_PARENT_INFLUENCE_GATE_007.md evidence/north-low-parent-influence-gate-007/README.md
+          cp src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py evidence/north-low-parent-influence-gate-007/receiver.py
+          cp tools/verify_rear_tree_rigging_north_low_parent_influence_gate.py evidence/north-low-parent-influence-gate-007/verifier.py
+          git rev-parse HEAD > evidence/north-low-parent-influence-gate-007/exact-head.txt
+          printf '%s\n' 925715d2f0491e2bcbc493b93dc6d14ab3dcb2a6 > evidence/north-low-parent-influence-gate-007/organic-donor-head.txt
+          printf '%s\n' 6cf64925f0ea00737e4d3f2d4f15979c773f309d > evidence/north-low-parent-influence-gate-007/rigging-predecessor-head.txt
+
+      - name: Assert bounded truth boundary
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('evidence/north-low-parent-influence-gate-007/evidence.json')
+          report = json.loads(p.read_text())
+          assert report['result'] == 'PASS_NORTH_LOW_UPPER_TRUNK_PARENT_INFLUENCE_EXCLUSION_GATE_DIAGNOSTIC', report
+          relation = report['organic_interaction_consumed']
+          assert relation['trunk_flex_intersects_neutral_attachment_cross_section'] is False, relation
+          assert relation['neutral_attachment_cross_section_to_trunk_flex_boundary_signed_m'] > 0.009, relation
+          constraint = report['rigging_constraint']
+          assert constraint['upper_trunk_parent_influence_enabled_for_north_low'] is False, constraint
+          assert constraint['diagnostic_parent_weight'] == 0.0, constraint
+          measurements = report['measurements']
+          assert measurements['representative_parent_child_pose_count'] == 9, measurements
+          assert measurements['maximum_gated_parent_command_leak_m'] <= 1e-9, measurements
+          assert measurements['maximum_counterfactual_inherited_parent_socket_travel_m'] > 0.01, measurements
+          assert report['all_failure_controls_rejected'] is True, report
+          truth = report['truth_boundary']
+          assert truth['production_skin_weighting_claimed'] is False, truth
+          assert truth['animation_timing_interpolation_or_playback_claimed'] is False, truth
+          assert truth['runtime_controller_or_device_claimed'] is False, truth
+          PY
+
+      - name: Upload exact Rigging evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-parent-influence-gate-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-parent-influence-gate-007
+          if-no-files-found: error
