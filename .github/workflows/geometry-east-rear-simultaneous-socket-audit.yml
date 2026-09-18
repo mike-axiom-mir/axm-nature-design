@@ -100,7 +100,8 @@ jobs:
             printf '%s\n' "$verifier_status" > evidence/verifier-exit-status.txt
             exit "$verifier_status"
           fi
-          cp contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json evidence/
+          cp contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json \
+            evidence/east-rear-simultaneous-primary-branch-geometry-contract-001.json
           cp docs/GEOMETRY_EAST_REAR_SIMULTANEOUS_PRIMARY_BRANCH_AUDIT_001.md evidence/
           python - <<'PY'
           import json
@@ -111,12 +112,21 @@ jobs:
           assert payload['receiver']['triangles'] == 570
           assert payload['receiver']['selected_vertex_union'] == 260
           assert payload['receiver']['globally_fixed_vertices'] == 130
+          assert payload['receiver']['triangle_partition']['triangle_closed_child_partitions'] is True
+          assert payload['receiver']['triangle_partition']['partial_selected_triangle_count'] == 0
+          assert payload['receiver']['triangle_partition']['cross_branch_triangle_count'] == 0
           assert payload['witness_family']['extreme_corner_state_count'] == 32
           assert payload['witness_family']['total_state_count'] == 33
           assert payload['witness_family']['maximum_composition_order_vertex_delta_m'] <= 1e-12
-          assert payload['uc_observer']['exact_pair_checks_per_state'] == 162165
+          assert payload['uc_observer']['full_receiver_pair_checks'] == 162165
+          assert payload['uc_observer']['solo_pair_checks'] == 2556
+          assert payload['uc_observer']['combined_child_pair_checks'] == 10296
+          assert payload['uc_observer']['branch_pair_count'] == 10
+          assert payload['uc_observer']['state_count'] == 33
+          assert payload['uc_observer']['branch_pair_state_observations'] == 330
           assert payload['uc_observer']['budget_hold_control']['inspection_complete'] is False
           assert payload['uc_observer']['budget_hold_control']['triangle_pair_checks_performed'] == 0
+          assert payload['uc_observer']['whole_receiver_intersection_verdict_used'] is False
           assert payload['all_failure_controls_rejected'] is True
           assert payload['truth_boundary']['continuous_deformation_clearance_claimed'] is False
           assert payload['uc_observer']['continuous_interval_checked'] is False
@@ -124,9 +134,9 @@ jobs:
           print(json.dumps({
               'geometry_result': payload['result'],
               'uc_observer_result': payload['uc_observer']['result'],
-              'neutral_intersections': payload['uc_observer']['neutral_self_intersection_pair_count'],
-              'min_corner_intersections': payload['uc_observer']['minimum_corner_self_intersection_pair_count'],
-              'max_corner_intersections': payload['uc_observer']['maximum_corner_self_intersection_pair_count'],
+              'branch_pair_state_observations': payload['uc_observer']['branch_pair_state_observations'],
+              'max_cross_branch_intersections': payload['uc_observer']['maximum_cross_branch_intersection_pair_count_in_any_pair_state'],
+              'states_with_cross_branch_intersections': payload['uc_observer']['states_with_cross_branch_intersections'],
               'triangle_partition': payload['receiver']['triangle_partition'],
           }, indent=2, sort_keys=True))
           PY
