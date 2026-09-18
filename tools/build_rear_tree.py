@@ -9,6 +9,9 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from axm_nature_design.organic_form import build_mesh, load_source
 from axm_nature_design.rear_tree_deformation_readiness import evaluate as evaluate_deformation_readiness
+from axm_nature_design.rear_tree_flex_interaction_classification import (
+    evaluate as evaluate_flex_interaction_classification,
+)
 from axm_nature_design.rear_tree_study import evaluate
 
 SOURCE = ROOT / "examples" / "east_rear_tree_neutral_001.json"
@@ -71,6 +74,7 @@ def main() -> int:
     mesh = build_mesh(source)
     report = evaluate(source)
     readiness = evaluate_deformation_readiness(source)
+    flex_interactions = evaluate_flex_interaction_classification(source)
     if report["status"] != "PASS_REAR_SOURCE_ENVELOPE":
         raise SystemExit("east rear tree evidence failed")
     if readiness["state"] not in {
@@ -78,11 +82,17 @@ def main() -> int:
         "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED",
     }:
         raise SystemExit("east rear tree deformation-readiness evidence failed")
+    if (
+        flex_interactions["state"]
+        != "PASS_EXACT_TRUNK_BRANCH_FLEX_INTERACTION_CLASSES__DEFORMATION_UNTESTED"
+    ):
+        raise SystemExit("east rear tree flex-interaction classification evidence failed")
 
     _write_json(out / "source.json", source)
     _write_json(out / "mesh.json", mesh)
     _write_json(out / "evidence.json", report)
     _write_json(out / "deformation-readiness.json", readiness)
+    _write_json(out / "flex-interaction-classification.json", flex_interactions)
     _write_obj(mesh, out / "east-rear-tree-neutral-001.obj", source["study_id"])
     for view in ("front", "side", "top"):
         _write_svg(mesh, out / f"{view}.svg", view, source["study_id"])
