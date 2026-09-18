@@ -80,16 +80,26 @@ jobs:
         if: matrix.python-version == '3.11'
         env:
           PYTHONPATH: src
+        shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           mkdir -p evidence
           git rev-parse HEAD > evidence/exact-geometry-head.txt
           printf '%s\n' '898529f602893c8f6be179bd3e9b6821fc099904' > evidence/exact-rigging-parent-head.txt
           printf '%s\n' 'ce70d717e381df6ca8a27c0c9fabe9d48bb1b23c' > evidence/exact-uc-head.txt
           cp /tmp/uc-self-intersection-blob.txt evidence/exact-uc-self-intersection-blob.txt
+          set +e
           python tools/verify_rear_tree_geometry_simultaneous_socket_audit.py \
             --uc-root _uc \
-            --output evidence/east-rear-simultaneous-primary-branch-geometry-audit-001.json
+            --output evidence/east-rear-simultaneous-primary-branch-geometry-audit-001.json \
+            > evidence/verifier.log 2>&1
+          verifier_status=$?
+          set -e
+          cat evidence/verifier.log
+          if [ "$verifier_status" -ne 0 ]; then
+            printf '%s\n' "$verifier_status" > evidence/verifier-exit-status.txt
+            exit "$verifier_status"
+          fi
           cp contracts/east-rear-simultaneous-primary-branch-geometry-audit-001.json evidence/
           cp docs/GEOMETRY_EAST_REAR_SIMULTANEOUS_PRIMARY_BRANCH_AUDIT_001.md evidence/
           python - <<'PY'
@@ -122,7 +132,7 @@ jobs:
           PY
 
       - name: Upload retained Geometry evidence
-        if: matrix.python-version == '3.11'
+        if: always() && matrix.python-version == '3.11'
         uses: actions/upload-artifact@v4
         with:
           name: nature-east-rear-simultaneous-geometry-${{ github.event.pull_request.head.sha || github.sha }}
