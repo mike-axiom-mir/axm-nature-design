@@ -1,0 +1,187 @@
+name: Technical Art Nature Runtime shader normal transport
+
+on:
+  push:
+    branches: [studio/uc-nature-surface-bridge-001]
+    paths:
+      - "tools/build_uc_runtime_shader_normal_transport.py"
+      - "target-proof/observe_runtime_shader_normal_transport.gd"
+      - ".github/workflows/uc-nature-runtime-shader-normal-target.yml"
+  pull_request:
+    paths:
+      - "tools/build_uc_runtime_shader_normal_transport.py"
+      - "target-proof/observe_runtime_shader_normal_transport.gd"
+      - ".github/workflows/uc-nature-runtime-shader-normal-target.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-runtime-normal-transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact Technical Art head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout exact Runtime shader candidate
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 520068e1167f369b24e749831954f9bda1cd7aec
+          path: .runtime-candidate
+
+      - name: Checkout exact Runtime semantic owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          path: .runtime-owner
+
+      - name: Checkout fresh Universal Creation main identity
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 520584c87071837e8dc1ff9a39da140f5efa229d
+          path: .uc
+
+      - name: Build exact Runtime carrier oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-shader-normal-transport-001
+          rm -rf "$root"; mkdir -p "$root"
+          PYTHONPATH=.runtime-owner/src python .runtime-candidate/tools/build_rear_tree_runtime_shader_driver.py \
+            --runtime-root .runtime-owner --out "$root" \
+            > "$root/runtime-carrier-build.log" 2>&1
+
+      - name: Bind proof normals through fresh UC and exact Runtime carrier
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-shader-normal-transport-001
+          PYTHONPATH=src:.uc/src python tools/build_uc_runtime_shader_normal_transport.py \
+            --runtime-owner-root .runtime-owner \
+            --runtime-candidate-root .runtime-candidate \
+            --uc-root .uc \
+            --runtime-oracle "$root/runtime-shader-driver-oracle.json" \
+            --runtime-shader "$root/runtime-shader-driver.gdshader" \
+            --out "$root" 2>&1 | tee "$root/technical-art-build.log"
+          if PYTHONPATH=src:.uc/src python tools/build_uc_runtime_shader_normal_transport.py \
+            --runtime-owner-root .runtime-owner \
+            --runtime-candidate-root .runtime-candidate \
+            --uc-root .uc \
+            --runtime-oracle "$root/runtime-shader-driver-oracle.json" \
+            --runtime-shader "$root/runtime-shader-driver.gdshader" \
+            --out /tmp/authority-inflation-negative \
+            --claim-generic-nature-normal-policy \
+            > "$root/authority-inflation-negative.log" 2>&1; then
+            echo "authority-inflation negative unexpectedly passed" >&2
+            exit 1
+          fi
+
+      - name: Validate static transport packet
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/east-rear-runtime-shader-normal-transport-001')
+          packet=json.loads((root/'technical-art-normal-transport-packet.json').read_text())
+          assert packet['result']=='PASS_NATURE_RUNTIME_SHADER_NORMAL_TRANSPORT_PACKET_READY',packet
+          assert packet['heads']['runtime_shader_candidate']=='520068e1167f369b24e749831954f9bda1cd7aec',packet
+          assert packet['heads']['uc']=='520584c87071837e8dc1ff9a39da140f5efa229d',packet
+          assert packet['uc']['procedural_3d_blob']=='cdb654d4d0f68a4ca7539d98a985d7a70cf7ee36',packet
+          assert packet['uc']['vertices']==390 and packet['uc']['normals']==390 and packet['uc']['triangles']==570,packet
+          assert packet['runtime_carrier']['vertex_id_run_count']==10,packet
+          assert packet['technical_art_adapter']['normal_direction_rotated_by_same_source_axis_angle'] is True,packet
+          assert packet['truth_boundary']['tangent_transport_proven'] is False,packet
+          assert packet['truth_boundary']['generic_uc_normal_deformation_policy_created'] is False,packet
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" -o .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then sudo apt-get update && sudo apt-get install -y xvfb; fi
+
+      - name: Exercise exact normal transport in real Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-shader-normal-transport-001
+          rm -rf target-proof/generated target-proof/renders/runtime-shader-normal-transport
+          mkdir -p target-proof/generated
+          cp "$root/nature-east-rear-runtime-normal-receiver.glb" target-proof/generated/
+          cp "$root/runtime-shader-driver-oracle.json" target-proof/generated/
+          cp "$root/technical-art-normal-transport-packet.json" target-proof/generated/
+          cp "$root/runtime-position-only-normal-debug.gdshader" target-proof/generated/
+          cp "$root/technical-art-position-plus-normal-debug.gdshader" target-proof/generated/
+          rm -f target-proof/runtime-shader-normal-transport-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --display-driver x11 --rendering-method gl_compatibility \
+            --path target-proof --script observe_runtime_shader_normal_transport.gd 2>&1 | tee "$root/godot-normal-transport.log"
+          cp target-proof/runtime-shader-normal-transport-receipt.json "$root/"
+          cp -R target-proof/renders/runtime-shader-normal-transport "$root/renders"
+
+      - name: Validate exact target receipt
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/east-rear-runtime-shader-normal-transport-001')
+          r=json.loads((root/'runtime-shader-normal-transport-receipt.json').read_text())
+          assert r['state']=='PASS_NATURE_RUNTIME_SHADER_NORMAL_TRANSPORT_CURRENT_UC_GODOT',r
+          assert r['receiver']=={'vertices':390,'normals':390,'triangles':570,'runtime_vertex_id_runs':10},r
+          m=r['measurements']
+          assert m['pose_count']==5,m
+          assert m['position_only_negative_pixels_gt_1_lsb_total']>100,m
+          assert m['nonzero_witnesses_where_corrected_beats_position_only']==4,m
+          assert m['corrected_absolute_channel_delta_sum']<m['position_only_negative_absolute_channel_delta_sum'],m
+          assert m['corrected_pixels_gt_1_lsb_total']<=max(64,int(m['position_only_negative_pixels_gt_1_lsb_total']*0.02)),m
+          assert r['truth_boundary']['tangent_transport_proven'] is False,r
+          assert r['truth_boundary']['target_device_performance_proven'] is False,r
+          assert r['truth_boundary']['generic_uc_normal_deformation_policy_created'] is False,r
+          PY
+
+      - name: Retain exact provenance and tooling
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/east-rear-runtime-shader-normal-transport-001; mkdir -p "$root"
+          git rev-parse HEAD > "$root/exact-technical-art-head.txt"
+          git -C .runtime-owner rev-parse HEAD > "$root/exact-runtime-owner-head.txt"
+          git -C .runtime-candidate rev-parse HEAD > "$root/exact-runtime-candidate-head.txt"
+          git -C .uc rev-parse HEAD > "$root/exact-uc-head.txt"
+          git -C .uc rev-parse HEAD:src/axm_uc/procedural_3d.py > "$root/exact-uc-procedural3d-blob.txt"
+          cp tools/build_uc_runtime_shader_normal_transport.py "$root/" || true
+          cp target-proof/observe_runtime_shader_normal_transport.gd "$root/" || true
+          cp .github/workflows/uc-nature-runtime-shader-normal-target.yml "$root/" || true
+
+      - name: Upload retained Technical Art normal-transport evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-runtime-shader-normal-transport-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/east-rear-runtime-shader-normal-transport-001
+          if-no-files-found: error
