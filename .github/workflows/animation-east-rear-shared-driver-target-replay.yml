@@ -259,6 +259,7 @@ jobs:
           cp tools/build_animation_shared_driver_target_replay.py "$root/" || true
           cp target-proof-animation/sample_bridge.gd "$root/" || true
           cp target-proof-animation/observe_shared_driver_animationplayer.gd "$root/" || true
+          cp target-proof-animation/animation-shared-driver-godot-target-receipt.json "$root/" || true
           cp /tmp/ta-window-receiver/nature-east-rear-dynamic-window.glb "$root/" || true
           git rev-parse HEAD > "$root/exact-animation-head.txt"
           git -C .ta rev-parse HEAD > "$root/exact-technical-art-donor-head.txt" || true
