@@ -1,0 +1,31 @@
+{
+  "schema": "axm.nature-north-low-weather-vfx-target-contract/v0.1",
+  "scope": "review exact current north-low detached target-host visual response against Weather visual direction",
+  "technical_art_owner_head": "02c5223dd9288c12607f0553e2f1103be38ae71f",
+  "technical_art_workflow_run": 35336912571,
+  "technical_art_artifact_id": 10542513318,
+  "technical_art_artifact_sha256": "7b991dfd749ac758ece3c2c6ea320d10cfed5ff38c822c7ed88342461226a932",
+  "source_vfx_predecessor_head": "e6704c311818561f47d503615427a06b37f1c0d1",
+  "source_vfx_workflow_run": 35335957299,
+  "source_vfx_artifact_id": 10543017723,
+  "source_vfx_artifact_sha256": "942e4b1b0671075eff47f6c7cca8976f6ff6a6c3e0784a26c91aa96a9b505759",
+  "weather_owner_head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+  "weather_source_blob": "11298d447f262da8a78e43e2df68bc0346c99a2c",
+  "weather_visual_direction_xy": [1.0, 0.35],
+  "weather_semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED",
+  "source_to_target_basis": "[x,y,z] -> [x,z,y]",
+  "target_weather_parallel_xyz": [1.0, 0.0, 0.35],
+  "comparison_rule": "compare sign and phase continuity only; source 52-vertex centroid and target imported witness magnitudes are different observables",
+  "sample_count": 41,
+  "visible_repeat_samples": 40,
+  "godot_version": "4.7.2-stable",
+  "position_tolerance_m": 0.000005,
+  "authority": {
+    "physical_wind": false,
+    "botanical_motion_quality": false,
+    "runtime_or_device_performance": false,
+    "gameplay_or_physics": false,
+    "art_direction_or_visual_qa_acceptance": false,
+    "canon_or_production_readiness": false
+  }
+}
