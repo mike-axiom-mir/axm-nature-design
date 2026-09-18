@@ -56,12 +56,22 @@ jobs:
         env:
           PYTHONPATH: src
         run: |
+          set -euo pipefail
           mkdir -p evidence
           git rev-parse HEAD > evidence/exact-head.txt
           python tools/verify_rear_tree_root_socket_rig.py \
-            --output evidence/east-rear-root-socket-rigging-001.json
-          cp contracts/east-rear-root-socket-rigging-001.json evidence/
+            --output evidence/east-rear-root-socket-rigging-evidence-001.json
+          cp contracts/east-rear-root-socket-rigging-001.json \
+            evidence/east-rear-root-socket-rigging-contract-001.json
           cp docs/RIGGING_EAST_REAR_ROOT_SOCKET_001.md evidence/
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('evidence/east-rear-root-socket-rigging-evidence-001.json').read_text())
+          assert payload['result'] == 'PASS_NORTH_TOP_ROOT_SOCKET_RIGID_CHILD_ARTICULATION_DIAGNOSTIC_MINUS5_TO_PLUS5'
+          assert payload['truth_boundary']['animation_timing_or_playback_claimed'] is False
+          assert payload['truth_boundary']['runtime_controller_or_device_claimed'] is False
+          PY
 
       - name: Upload retained evidence
         if: matrix.python-version == '3.11'
