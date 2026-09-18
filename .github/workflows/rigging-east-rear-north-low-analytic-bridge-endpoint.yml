@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py"
+      - "src/axm_nature_design/rear_tree_flex_interaction_classification.py"
       - "tests/test_rear_tree_rigging_north_low_bridge_endpoint_gate.py"
       - "tools/verify_rear_tree_rigging_north_low_bridge_endpoint_gate.py"
       - "contracts/east-rear-north-low-analytic-bridge-endpoint-rigging-009.json"
@@ -14,6 +15,7 @@ on:
       - "studio/rigging-east-rear-root-socket-001"
     paths:
       - "src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py"
+      - "src/axm_nature_design/rear_tree_flex_interaction_classification.py"
       - "tests/test_rear_tree_rigging_north_low_bridge_endpoint_gate.py"
       - "tools/verify_rear_tree_rigging_north_low_bridge_endpoint_gate.py"
       - "contracts/east-rear-north-low-analytic-bridge-endpoint-rigging-009.json"
@@ -38,7 +40,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
-      - name: Bind exact Rigging and Geometry identities
+      - name: Bind exact Rigging, Geometry and Organic evidence identities
         shell: bash
         run: |
           set -euo pipefail
@@ -49,6 +51,7 @@ jobs:
           test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py)" = "de00694e103b975f9a25a72a50054821b469b528"
           test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py)" = "47ba57110f43b0f3f1f29582b46a90505fa4515c"
           test "$(git rev-parse HEAD:contracts/east-rear-north-low-analytic-trunk-bridge-geometry-007.json)" = "047daa7d5764f53cb42aa14b8bec82f3150bd809"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_flex_interaction_classification.py)" = "be31e22283d43dcb4e6e8bda870760fa67ab1628"
           test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
 
       - uses: actions/setup-python@v5
@@ -79,12 +82,14 @@ jobs:
           cp docs/RIGGING_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_ENDPOINT_009.md "$root/README.md"
           cp src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py "$root/observer.py"
           cp src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py "$root/geometry-donor.py"
+          cp src/axm_nature_design/rear_tree_flex_interaction_classification.py "$root/organic-evidence-dependency.py"
           cp tests/test_rear_tree_rigging_north_low_bridge_endpoint_gate.py "$root/test_observer.py"
           cp tools/verify_rear_tree_rigging_north_low_bridge_endpoint_gate.py "$root/verifier.py"
           cp .github/workflows/rigging-east-rear-north-low-analytic-bridge-endpoint.yml "$root/workflow.yml"
           git rev-parse HEAD > "$root/exact-rigging-head.txt"
           printf '%s\n' 69640e558f0c1ac59d4d0e3155676e0967a03d04 > "$root/rigging-predecessor-head.txt"
           printf '%s\n' 14d05fdabc943376c231308001d00eb87dc23430 > "$root/geometry-bridge-donor-head.txt"
+          printf '%s\n' be31e22283d43dcb4e6e8bda870760fa67ab1628 > "$root/organic-evidence-dependency-blob.txt"
 
       - name: Assert bounded truth gate
         if: matrix.python-version == '3.11'
