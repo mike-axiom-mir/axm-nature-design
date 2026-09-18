@@ -210,7 +210,14 @@ func _run() -> void:
     if samples.size() != 41:
         _fail("Animation endpoint-inclusive sample count drift")
         return
-    if int(receiver.get("vertex_count", -1)) != EXPECTED_VERTICES or receiver.get("dynamic_window_vertices", []) != [WINDOW_START, WINDOW_END]:
+    var dynamic_window = receiver.get("dynamic_window_vertices", [])
+    if (
+        int(receiver.get("vertex_count", -1)) != EXPECTED_VERTICES
+        or not (dynamic_window is Array)
+        or dynamic_window.size() != 2
+        or int(dynamic_window[0]) != WINDOW_START
+        or int(dynamic_window[1]) != WINDOW_END
+    ):
         _fail("receiver vertex/window identity drift")
         return
     if int(receiver.get("dynamic_byte_offset", -1)) != EXPECTED_OFFSET or int(receiver.get("dynamic_byte_length", -1)) != EXPECTED_LENGTH:
