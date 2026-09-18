@@ -1,0 +1,50 @@
+{
+  "schema": "axm.nature-north-low-indexed-surface-rigging-rebind-contract/v0.1",
+  "owner": "Rigging / Deformation",
+  "study_id": "east-rear-tree-neutral-001",
+  "branch_id": "north-low",
+  "exact_inputs": {
+    "rigging_predecessor_head": "efe99261459858636dbe65b16cbe1d5ad2b93a56",
+    "rigging_predecessor_module_blob": "96e9078afc9925dd9261ca9b3c03939fbd0e7aa2",
+    "geometry_indexed_surface_donor_head": "8ab552710df21567cfd601af99181918e2cfadb3",
+    "geometry_indexed_surface_module_blob": "af43e49bf6f14c050a3930d3258bc4ee50c0a9f3",
+    "geometry_indexed_surface_contract_blob": "081e2a610a6938cb12c501b7f8a907e590a7214c",
+    "source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+  },
+  "constraint": "INDEXED_SURFACE_RECEIVER_PIN_WITH_CONTINUOUS_PAIRED_SPAN_CERTIFICATE",
+  "diagnostic_domain_deg": [-5.0, 5.0],
+  "representative_angles_deg": [-5.0, -2.5, 0.0, 2.5, 5.0],
+  "endpoint_policy": {
+    "branch_boundary_vertices": 8,
+    "fixed_receiver_vertices": 8,
+    "branch_endpoint_diagnostic_weight": 1.0,
+    "receiver_endpoint_diagnostic_weight": 0.0,
+    "production_weight_claim": false
+  },
+  "proof": {
+    "geometry_membership_authority": "exact Geometry PR #30 donor",
+    "branch_socket_authority": "unchanged north-low Rigging predecessor",
+    "continuous_paired_span_method": "closed-interval endpoints plus stationary points of K + 2*A*cos(theta) + 2*B*sin(theta)",
+    "representative_triangle_check_only": true,
+    "sampling_used_for_continuous_span_claim": false
+  },
+  "authority": {
+    "source_geometry_mutated": false,
+    "socket_identity_or_domain_mutated": false,
+    "geometry_receiver_topology_mutated_by_rigging": false,
+    "indexed_trunk_cut_or_connected_junction_claimed": false,
+    "production_skinning_or_blending_claimed": false,
+    "continuous_triangle_nondegeneracy_or_foldover_claimed": false,
+    "collision_or_self_intersection_claimed": false,
+    "animation_acceptance_claimed": false,
+    "technical_art_acceptance_claimed": false,
+    "runtime_acceptance_claimed": false,
+    "canon_or_production_readiness_claimed": false
+  },
+  "four_roots": [
+    "Truth",
+    "Agency / non-domination",
+    "Continuity",
+    "Wisdom before speed"
+  ]
+}
