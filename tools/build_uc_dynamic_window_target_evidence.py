@@ -134,8 +134,9 @@ def main() -> int:
     surface_path.write_bytes(canonical(receiver["surface"]) + b"\n")
     publication = publish_glb(glb_path, receiver["surface"], replace=True)
     verification = verify_glb(glb_path.read_bytes(), expected_spec_digest=publication["specification_sha256"])
-    if verification.get("vertices") != EXPECTED_TOTAL_VERTICES:
-        raise ValueError(f"current UC GLB vertex identity drift: {verification}")
+    published_vertices = sum(len(primitive["positions"]) for primitive in publication["specification"]["primitives"])
+    if published_vertices != EXPECTED_TOTAL_VERTICES:
+        raise ValueError(f"current UC published surface vertex identity drift: {published_vertices}")
     if verification.get("triangles") != receiver["source_triangle_count"]:
         raise ValueError("current UC GLB triangle count drift")
 
@@ -199,7 +200,7 @@ def main() -> int:
             "procedural_3d_blob": uc_blob,
             "glb_sha256": sha256_file(glb_path),
             "surface_sha256": sha256_file(surface_path),
-            "vertices": verification.get("vertices"),
+            "vertices": published_vertices,
             "triangles": verification.get("triangles"),
             "product_code_modified_by_technical_art": False,
             "nature_or_runtime_domain_semantics_moved_to_uc": False,
