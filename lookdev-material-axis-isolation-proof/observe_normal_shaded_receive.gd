@@ -94,11 +94,11 @@ func _pbr_shader_code(path: String) -> String:
     if code.count("render_mode unshaded, cull_disabled;") != 1:
         _fail("Technical Art diagnostic render mode drift: %s" % path)
         return ""
+    code = code.replace("render_mode unshaded, cull_disabled;", "render_mode cull_disabled;")
     var fragment_index: int = code.find("void fragment()")
     if fragment_index < 0:
         _fail("Technical Art diagnostic fragment drift: %s" % path)
         return ""
-    code = code.replace("render_mode unshaded, cull_disabled;", "render_mode cull_disabled;")
     code = code.substr(0, fragment_index)
     var marker := "render_mode cull_disabled;\n"
     var uniforms := (
