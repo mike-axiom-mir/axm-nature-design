@@ -1,0 +1,62 @@
+{
+  "authority": {
+    "animation_acceptance": false,
+    "canon": false,
+    "geometry_topology_acceptance": false,
+    "production_ready": false,
+    "production_skin_weights_claimed": false,
+    "runtime_acceptance": false,
+    "source_rewritten": false,
+    "vfx_wind_acceptance": false,
+    "visual_acceptance": false
+  },
+  "axis_policy": "NORMALIZED_CROSS_OF_NEAREST_LOCAL_TRUNK_TANGENT_AND_FIRST_BRANCH_TANGENT",
+  "branch_id": "north-top",
+  "child_partition": {
+    "expected_fixed_vertices": 338,
+    "expected_selected_triangles": 72,
+    "expected_selected_vertices": 52,
+    "region_prefixes": [
+      "branch:north-top:",
+      "leaf:north-top-leaves:"
+    ]
+  },
+  "diagnostic_probe": {
+    "angle_max_deg": 5.0,
+    "angle_min_deg": -5.0,
+    "representative_angles_deg": [
+      -5.0,
+      -2.5,
+      0.0,
+      2.5,
+      5.0
+    ],
+    "semantics": "RIGGING_VERIFICATION_PROBE_ONLY_NOT_SOURCE_OR_BIOLOGICAL_ROM"
+  },
+  "flex_zone": {
+    "center_m": [
+      0.01,
+      0.0,
+      3.16
+    ],
+    "id": "north-top-branch-flex",
+    "radius_m": 0.12,
+    "source_status": "DECLARED_NOT_DEFORMATION_TESTED"
+  },
+  "four_root_gate": [
+    "Truth",
+    "Agency / non-domination",
+    "Continuity",
+    "Wisdom before speed"
+  ],
+  "leaf_cluster_id": "north-top-leaves",
+  "schema": "axm.nature-east-rear-root-socket-rigging-contract/v0.1",
+  "source_owner": {
+    "generated_mesh_digest": "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48",
+    "head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "pr": 8,
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61"
+  },
+  "study_id": "east-rear-tree-neutral-001"
+}

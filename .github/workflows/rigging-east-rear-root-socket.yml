@@ -1,0 +1,72 @@
+name: Rigging east rear root socket evidence
+
+on:
+  pull_request:
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/rear_tree_rigging.py"
+      - "contracts/east-rear-root-socket-rigging-001.json"
+      - "tools/verify_rear_tree_root_socket_rig.py"
+      - "tests/test_rear_tree_root_socket_rigging.py"
+      - "docs/RIGGING_EAST_REAR_ROOT_SOCKET_001.md"
+      - ".github/workflows/rigging-east-rear-root-socket.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin source-owner ancestry and source bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a HEAD
+          git diff --exit-code fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a HEAD -- \
+            examples/east_rear_tree_neutral_001.json \
+            src/axm_nature_design/organic_form.py
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Rigging evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        run: |
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-head.txt
+          python tools/verify_rear_tree_root_socket_rig.py \
+            --output evidence/east-rear-root-socket-rigging-001.json
+          cp contracts/east-rear-root-socket-rigging-001.json evidence/
+          cp docs/RIGGING_EAST_REAR_ROOT_SOCKET_001.md evidence/
+
+      - name: Upload retained evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-root-socket-rigging-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
