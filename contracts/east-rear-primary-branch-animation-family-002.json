@@ -1,0 +1,48 @@
+{
+  "schema": "axm.nature-animation-root-socket-diagnostic-pulse-family/v0.2",
+  "result": "PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_INDEPENDENT_DIAGNOSTIC_PULSE_FAMILY_SAMPLED_MOTION",
+  "truth_label": "ANIMATION_INDEPENDENT_SOCKET_PULSE_FAMILY_NOT_WIND_NOT_BIOLOGICAL_ROM_NOT_CONTROLLER_NOT_SIMULTANEOUS_ACCEPTANCE",
+  "rigging_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 14,
+    "head": "898529f602893c8f6be179bd3e9b6821fc099904",
+    "result": "PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_RIGID_CHILD_FAMILY_GEOMETRY_RECEIVER_DIAGNOSTIC_MINUS5_TO_PLUS5",
+    "branch_ids": ["south-low", "north-low", "east-mid", "west-high", "north-top"],
+    "diagnostic_interval_deg": [-5.0, 5.0],
+    "diagnostic_interval_semantics": "RIGGING_VERIFICATION_PROBE_ONLY_NOT_SOURCE_OR_BIOLOGICAL_ROM"
+  },
+  "animation_method": {
+    "execution_mode": "INDEPENDENT_ONE_BRANCH_AT_A_TIME__NO_SIMULTANEOUS_MOTION_ACCEPTANCE",
+    "duration_s": 1.0,
+    "sample_rate_hz": 40,
+    "endpoint_inclusive_samples_per_clip": 41,
+    "visible_repeating_samples_per_clip": 40,
+    "curve": "angle_deg = 5 * sin(2*pi*t)^3",
+    "exact_landmarks": [[0.0, 0.0], [0.25, 5.0], [0.5, 0.0], [0.75, -5.0], [1.0, 0.0]],
+    "amplitude_semantics": "EXACT_RIGGING_DIAGNOSTIC_BOUND_ONLY_NOT_SOURCE_OR_BIOLOGICAL_ROM",
+    "timing_semantics": "ANIMATION_DIAGNOSTIC_CANDIDATE_ONLY_NOT_NATURAL_VEGETATION_TIMING"
+  },
+  "required_checks": [
+    "exact Rigging family head and PASS are consumed from an isolated exact worktree",
+    "all five canonical source-declared branch identities are replayed independently",
+    "all 41 samples per branch remain inside the exact Rigging diagnostic interval",
+    "all 338 non-child vertices remain exact for each independent branch clip",
+    "each 52-vertex child preserves pivot, pairwise distances and axis projection",
+    "each endpoint closes to neutral and visible repeat wrap equals the authored final adjacent step",
+    "Animation-local replay matches all five retained Rigging witness poses per branch",
+    "wind, biological ROM, simultaneous multi-branch acceptance, Runtime controller and gameplay acceptance remain false"
+  ],
+  "non_claims": [
+    "simultaneous multi-branch deformation or motion acceptance",
+    "source or biological range of motion",
+    "physical wind or plant biomechanics",
+    "VFX response adoption",
+    "target-engine AnimationPlayer playback",
+    "wall-clock frame pacing or display delivery",
+    "Runtime controller or state-machine acceptance",
+    "gameplay, input, collision or clearance acceptance",
+    "target-device performance",
+    "Art Direction or Visual QA acceptance",
+    "CANON or production readiness"
+  ]
+}
