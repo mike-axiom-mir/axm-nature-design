@@ -1,0 +1,86 @@
+name: Procedural Nature trunk envelope projection family
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact Organic transition-frame owner
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 7f3b937b440e9870d07f7c356c5a3cbb779d0cd7
+          path: .studio-deps/organic-transition-frame-owner
+
+      - name: Checkout exact Geometry north-low projection reference
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 14d05fdabc943376c231308001d00eb87dc23430
+          path: .studio-deps/geometry-north-low-reference
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact topology-free trunk envelope projection evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_branch_transition_trunk_envelope_projection_family_evidence.py
+          evidence/nature-rear-tree-branch-transition-trunk-envelope-projection-family-001
+          --owner-organic-root .studio-deps/organic-transition-frame-owner
+          --geometry-reference-root .studio-deps/geometry-north-low-reference
+
+      - name: Verify bounded trunk envelope projection truth gate
+        if: matrix.python == '3.11'
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads(Path("evidence/nature-rear-tree-branch-transition-trunk-envelope-projection-family-001/summary.json").read_text())
+          assert data["state"] == "PASS_BOUNDED_TRANSITION_TRUNK_ENVELOPE_PROJECTION_FAMILY"
+          assert data["decision"] == "PASS_TOPOLOGY_FREE_TAPERED_TRUNK_ENVELOPE_PROJECTOR__FIVE_OWNER_BACKED_OUTPUTS__NORTH_LOW_GEOMETRY_REFERENCE_MATCHES__NO_RING_TOPOLOGY_TRUNK_CUT_WELD_RIGGING_OR_DOWNSTREAM_ADOPTION"
+          assert data["procedural_head"] == os.environ["EXPECTED_HEAD"]
+          assert data["organic_owner_head"] == "7f3b937b440e9870d07f7c356c5a3cbb779d0cd7"
+          assert data["geometry_reference_head"] == "14d05fdabc943376c231308001d00eb87dc23430"
+          assert data["predecessor_frame_family_digest"] == "0b4bfc52accdf46e6d9f7a6d10f2c2670b2a13ed97a61bec9a6f9007107a50dc"
+          assert data["output_count"] == 5
+          assert data["distinct_projection_digest_count"] == 5
+          assert data["family_digest"] == data["reverse_order_family_digest"]
+          assert data["geometry_reference_segment_id"] == "mid->upper"
+          assert data["geometry_reference_sample_count"] == 8
+          assert data["geometry_reference_compatibility"]["match_within_tolerance"] is True
+          assert data["geometry_reference_compatibility"]["maximum_numeric_delta"] <= 1e-10
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 14
+          print("PASS_NATURE_TOPOLOGY_FREE_TRUNK_ENVELOPE_PROJECTOR_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained trunk envelope projection evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-rear-tree-trunk-envelope-projection-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-branch-transition-trunk-envelope-projection-family-001
+          if-no-files-found: error
