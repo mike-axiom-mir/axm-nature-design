@@ -204,8 +204,11 @@ func _run() -> void:
         return
     var moving = oracle.get("moving_vertex_region", [])
     var fixed = oracle.get("fixed_vertex_region", [])
-    if moving != [0, EXPECTED_MOVING_END] or fixed != [EXPECTED_MOVING_END, EXPECTED_VERTICES]:
-        fail("target endpoint region identity drift")
+    if not (moving is Array) or moving.size() != 2 or int(moving[0]) != 0 or int(moving[1]) != EXPECTED_MOVING_END:
+        fail("target moving endpoint region identity drift")
+        return
+    if not (fixed is Array) or fixed.size() != 2 or int(fixed[0]) != EXPECTED_MOVING_END or int(fixed[1]) != EXPECTED_VERTICES:
+        fail("target fixed endpoint region identity drift")
         return
 
     var imported := import_receiver()
