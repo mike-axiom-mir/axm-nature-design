@@ -96,9 +96,9 @@ class BranchPartitionRiggingCompositionRebindTests(unittest.TestCase):
             "result": "PASS_COMPOSITION",
             "composition": {
                 "branch_ids": self.branches,
-                "selected_vertex_union": 260,
-                "globally_fixed_vertices": 130,
-                "per_branch_selected_vertices": {"alpha": 52, "beta": 52},
+                "selected_vertex_union": 6,
+                "globally_fixed_vertices": 0,
+                "per_branch_selected_vertices": {"alpha": 3, "beta": 3},
             },
             "continuous_parameter_certificate": {
                 "timing_or_playback_defined": False,
@@ -131,6 +131,9 @@ class BranchPartitionRiggingCompositionRebindTests(unittest.TestCase):
                 "composition_module_blob": "e" * 40,
                 "composition_contract_path": "composition.json",
                 "composition_contract_blob": "6" * 40,
+                "expected_selected_vertex_union": 6,
+                "expected_globally_fixed_vertices": 0,
+                "expected_per_branch_selected_vertices": {"alpha": 3, "beta": 3},
             },
             "automatic_rigging_adoption": False,
             "rigging_authority_transferred": False,
@@ -156,8 +159,6 @@ class BranchPartitionRiggingCompositionRebindTests(unittest.TestCase):
         )
 
     def test_multiple_distinct_partitions_match_composition_consumer(self):
-        # Unit fixture uses a reduced two-branch source family, while the real contract
-        # intentionally retains the exact five-branch 260/130 composition witness.
         result = self.assemble()
         self.assertEqual(2, result["branch_count"])
         self.assertTrue(result["all_exact_selection_identities_match"])
@@ -178,7 +179,7 @@ class BranchPartitionRiggingCompositionRebindTests(unittest.TestCase):
 
     def test_composition_union_drift_fails_closed(self):
         composition = copy.deepcopy(self.composition)
-        composition["composition"]["selected_vertex_union"] = 259
+        composition["composition"]["selected_vertex_union"] = 5
         with self.assertRaises(ValueError):
             self.assemble(composition=composition)
 
