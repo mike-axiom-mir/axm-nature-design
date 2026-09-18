@@ -1,0 +1,116 @@
+name: Rigging east rear north-low continuous bridge paired span
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_rigging_north_low_bridge_continuous_span.py"
+      - "tests/test_rear_tree_rigging_north_low_bridge_continuous_span.py"
+      - "tools/verify_rear_tree_rigging_north_low_bridge_continuous_span.py"
+      - "contracts/east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_CONTINUOUS_SPAN_010.md"
+      - ".github/workflows/rigging-east-rear-north-low-analytic-bridge-continuous-span.yml"
+  push:
+    branches:
+      - "studio/rigging-east-rear-root-socket-001"
+    paths:
+      - "src/axm_nature_design/rear_tree_rigging_north_low_bridge_continuous_span.py"
+      - "tests/test_rear_tree_rigging_north_low_bridge_continuous_span.py"
+      - "tools/verify_rear_tree_rigging_north_low_bridge_continuous_span.py"
+      - "contracts/east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json"
+      - "docs/RIGGING_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_CONTINUOUS_SPAN_010.md"
+      - ".github/workflows/rigging-east-rear-north-low-analytic-bridge-continuous-span.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Rigging head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact endpoint predecessor and source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          predecessor=5ca11b1577b6f4f4a2ee2b34f08ae02aa23aa079
+          git merge-base --is-ancestor "$predecessor" HEAD
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py)" = "352e7c83e57779aef327390f5250875e26a7b610"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py)" = "47ba57110f43b0f3f1f29582b46a90505fa4515c"
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_flex_interaction_classification.py)" = "be31e22283d43dcb4e6e8bda870760fa67ab1628"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact continuous paired-span evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-rigging-head.txt
+          printf '%s\n' '5ca11b1577b6f4f4a2ee2b34f08ae02aa23aa079' > evidence/exact-rigging-endpoint-predecessor-head.txt
+          printf '%s\n' '352e7c83e57779aef327390f5250875e26a7b610' > evidence/exact-rigging-endpoint-module-blob.txt
+          printf '%s\n' '47ba57110f43b0f3f1f29582b46a90505fa4515c' > evidence/exact-geometry-bridge-module-blob.txt
+          printf '%s\n' 'fb12b759e1abfd0455bf46fd39a0eba27095796b' > evidence/exact-source-blob.txt
+
+          python tools/verify_rear_tree_rigging_north_low_bridge_continuous_span.py \
+            --output evidence/east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json \
+            | tee evidence/verifier.log
+
+          cp contracts/east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json evidence/
+          cp docs/RIGGING_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_CONTINUOUS_SPAN_010.md evidence/
+          cp src/axm_nature_design/rear_tree_rigging_north_low_bridge_continuous_span.py evidence/
+          cp tests/test_rear_tree_rigging_north_low_bridge_continuous_span.py evidence/
+          cp tools/verify_rear_tree_rigging_north_low_bridge_continuous_span.py evidence/
+          cp .github/workflows/rigging-east-rear-north-low-analytic-bridge-continuous-span.yml evidence/
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path("evidence/east-rear-north-low-analytic-bridge-continuous-span-rigging-010.json").read_text())
+          assert p["result"] == "PASS_NORTH_LOW_ANALYTIC_BRIDGE_PAIRED_SPAN_CONTINUOUS_NONCOLLAPSE_MINUS5_TO_PLUS5__HOLD_TRIANGLE_FOLDOVER_COLLISION"
+          c = p["continuous_paired_span_certificate"]
+          assert c["child_domain_deg"] == [-5.0, 5.0]
+          assert c["paired_span_count"] == 8
+          assert c["global_minimum_span_m"] > 1e-10
+          assert c["continuous_for_every_real_child_command_in_domain"] is True
+          assert c["maximum_closed_form_vs_direct_residual_m"] <= 1e-10
+          assert all(p["checks"].values())
+          t = p["truth_boundary"]
+          assert t["continuous_triangle_nondegeneracy_claimed"] is False
+          assert t["continuous_foldover_collision_or_self_intersection_claimed"] is False
+          assert t["production_skinning_or_blending_claimed"] is False
+          assert t["animation_timing_interpolation_or_playback_claimed"] is False
+          assert t["technical_art_target_host_claimed"] is False
+          assert t["runtime_controller_device_or_performance_claimed"] is False
+          PY
+
+      - name: Retain exact Rigging evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-continuous-bridge-span-rigging-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence
+          if-no-files-found: error
