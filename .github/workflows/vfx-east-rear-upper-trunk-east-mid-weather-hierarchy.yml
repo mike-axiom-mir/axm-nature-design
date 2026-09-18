@@ -1,0 +1,118 @@
+name: VFX east rear upper-trunk east-mid Weather hierarchy
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_vfx_upper_trunk_east_mid_weather_hierarchy.py"
+      - "tools/verify_rear_tree_vfx_upper_trunk_east_mid_weather_hierarchy.py"
+      - "tests/test_rear_tree_vfx_upper_trunk_east_mid_weather_hierarchy.py"
+      - "contracts/east-rear-upper-trunk-east-mid-weather-direction-vfx-005.json"
+      - "docs/VFX_EAST_REAR_UPPER_TRUNK_EAST_MID_WEATHER_HIERARCHY_005.md"
+      - ".github/workflows/vfx-east-rear-upper-trunk-east-mid-weather-hierarchy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact VFX head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Checkout exact Weather donor
+        if: matrix.python-version == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-weather-design
+          ref: ca2eaba519e8449835b0ea6ef944b7080c3caa6a
+          path: _weather
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin Rigging hierarchy and prior VFX sign lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 6cf64925f0ea00737e4d3f2d4f15979c773f309d HEAD
+          git fetch --no-tags origin studio/vfx-primary-branch-weather-direction-sign-family-002
+          git cat-file -e ef7b35af27d5ca98a6447c1e33be07863e387305^{commit}
+          test "$(git rev-parse 6cf64925f0ea00737e4d3f2d4f15979c773f309d:src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py)" = "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_upper_trunk_east_mid_hierarchy.py)"
+
+      - name: Pin Weather source identity
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _weather rev-parse HEAD)" = "ca2eaba519e8449835b0ea6ef944b7080c3caa6a"
+          test "$(git -C _weather rev-parse HEAD:examples/wind_atmosphere_baseline_001.json)" = "11298d447f262da8a78e43e2df68bc0346c99a2c"
+
+      - name: Compile and run full receiving repository
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m compileall -q src tools tests
+          python -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Build exact VFX hierarchy evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005
+          python tools/verify_rear_tree_vfx_upper_trunk_east_mid_weather_hierarchy.py \
+            --output evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005 \
+            | tee evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005/verifier.log
+          git rev-parse HEAD > evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005/exact-head.txt
+          printf '%s\n' '6cf64925f0ea00737e4d3f2d4f15979c773f309d' > evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005/exact-rigging-owner-head.txt
+          printf '%s\n' 'ef7b35af27d5ca98a6447c1e33be07863e387305' > evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005/exact-vfx-sign-predecessor-head.txt
+          printf '%s\n' 'ca2eaba519e8449835b0ea6ef944b7080c3caa6a' > evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005/exact-weather-head.txt
+          cp contracts/east-rear-upper-trunk-east-mid-weather-direction-vfx-005.json evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005/
+          cp docs/VFX_EAST_REAR_UPPER_TRUNK_EAST_MID_WEATHER_HIERARCHY_005.md evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005/
+
+      - name: Fail closed on authority promotion
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from axm_nature_design.rear_tree_vfx_upper_trunk_east_mid_weather_hierarchy import evaluate
+          source = json.loads(Path('examples/east_rear_tree_neutral_001.json').read_text())
+          for kwargs in (
+              {'claim_physical_wind': True},
+              {'claim_animation_adoption': True},
+              {'claim_runtime_controller': True},
+              {'claim_gameplay': True},
+              {'claim_art_acceptance': True},
+          ):
+              try:
+                  evaluate(source, **kwargs)
+              except ValueError:
+                  pass
+              else:
+                  raise SystemExit(f'authority promotion unexpectedly passed: {kwargs}')
+          print('PASS_FAIL_CLOSED_AUTHORITY_PROMOTIONS')
+          PY
+
+      - name: Upload exact VFX evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-vfx-upper-trunk-east-mid-weather-hierarchy-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005
+          if-no-files-found: error
