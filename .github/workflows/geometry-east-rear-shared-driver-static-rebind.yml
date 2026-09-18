@@ -115,7 +115,8 @@ jobs:
             --vfx-root _vfx \
             --output evidence/east-rear-shared-driver-static-geometry-rebind-002.json \
             | tee evidence/verifier.log
-          cp contracts/east-rear-shared-driver-static-geometry-rebind-002.json evidence/
+          cp contracts/east-rear-shared-driver-static-geometry-rebind-002.json \
+            evidence/east-rear-shared-driver-static-geometry-contract-002.json
           cp docs/GEOMETRY_EAST_REAR_SHARED_DRIVER_STATIC_REBIND_002.md evidence/
           cp _rigging/contracts/east-rear-primary-branch-shared-driver-polarity-rigging-004.json \
             evidence/exact-rigging-shared-driver-contract.json
