@@ -1,0 +1,50 @@
+{
+  "schema": "axm.nature-vfx-weather-direction-socket-sign-family/v0.2",
+  "study_id": "east-rear-primary-branch-weather-direction-sign-family-002",
+  "nature_rigging_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pull_request": 14,
+    "head": "898529f602893c8f6be179bd3e9b6821fc099904",
+    "result": "PASS_FIVE_PRIMARY_BRANCH_ROOT_SOCKET_RIGID_CHILD_FAMILY_GEOMETRY_RECEIVER_DIAGNOSTIC_MINUS5_TO_PLUS5"
+  },
+  "vfx_predecessor": {
+    "pull_request": 16,
+    "head": "1976c5a4ff0a51b5f3ee4bfd323dbb6f89c34787",
+    "scope": "north-top-only sign compatibility",
+    "review_only_downwind_alignment_angle_deg": 5.0
+  },
+  "weather_visual_direction_donor": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pull_request": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "source_path": "examples/wind_atmosphere_baseline_001.json",
+    "source_blob_sha": "11298d447f262da8a78e43e2df68bc0346c99a2c",
+    "wind_xy": [
+      1.0,
+      0.35
+    ],
+    "wind_semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "diagnostic_angles_deg": [
+    -5.0,
+    0.0,
+    5.0
+  ],
+  "bounded_question": "For each exact Rigging-owned primary branch socket, which signed +/-5 degree diagnostic witness moves the actual generated child centroid farther along the exact source-owned Weather visual direction in XY?",
+  "allowed_mutation": "NONE__REVIEW_ONLY_SIGN_MAP",
+  "automatic_animation_adoption": false,
+  "automatic_vfx_motion_adoption": false,
+  "simultaneous_multi_branch_motion_claimed": false,
+  "physical_wind_claimed": false,
+  "biological_response_claimed": false,
+  "runtime_controller_claimed": false,
+  "gameplay_claimed": false,
+  "truth_boundary": "A PASS resolves only a per-socket signed visual-direction relationship on exact generated geometry. It does not author wind force, speed, timing, cadence, amplitude, biological motion, simultaneous branch motion, Animation, Runtime, gameplay, target-device performance, Art/QA acceptance, CANON or production readiness."
+}
