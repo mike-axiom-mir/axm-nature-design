@@ -1,9 +1,9 @@
 """Current Rigging-composition continuity guard for the Nature branch partition family.
 
-Procedural owns only deterministic generated-region selection.  This successor proves
-that the existing five materially different selections remain the exact child supports
+Procedural owns only deterministic generated-region selection. This successor proves
+that the existing materially different selections remain the exact child supports
 consumed after Rigging advanced from the polarity adapter to one simultaneous shared
-kinematic parameter.  It deliberately does not copy pivots, axes, sign logic, timing,
+kinematic parameter. It deliberately does not copy pivots, axes, sign logic, timing,
 deformation, collision, wind, Animation, Runtime, or target-host semantics into
 Procedural.
 """
@@ -55,9 +55,17 @@ def validate_contract(contract: dict) -> None:
         "composition_module_blob",
         "composition_contract_path",
         "composition_contract_blob",
+        "expected_selected_vertex_union",
+        "expected_globally_fixed_vertices",
+        "expected_per_branch_selected_vertices",
     ):
-        if not consumer.get(key):
+        if key not in consumer:
             raise ValueError(f"Rigging consumer provenance missing: {key}")
+    per_branch = consumer["expected_per_branch_selected_vertices"]
+    if not isinstance(per_branch, dict) or list(per_branch) != branch_ids:
+        raise ValueError("expected per-branch support identity drift")
+    if any(not isinstance(per_branch[branch_id], int) or per_branch[branch_id] <= 0 for branch_id in branch_ids):
+        raise ValueError("expected per-branch support counts must be positive integers")
 
     forbidden = (
         "automatic_rigging_adoption",
@@ -157,12 +165,13 @@ def assemble_rigging_composition_rebind(
     composition = composition_evidence.get("composition", {})
     if composition.get("branch_ids") != expected_branches:
         raise ValueError("Rigging composition branch order or identity drift")
-    if composition.get("selected_vertex_union") != 260:
+    if composition.get("selected_vertex_union") != consumer["expected_selected_vertex_union"]:
         raise ValueError("Rigging composition selected-vertex union drift")
-    if composition.get("globally_fixed_vertices") != 130:
+    if composition.get("globally_fixed_vertices") != consumer["expected_globally_fixed_vertices"]:
         raise ValueError("Rigging composition fixed-receiver identity drift")
     per_branch = composition.get("per_branch_selected_vertices", {})
-    if list(per_branch) != expected_branches or any(per_branch.get(branch_id) != 52 for branch_id in expected_branches):
+    expected_per_branch = consumer["expected_per_branch_selected_vertices"]
+    if list(per_branch) != expected_branches or per_branch != expected_per_branch:
         raise ValueError("Rigging composition per-branch support drift")
 
     certificate = composition_evidence.get("continuous_parameter_certificate", {})
