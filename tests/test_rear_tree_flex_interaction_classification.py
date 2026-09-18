@@ -62,8 +62,19 @@ class RearTreeFlexInteractionClassificationTests(unittest.TestCase):
                 }
             ],
         )
+        self.assertEqual(report["neutral_attachment_cross_section_intersection_pair_count"], 1)
+        self.assertEqual(
+            report["neutral_attachment_cross_section_intersection_pairs"],
+            [
+                {
+                    "trunk_flex_zone_id": "trunk-upper-flex",
+                    "branch_id": "east-mid",
+                    "branch_flex_zone_id": "east-mid-branch-flex",
+                }
+            ],
+        )
 
-    def test_north_low_is_overlap_only_with_positive_neutral_support(self):
+    def test_north_low_is_overlap_only_but_upper_flex_does_not_reach_attachment_cross_section(self):
         report = evaluate(self.source)
         row = self._pairs(report)[("trunk-upper-flex", "north-low")]
         self.assertEqual(row["interaction_class"], FLEX_ENVELOPE_OVERLAP_ONLY)
@@ -100,9 +111,20 @@ class RearTreeFlexInteractionClassificationTests(unittest.TestCase):
             0.040773804595473605,
             places=12,
         )
+        self.assertAlmostEqual(
+            row["trunk_flex_to_neutral_attachment_centerline_distance_m"],
+            0.33144612713000876,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            row["neutral_attachment_cross_section_to_trunk_flex_boundary_signed_m"],
+            0.009079537802862594,
+            places=12,
+        )
+        self.assertFalse(row["trunk_flex_intersects_neutral_attachment_cross_section"])
         self.assertTrue(row["full_branch_root_radius_supported_in_neutral_form"])
 
-    def test_east_mid_is_root_contained_and_materially_different_from_north_low(self):
+    def test_east_mid_is_root_contained_and_upper_flex_reaches_attachment_cross_section(self):
         report = evaluate(self.source)
         row = self._pairs(report)[("trunk-upper-flex", "east-mid")]
         self.assertEqual(row["interaction_class"], ROOT_CENTER_CONTAINED)
@@ -122,6 +144,17 @@ class RearTreeFlexInteractionClassificationTests(unittest.TestCase):
             0.009731379482495778,
             places=12,
         )
+        self.assertAlmostEqual(
+            row["trunk_flex_to_neutral_attachment_centerline_distance_m"],
+            0.10270063195882467,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            row["neutral_attachment_cross_section_to_trunk_flex_boundary_signed_m"],
+            -0.2034639426576328,
+            places=12,
+        )
+        self.assertTrue(row["trunk_flex_intersects_neutral_attachment_cross_section"])
         self.assertTrue(row["full_branch_root_radius_supported_in_neutral_form"])
 
     def test_upper_flex_radius_sensitivity_changes_classes_without_inventing_failure(self):
@@ -153,15 +186,35 @@ class RearTreeFlexInteractionClassificationTests(unittest.TestCase):
             FLEX_ENVELOPE_OVERLAP_ONLY,
         )
 
+    def test_attachment_cross_section_reach_is_measured_not_hardcoded(self):
+        candidate = copy.deepcopy(self.source)
+        upper = next(
+            zone for zone in candidate["flex_zones"] if zone["id"] == "trunk-upper-flex"
+        )
+        upper["radius"] = 0.23
+        report = evaluate(candidate)
+        pairs = self._pairs(report)
+        north_low = pairs[("trunk-upper-flex", "north-low")]
+        self.assertTrue(north_low["trunk_flex_intersects_neutral_attachment_cross_section"])
+        self.assertAlmostEqual(
+            north_low["neutral_attachment_cross_section_to_trunk_flex_boundary_signed_m"],
+            -0.000920462197137412,
+            places=12,
+        )
+        self.assertEqual(report["neutral_attachment_cross_section_intersection_pair_count"], 2)
+
     def test_truth_boundary_refuses_policy_or_deformation_promotion(self):
         boundary = evaluate(self.source)["truth_boundary"]
         self.assertTrue(boundary["source_metadata_spatial_relations_measured"])
         self.assertTrue(boundary["neutral_attachment_support_measured"])
+        self.assertTrue(boundary["neutral_attachment_cross_section_relation_to_trunk_flex_measured"])
         self.assertTrue(boundary["interaction_classes_are_source_geometry_only"])
         self.assertFalse(boundary["source_geometry_changed"])
         self.assertFalse(boundary["flex_zone_metadata_changed"])
         self.assertFalse(boundary["interaction_class_assigns_rig_policy"])
+        self.assertFalse(boundary["attachment_cross_section_intersection_assigns_rig_policy"])
         self.assertFalse(boundary["neutral_attachment_support_is_deformation_proof"])
+        self.assertFalse(boundary["neutral_attachment_cross_section_intersection_is_deformation_proof"])
         self.assertFalse(boundary["deformation_simulated"])
         self.assertFalse(boundary["hierarchy_or_weighting_inferred"])
         self.assertFalse(boundary["biological_interpretation_claimed"])
