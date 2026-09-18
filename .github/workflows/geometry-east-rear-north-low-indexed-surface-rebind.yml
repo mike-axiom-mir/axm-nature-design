@@ -1,0 +1,114 @@
+name: Geometry east rear north-low indexed surface rebind
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_geometry_north_low_indexed_surface_rebind.py"
+      - "tests/test_rear_tree_geometry_north_low_indexed_surface_rebind.py"
+      - "tools/verify_rear_tree_geometry_north_low_indexed_surface_rebind.py"
+      - "contracts/east-rear-north-low-indexed-surface-rebind-geometry-008.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_INDEXED_SURFACE_REBIND_008.md"
+      - ".github/workflows/geometry-east-rear-north-low-indexed-surface-rebind.yml"
+  push:
+    branches:
+      - "studio/02-geometry-north-low-indexed-surface-rebind-008"
+    paths:
+      - "src/axm_nature_design/rear_tree_geometry_north_low_indexed_surface_rebind.py"
+      - "tests/test_rear_tree_geometry_north_low_indexed_surface_rebind.py"
+      - "tools/verify_rear_tree_geometry_north_low_indexed_surface_rebind.py"
+      - "contracts/east-rear-north-low-indexed-surface-rebind-geometry-008.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_INDEXED_SURFACE_REBIND_008.md"
+      - ".github/workflows/geometry-east-rear-north-low-indexed-surface-rebind.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Geometry head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact Geometry Rigging and source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          analytic_geometry=14d05fdabc943376c231308001d00eb87dc23430
+          rigging_owner=efe99261459858636dbe65b16cbe1d5ad2b93a56
+
+          git merge-base --is-ancestor "$analytic_geometry" HEAD
+          git merge-base --is-ancestor "$rigging_owner" HEAD
+
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py)" = "47ba57110f43b0f3f1f29582b46a90505fa4515c"
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Geometry indexed-surface evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-geometry-head.txt
+          printf '%s\n' '14d05fdabc943376c231308001d00eb87dc23430' > evidence/exact-analytic-geometry-donor-head.txt
+          printf '%s\n' 'efe99261459858636dbe65b16cbe1d5ad2b93a56' > evidence/exact-rigging-owner-head.txt
+
+          python tools/verify_rear_tree_geometry_north_low_indexed_surface_rebind.py \
+            --output evidence/east-rear-north-low-indexed-surface-rebind-geometry-008.json \
+            | tee evidence/verifier.log
+
+          cp contracts/east-rear-north-low-indexed-surface-rebind-geometry-008.json \
+            evidence/east-rear-north-low-indexed-surface-rebind-contract-008.json
+          cp docs/GEOMETRY_EAST_REAR_NORTH_LOW_INDEXED_SURFACE_REBIND_008.md evidence/
+          cp src/axm_nature_design/rear_tree_geometry_north_low_indexed_surface_rebind.py evidence/
+          cp tests/test_rear_tree_geometry_north_low_indexed_surface_rebind.py evidence/
+          cp tools/verify_rear_tree_geometry_north_low_indexed_surface_rebind.py evidence/
+          cp .github/workflows/geometry-east-rear-north-low-indexed-surface-rebind.yml evidence/
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path("evidence/east-rear-north-low-indexed-surface-rebind-geometry-008.json").read_text())
+          assert p["result"] == "PASS_NORTH_LOW_EXACT_INDEXED_TRUNK_SURFACE_REBIND__HOLD_INDEXED_CUT_CONNECTED_JUNCTION"
+          b = p["indexed_surface_binding"]
+          d = p["analytic_to_indexed_surface_rebind"]
+          assert b["touched_side_cells"] == [0, 1, 2, 9]
+          assert b["parameter_space_self_intersections"] == 0
+          assert len(b["memberships"]) == 8
+          assert d["maximum_surface_delta_m"] > 0.004
+          assert 0.010 < d["indexed_surface_minimum_bridge_span_m"] < d["analytic_minimum_bridge_span_m"]
+          assert p["all_failure_controls_rejected"] is True
+          assert p["truth_boundary"]["indexed_trunk_cut_integrated"] is False
+          assert p["truth_boundary"]["analytic_rigging_pass_transferred"] is False
+          PY
+
+      - name: Upload retained Geometry evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-indexed-surface-rebind-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 90
