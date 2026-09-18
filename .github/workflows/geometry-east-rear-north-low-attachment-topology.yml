@@ -1,0 +1,108 @@
+name: Geometry east rear north-low attachment topology
+
+on:
+  pull_request:
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/rear_tree_rigging_primary_branch_family.py"
+      - "src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py"
+      - "src/axm_nature_design/rear_tree_geometry_north_low_attachment_topology.py"
+      - "tests/test_rear_tree_geometry_north_low_attachment_topology.py"
+      - "tools/verify_rear_tree_geometry_north_low_attachment_topology.py"
+      - "contracts/east-rear-north-low-attachment-topology-geometry-005.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_ATTACHMENT_TOPOLOGY_005.md"
+      - ".github/workflows/geometry-east-rear-north-low-attachment-topology.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Geometry branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Pin exact Geometry predecessor and Rigging owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 200ab4b60b8a54460f1265b0ee52eb111f1b280a HEAD
+          git merge-base --is-ancestor 975931b11555d156e04e2ab12e9756fc6c9598a3 HEAD
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git rev-parse HEAD:src/axm_nature_design/organic_form.py)" = "82753ccd91e0ed377dc4649381cd61cb80a56bec"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_parent_influence_gate.py)" = "1b002ea82d55ce97849d506fe33f9aa1cb6c2a36"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact Geometry evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/north-low-attachment-topology-005
+          mkdir -p "$root"
+          python tools/verify_rear_tree_geometry_north_low_attachment_topology.py \
+            --output "$root/evidence.json" | tee "$root/verifier.log"
+          cp contracts/east-rear-north-low-attachment-topology-geometry-005.json "$root/contract.json"
+          cp docs/GEOMETRY_EAST_REAR_NORTH_LOW_ATTACHMENT_TOPOLOGY_005.md "$root/README.md"
+          cp src/axm_nature_design/rear_tree_geometry_north_low_attachment_topology.py "$root/observer.py"
+          cp tests/test_rear_tree_geometry_north_low_attachment_topology.py "$root/test_observer.py"
+          cp tools/verify_rear_tree_geometry_north_low_attachment_topology.py "$root/verifier.py"
+          git rev-parse HEAD > "$root/exact-head.txt"
+          printf '%s\n' 200ab4b60b8a54460f1265b0ee52eb111f1b280a > "$root/geometry-predecessor-head.txt"
+          printf '%s\n' 975931b11555d156e04e2ab12e9756fc6c9598a3 > "$root/rigging-owner-head.txt"
+
+      - name: Assert bounded topology result
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('evidence/north-low-attachment-topology-005/evidence.json').read_text())
+          assert p['result'] == 'PASS_NORTH_LOW_DIAGNOSTIC_CHILD_TOPOLOGY_CLASSIFIED__HOLD_CONNECTED_BRANCH_TRUNK_ATTACHMENT', p
+          topo = p['indexed_topology']
+          assert topo['selected_vertices'] == 52, topo
+          assert topo['selected_triangles'] == 72, topo
+          assert topo['edge_connected_components'] == 6, topo
+          assert topo['closed_edge_manifold_components'] == 2, topo
+          assert topo['open_components'] == 4, topo
+          assert topo['shared_indexed_vertices_with_trunk'] == [], topo
+          assert topo['indexed_branch_trunk_attachment_proven'] is False, topo
+          assert topo['root_branch_segment']['boundary_edges'] == 0, topo
+          assert topo['root_branch_segment']['euler_characteristic'] == 2, topo
+          assert p['all_failure_controls_rejected'] is True, p
+          truth = p['truth_boundary']
+          assert truth['connected_branch_trunk_attachment_claimed'] is False, truth
+          assert truth['production_topology_claimed'] is False, truth
+          assert truth['canon_or_production_readiness_claimed'] is False, truth
+          PY
+
+      - name: Upload exact Geometry evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-attachment-topology-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-attachment-topology-005
+          if-no-files-found: error
