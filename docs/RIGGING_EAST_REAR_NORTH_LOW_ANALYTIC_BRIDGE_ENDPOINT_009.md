@@ -15,9 +15,18 @@ Rigging therefore asks only:
 - Geometry bridge donor: `14d05fdabc943376c231308001d00eb87dc23430`;
 - Geometry bridge module blob: `47ba57110f43b0f3f1f29582b46a90505fa4515c`;
 - Geometry bridge contract blob: `047daa7d5764f53cb42aa14b8bec82f3150bd809`;
-- exact Organic/source and migrated-receiver identities remain inherited from the predecessor and Geometry donor and are revalidated by their own evaluators.
+- exact Organic/source and migrated-receiver identities remain inherited from the predecessor and Geometry donor and are revalidated by their own evaluators;
+- exact current Organic evidence dependency `rear_tree_flex_interaction_classification.py` is pinned byte-for-byte to blob `be31e22283d43dcb4e6e8bda870760fa67ab1628` from the current Organic base.
 
 No source position, topology, existing pivot, existing axis, diagnostic range, Animation clip, Technical-Art receiver, Runtime representation or UC product code is rewritten.
+
+## Integration continuity repair
+
+After the first bounded Rigging evidence head was green, the ordinary Organic east-rear evidence workflow exposed a separate branch-integration defect: `tools/build_rear_tree.py` imports `rear_tree_flex_interaction_classification.py`, but that source-owned observer was absent from the long-lived stacked Rigging branch even though it exists on the current Organic base.
+
+The full receiving unit suite still passed 158 tests before that evidence-build failure, so the defect was not interpreted as a deformation failure. Rigging restored the missing observer from the current Organic base without altering its semantics. The first restoration commit `5ac065f6fe9dee4ac78fdb94e1a26db6a3d44318` was immediately found not to be byte-identical and was superseded by `e972caaf9fb6482659e6eca43cf7aa9a26be81f4`, which restores the exact owner blob `be31e22283d43dcb4e6e8bda870760fa67ab1628`.
+
+The Rigging workflow now pins that exact Organic-owned blob and retains it only as an evidence dependency. This repair changes no Rigging endpoint math, Geometry bridge geometry, source JSON, owner flex semantics, motion range, weights, Animation or Runtime behavior.
 
 ## Diagnostic endpoint constraint
 
