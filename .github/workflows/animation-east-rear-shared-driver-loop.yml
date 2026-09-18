@@ -1,0 +1,172 @@
+name: Animation east rear shared-driver loop
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_animation_shared_driver.py"
+      - "tests/test_rear_tree_animation_shared_driver.py"
+      - "tools/verify_rear_tree_animation_shared_driver.py"
+      - "contracts/east-rear-shared-driver-animation-loop-004.json"
+      - "docs/ANIMATION_EAST_REAR_SHARED_DRIVER_LOOP_004.md"
+      - ".github/workflows/animation-east-rear-shared-driver-loop.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Animation head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Preserve exact Rigging owner identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          RIGGING_OWNER_HEAD=b4b480b415047fea90b4740f7702ced0dba9142d
+          git merge-base --is-ancestor "$RIGGING_OWNER_HEAD" HEAD
+          git diff --exit-code "$RIGGING_OWNER_HEAD" HEAD -- \
+            src/axm_nature_design/rear_tree_rigging_shared_driver_composition.py \
+            src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py \
+            src/axm_nature_design/rear_tree_rigging_primary_branch_family.py \
+            contracts/east-rear-primary-branch-shared-driver-rigging-composition-005.json \
+            tools/verify_rear_tree_rigging_shared_driver_composition.py
+
+      - name: Preserve previous Animation evidence identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREVIOUS_ANIMATION_HEAD=b0771b3319b783103c8e4677d062c00419df7559
+          git fetch --no-tags origin studio/animation-east-rear-root-socket-pulse-001
+          git cat-file -e "$PREVIOUS_ANIMATION_HEAD^{commit}"
+          git show "$PREVIOUS_ANIMATION_HEAD:contracts/east-rear-primary-branch-animation-family-002.json" > /tmp/previous-animation-contract.json
+          test -s /tmp/previous-animation-contract.json
+
+      - name: Compile current branch
+        run: python -m compileall -q src tools tests
+
+      - name: Full current repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Re-run exact Rigging shared-driver prerequisite
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/verify_rear_tree_rigging_shared_driver_composition.py \
+            --output /tmp/exact-rigging-shared-driver-evidence.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/exact-rigging-shared-driver-evidence.json').read_text())
+          assert payload['result'] == 'PASS_FIVE_SOCKET_SHARED_DRIVER_RIG_COMPOSITION_CONTINUOUS_PARAMETER_MINUS5_TO_PLUS5'
+          assert payload['continuous_parameter_certificate']['continuous_for_every_real_parameter_in_closed_interval'] is True
+          assert payload['continuous_parameter_certificate']['timing_or_playback_defined'] is False
+          assert payload['continuous_parameter_certificate']['continuous_collision_clearance_proven'] is False
+          PY
+
+      - name: Execute sampled simultaneous Animation loop
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/animation-shared-driver
+          python tools/verify_rear_tree_animation_shared_driver.py \
+            --output /tmp/animation-shared-driver/evidence.json \
+            --svg-output /tmp/animation-shared-driver/review.svg
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/animation-shared-driver/evidence.json').read_text())
+          assert payload['result'] == 'PASS_FIVE_SOCKET_SHARED_DRIVER_SIMULTANEOUS_DIAGNOSTIC_LOOP_SAMPLED_MOTION'
+          assert payload['lineage']['rigging_owner_head'] == 'b4b480b415047fea90b4740f7702ced0dba9142d'
+          assert payload['lineage']['previous_animation_head'] == 'b0771b3319b783103c8e4677d062c00419df7559'
+          assert len(payload['samples']) == 41
+          assert payload['receiver']['selected_vertex_union'] == 260
+          assert payload['receiver']['globally_fixed_vertices'] == 130
+          assert payload['samples'][10]['local_angles_deg'] == {
+              'south-low': 5.0, 'north-low': -5.0, 'east-mid': 5.0,
+              'west-high': -5.0, 'north-top': 5.0,
+          }
+          assert payload['measurements']['maximum_composition_order_vertex_delta_m'] <= 1e-12
+          assert payload['measurements']['maximum_globally_fixed_vertex_drift_m'] <= 1e-12
+          assert payload['measurements']['maximum_pivot_vertex_drift_m'] <= 1e-12
+          assert payload['measurements']['maximum_rigid_child_pairwise_distance_drift_m'] <= 1e-12
+          assert payload['measurements']['maximum_child_axis_projection_drift_m'] <= 1e-12
+          assert payload['measurements']['endpoint_closure_m'] <= 1e-12
+          assert payload['measurements']['wrap_step_residual_m'] <= 1e-12
+          assert payload['measurements']['maximum_owner_replay_metric_residual'] <= 1e-12
+          assert payload['truth_boundary']['sampled_simultaneous_kinematic_motion_proven'] is True
+          assert payload['truth_boundary']['continuous_collision_or_self_intersection_claimed'] is False
+          assert payload['truth_boundary']['target_engine_or_godot_playback_claimed'] is False
+          assert payload['truth_boundary']['runtime_controller_state_machine_or_device_claimed'] is False
+          assert payload['truth_boundary']['physics_or_gameplay_claimed'] is False
+          ET.parse('/tmp/animation-shared-driver/review.svg')
+          PY
+
+      - name: Fail closed on motion and authority inflation
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_must_fail() {
+            label="$1"; shift
+            if python tools/verify_rear_tree_animation_shared_driver.py \
+              --output "/tmp/${label}.json" "$@"; then
+              echo "negative control unexpectedly passed: $label" >&2
+              exit 1
+            fi
+          }
+          run_must_fail widened-amplitude --amplitude-deg 5.25
+          run_must_fail retimed --duration-s 1.1
+          run_must_fail rate-drift --sample-rate-hz 60
+          run_must_fail wind-promotion --claim-wind-motion
+          run_must_fail biological-rom-promotion --claim-biological-rom
+          run_must_fail collision-promotion --claim-continuous-collision-clearance
+          run_must_fail target-host-promotion --claim-target-engine-playback
+          run_must_fail runtime-promotion --claim-runtime-controller
+          run_must_fail gameplay-promotion --claim-gameplay-acceptance
+
+      - name: Retain exact Animation evidence
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-animation-head.txt
+          printf '%s\n' b4b480b415047fea90b4740f7702ced0dba9142d > evidence/exact-rigging-owner-head.txt
+          printf '%s\n' b0771b3319b783103c8e4677d062c00419df7559 > evidence/previous-animation-head.txt
+          cp /tmp/exact-rigging-shared-driver-evidence.json evidence/
+          cp /tmp/animation-shared-driver/evidence.json evidence/east-rear-shared-driver-animation-loop-evidence-004.json
+          cp /tmp/animation-shared-driver/review.svg evidence/east-rear-shared-driver-animation-loop-review-004.svg
+          cp contracts/east-rear-shared-driver-animation-loop-004.json evidence/
+          cp docs/ANIMATION_EAST_REAR_SHARED_DRIVER_LOOP_004.md evidence/
+          cp tools/verify_rear_tree_animation_shared_driver.py evidence/
+
+      - name: Upload retained Animation evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-shared-driver-animation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
