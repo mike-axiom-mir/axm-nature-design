@@ -1,0 +1,54 @@
+{
+  "schema": "axm.nature-animation-root-socket-diagnostic-pulse/v0.1",
+  "clip_id": "north-top-root-socket-diagnostic-pulse-001",
+  "truth_label": "ANIMATION_DIAGNOSTIC_SOCKET_PULSE_NOT_WIND_NOT_BIOLOGICAL_ROM_NOT_CONTROLLER",
+  "rigging_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 14,
+    "head": "87ce8b2ff10937abec4432e1c6d5a7114a076cdb",
+    "result": "PASS_NORTH_TOP_ROOT_SOCKET_RIGID_CHILD_ARTICULATION_DIAGNOSTIC_MINUS5_TO_PLUS5",
+    "branch_id": "north-top",
+    "flex_zone_id": "north-top-branch-flex",
+    "diagnostic_interval_deg": [-5.0, 5.0],
+    "diagnostic_interval_semantics": "RIGGING_VERIFICATION_PROBE_ONLY_NOT_SOURCE_OR_BIOLOGICAL_ROM"
+  },
+  "animation_candidate": {
+    "duration_s": 1.0,
+    "sample_rate_hz": 40,
+    "endpoint_inclusive_samples": 41,
+    "visible_repeating_samples": 40,
+    "curve": "angle_deg = 5 * sin(2*pi*t)^3",
+    "exact_landmarks": [
+      [0.0, 0.0],
+      [0.25, 5.0],
+      [0.5, 0.0],
+      [0.75, -5.0],
+      [1.0, 0.0]
+    ],
+    "endpoint_policy": "RETAIN_DUPLICATE_NEUTRAL_AS_SEAM_WITNESS__OMIT_FROM_REPEATING_VISIBLE_SAMPLE_SET",
+    "amplitude_semantics": "EXACT_RIGGING_DIAGNOSTIC_BOUND_ONLY_NOT_SOURCE_OR_BIOLOGICAL_ROM"
+  },
+  "required_checks": [
+    "exact Rigging prerequisite remains green and byte-lineage pinned",
+    "all 41 Animation samples remain inside the exact -5..+5 degree Rigging diagnostic interval",
+    "all 338 fixed vertices remain exact",
+    "the source-owned pivot remains exact",
+    "the 52-vertex child remains rigid and preserves axis projection",
+    "neutral endpoint closes exactly",
+    "visible 0.975s -> repeat-neutral step equals the authored 0.975s -> 1.000s final step",
+    "Animation-local replay matches all five retained Rigging witness metrics",
+    "wind, biological ROM, Runtime controller/state-machine and gameplay acceptance remain false"
+  ],
+  "non_claims": [
+    "source or biological range of motion",
+    "physical wind or plant biomechanics",
+    "VFX response adoption",
+    "target-engine AnimationPlayer playback",
+    "wall-clock frame pacing or display delivery",
+    "Runtime controller or state-machine acceptance",
+    "gameplay, input, collision or clearance acceptance",
+    "target-device performance",
+    "Art Direction or Visual QA acceptance",
+    "CANON or production readiness"
+  ]
+}
