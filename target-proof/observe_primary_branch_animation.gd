@@ -133,6 +133,10 @@ func _initialize() -> void:
 
     var scene := imported_scene(RECEIVER_GLB)
     get_root().add_child(scene)
+    await process_frame
+    if not scene.is_inside_tree():
+        fail("imported receiver did not enter SceneTree before target observation")
+        return
 
     var expected_names := ["static-woody", "static-foliage"]
     for branch_id in BRANCH_IDS:
