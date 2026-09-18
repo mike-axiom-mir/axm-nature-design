@@ -28,4 +28,8 @@ The receiver rejects donor/head drift, any change to the exact Geometry contract
 
 This result changes no source, Geometry bytes, pivot, axis, angle domain, weights, Animation clip, VFX behavior, target-host representation, Runtime behavior, Art/QA decision, CANON or production state.
 
+## Hosted verification authority
+
+Exact-head CI owns the final scoped verdict. The implementation and contract do not substitute an unhosted/local PASS for the repository evidence gate.
+
 The four AXM roots remain the merge gate: **Truth; Agency / non-domination; Continuity; Wisdom before speed**.
