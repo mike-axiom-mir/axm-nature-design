@@ -1,0 +1,32 @@
+{
+  "allowed_review_radius_classes_m": [
+    0.12,
+    0.14
+  ],
+  "automatic_source_adoption": false,
+  "deformation_semantics_authorized": false,
+  "expected_baseline_missing_branch_ids": [
+    "north-top"
+  ],
+  "expected_baseline_state": "HOLD_BRANCH_ROOT_FLEX_ZONE_COVERAGE",
+  "expected_owner_example_count": 4,
+  "expected_review_candidate_state": "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED",
+  "failure_policy": "FAIL_CLOSED_ON_DONOR_DRIFT_UNKNOWN_RADIUS_OFF_ROOT_CENTER_STATUS_PROMOTION_DUPLICATE_ROOT_OR_AUTHORITY_EXPANSION",
+  "family_id": "east-rear-tree-root-flex-zone-review-001",
+  "organic_provider": {
+    "observer_blob": "cdade64afabe3918f6fb5e81d928250dde0c1073",
+    "observer_path": "src/axm_nature_design/rear_tree_deformation_readiness.py",
+    "ref": "b681b8beb0f91c6cedb6067aa8a79ae9feea6482",
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "source_blob": "7cceee08b250b1fdf1af1e2d496b61f6515981dd",
+    "source_digest": "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307",
+    "source_path": "examples/east_rear_tree_neutral_001.json"
+  },
+  "radius_class_policy": "EXACT_UNIQUE_BRANCH_ROOT_FLEX_RADII_ALREADY_AUTHORED_IN_OWNER_SOURCE__NO_INTERPOLATION_OR_NEW_RADIUS_INFERENCE",
+  "required_status": "DECLARED_NOT_DEFORMATION_TESTED",
+  "review_relation": "REVIEW_ONLY_CANDIDATE_NOT_SOURCE_AUTHORIZATION",
+  "schema": "axm.nature-root-flex-zone-review-candidate-family/v0.1",
+  "source_geometry_mutation_authorized": false,
+  "target_branch_id": "north-top",
+  "truth_boundary": "This family only automates the repeated construction of exact-root branch flex-zone metadata already present four times in the east-rear owner source and exposes the two exact owner-authored radius classes as review-only north-top candidates. It does not select a production radius, authorize a source edit, simulate deformation, establish bend range, wind response, rigging, biomechanics, runtime acceptance, visual acceptance, CANON, production readiness, or Procedural mastery."
+}

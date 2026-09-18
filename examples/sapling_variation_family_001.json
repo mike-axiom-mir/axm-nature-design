@@ -1,0 +1,28 @@
+{
+  "schema": "axm.nature-sapling-variation-family/v0.1",
+  "family_id": "sapling-branch-crown-variation-001",
+  "base_source": {
+    "study_id": "sapling-neutral-001",
+    "expected_digest": "a61207b23c441b2cc0becd165fa62289bb7e51065ae0d6fa56bf9f3cab036cc1"
+  },
+  "purpose": "Proceduralize repeated manual branch-tip and leaf-fan editing around the first source-owned sapling without changing trunk, flex, donor, environment or weather semantics.",
+  "attempt_limit": 32,
+  "evidence_seeds": [11, 47, 101],
+  "bounds": {
+    "branch_length_scale": [0.9, 1.0],
+    "branch_yaw_jitter_deg": [-10.0, 10.0],
+    "leaf_length_scale": [0.88, 1.0],
+    "leaf_width_scale": [0.9, 1.0],
+    "leaf_yaw_jitter_deg": [-18.0, 18.0],
+    "leaf_pitch_jitter_deg": [-8.0, 8.0]
+  },
+  "acceptance": {
+    "max_envelope_m": [2.2, 2.2, 5.2],
+    "minimum_moved_branch_tips": 4,
+    "minimum_branch_tip_move_m": 0.02,
+    "minimum_changed_leaf_blades": 18,
+    "minimum_leaf_angle_change_deg": 2.0
+  },
+  "failure_policy": "Reject candidates that fail the existing organic-form checks, exceed the retained west-A proxy envelope, lose exact branch attachments, mutate source-owned immutable fields, or fail the minimum material-difference gate. After attempt_limit, return HOLD; never widen bounds automatically.",
+  "truth_boundary": "This family proves only bounded deterministic variation of already-authored branch/crown degrees of freedom around one stylized sapling source. It does not establish botanical species generation, biological growth, environment/art-direction acceptance, deformation, materials, runtime performance, production readiness, CANON, or procedural-design mastery."
+}

@@ -1,0 +1,107 @@
+name: Procedural Nature branch transition parameter family
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact Organic transition owner
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 4b5c291d6b044dafeadd6eeaf4849a6f3d4f4148
+          path: .studio-deps/organic-transition-owner
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact branch transition parameter evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_branch_transition_parameter_family_evidence.py
+          evidence/nature-rear-tree-branch-transition-parameter-family-001
+          --owner-organic-root .studio-deps/organic-transition-owner
+
+      - name: Verify bounded branch transition parameter truth gate
+        if: matrix.python == '3.11'
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          data = json.loads(
+              Path("evidence/nature-rear-tree-branch-transition-parameter-family-001/summary.json").read_text()
+          )
+          assert data["state"] == "PASS_BOUNDED_OWNER_TRANSITION_PARAMETER_FAMILY"
+          assert data["decision"] == "PASS_DERIVED_OWNER_TRANSITION_PARAMETER_WINDOWS__NO_JUNCTION_RIGGING_WEIGHT_OR_DOWNSTREAM_ADOPTION"
+          assert data["procedural_head"] == os.environ["EXPECTED_HEAD"]
+          assert data["organic_transition_owner_head"] == "4b5c291d6b044dafeadd6eeaf4849a6f3d4f4148"
+          assert data["organic_transition_observer_blob"] == "1e8323b9bf6495a9f19704c217808300f3b46757"
+          assert data["organic_source_blob"] == "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          assert data["owner_report_state"] == "PASS_EXACT_NEUTRAL_BRANCH_TRANSITION_ENVELOPES__CONNECTED_TOPOLOGY_HELD"
+          assert data["owner_branch_count"] == 5
+          assert data["output_count"] == 5
+          assert data["distinct_parameter_digest_count"] == 5
+          assert data["distinct_transition_length_count"] == 5
+          assert data["distinct_transition_fraction_count"] == 5
+          assert data["family_digest"] == data["reverse_order_family_digest"]
+          rows = {row["branch_id"]: row for row in data["outputs"]}
+          expected = {
+              "south-low": (0.13755075785472692, 0.060865238939307745),
+              "north-low": (0.14801958337760968, 0.0645372173379806),
+              "east-mid": (0.04877293495372904, 0.021620222932618765),
+              "west-high": (0.08456756400847554, 0.036156960642309076),
+              "north-top": (0.05131780006304828, 0.021221011737572286),
+          }
+          tolerance = 1e-12
+          for branch_id, (fraction, length) in expected.items():
+              row = rows[branch_id]
+              assert row["transition_u_min"] == 0.0
+              assert abs(row["transition_u_max"] - fraction) <= tolerance
+              assert abs(row["transition_length_m"] - length) <= tolerance
+              assert row["sample_u"][0] == 0.0
+              assert abs(row["sample_u"][1] - row["transition_u_max"] * 0.5) <= tolerance
+              assert row["sample_u"][2] == row["transition_u_max"]
+              assert row["sample_distance_m"][0] == 0.0
+              assert abs(row["sample_distance_m"][1] - row["transition_length_m"] * 0.5) <= tolerance
+              assert row["sample_distance_m"][2] == row["transition_length_m"]
+              assert row["source_authorized"] is False
+              assert row["junction_strategy_authorized"] is False
+              assert row["connected_topology_claim_authorized"] is False
+              assert row["rigging_authorized"] is False
+              assert row["production_weight_authorized"] is False
+              assert row["downstream_adoption_authorized"] is False
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 11
+          print("PASS_NATURE_BRANCH_TRANSITION_PARAMETER_FAMILY_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained branch transition parameter evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-rear-tree-branch-transition-parameter-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-branch-transition-parameter-family-001
+          if-no-files-found: error

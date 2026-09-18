@@ -1,0 +1,53 @@
+{
+  "schema": "axm.nature-procedural-leaf-backface-family/v0.1",
+  "family_id": "nature-branch-crown-explicit-leaf-backface-review-001",
+  "relation": "DERIVE_GEOMETRY_REVIEW_CANDIDATE_FOR_EACH_ACCEPTED_PROCEDURAL_VARIANT_NO_SOURCE_ADOPTION",
+  "geometry_provider": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "ref": "da3adbef4de8cddb8f3ebe841d39bb31a8936f5f",
+    "path": "src/axm_nature_design/leaf_backface_candidate.py",
+    "git_blob": "beebd8fd9c4190a8b729a0314965a29607c7f531",
+    "operation": "add_explicit_leaf_backfaces"
+  },
+  "source_lineage_ref": "4ddbe66e5c02d22407ef773d5346a2fe6f349a2d",
+  "cases": [
+    {
+      "case_id": "sapling-west-a",
+      "source_path": "examples/sapling_neutral_001.json",
+      "family_path": "examples/sapling_variation_family_001.json"
+    },
+    {
+      "case_id": "compact-east-b",
+      "source_path": "examples/compact_east_tree_neutral_001.json",
+      "family_path": "examples/compact_tree_variation_family_001.json"
+    },
+    {
+      "case_id": "east-rear-a",
+      "source_path": "examples/east_rear_tree_neutral_001.json",
+      "family_path": "examples/east_rear_tree_variation_family_001.json"
+    }
+  ],
+  "expected_source_case_count": 3,
+  "expected_variants_per_source": 3,
+  "expected_total_outputs": 9,
+  "expected_leaf_blades_per_output": 25,
+  "expected_baseline_vertices": 390,
+  "expected_baseline_triangles": 570,
+  "expected_candidate_vertices": 490,
+  "expected_candidate_triangles": 620,
+  "failure_policy": "FAIL_CLOSED_NO_REGION_GUESSING_NO_SOURCE_REWRITE_NO_VARIANT_WIDENING_NO_GEOMETRY_PROVIDER_FALLBACK",
+  "truth_boundary": {
+    "source_json_rewritten": false,
+    "procedural_mutator_rewritten": false,
+    "procedural_family_bounds_rewritten": false,
+    "geometry_provider_copied_into_procedural_lane": false,
+    "geometry_candidate_becomes_source": false,
+    "renderer_backface_behavior_proven": false,
+    "visual_preference_proven": false,
+    "deformation_or_wind_accepted": false,
+    "runtime_cost_accepted": false,
+    "map_receiving_acceptance": false,
+    "uc_or_profession_fabric_promotion": false,
+    "canon_or_production_readiness": false
+  }
+}

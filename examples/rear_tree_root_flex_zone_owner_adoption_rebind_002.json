@@ -1,0 +1,35 @@
+{
+  "schema": "axm.nature-root-flex-zone-owner-adoption-rebind/v0.1",
+  "rebind_id": "east-rear-tree-root-flex-zone-owner-adoption-002",
+  "candidate_family_contract": {
+    "path": "examples/rear_tree_root_flex_zone_review_family_001.json",
+    "blob": "551fd1ae35d6af330af8817cde3fbe6b309b35d7",
+    "family_digest": "a513d5576655782e6cf333900c8cf0ab04d708021b2de43003ca92f52c23b14f"
+  },
+  "historical_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "ref": "b681b8beb0f91c6cedb6067aa8a79ae9feea6482",
+    "source_path": "examples/east_rear_tree_neutral_001.json",
+    "source_blob": "7cceee08b250b1fdf1af1e2d496b61f6515981dd",
+    "source_digest": "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307",
+    "observer_path": "src/axm_nature_design/rear_tree_deformation_readiness.py",
+    "observer_blob": "cdade64afabe3918f6fb5e81d928250dde0c1073"
+  },
+  "current_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "ref": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "source_path": "examples/east_rear_tree_neutral_001.json",
+    "source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "observer_path": "src/axm_nature_design/rear_tree_deformation_readiness.py",
+    "observer_blob": "cdade64afabe3918f6fb5e81d928250dde0c1073"
+  },
+  "target_branch_id": "north-top",
+  "expected_owner_adopted_radius_m": 0.12,
+  "historical_alternative_radius_m": 0.14,
+  "required_status": "DECLARED_NOT_DEFORMATION_TESTED",
+  "automatic_source_adoption": false,
+  "deformation_semantics_authorized": false,
+  "downstream_adoption_authorized": false,
+  "truth_boundary": "This successor proves only that the current Organic owner source exactly matches one previously generated review-only metadata candidate while the historical 0.14 m alternative remains distinct. Organic made the source decision. Procedural does not retroactively authorize that edit, grant deformation meaning, select future radii, or transfer Rigging, VFX, Animation, Runtime, Environment, Art, QA, CANON, production-readiness, UC or PF authority."
+}

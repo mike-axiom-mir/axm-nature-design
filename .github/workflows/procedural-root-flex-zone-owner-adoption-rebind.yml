@@ -1,0 +1,96 @@
+name: Procedural Nature root flex-zone owner adoption rebind
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout historical Organic owner head
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: b681b8beb0f91c6cedb6067aa8a79ae9feea6482
+          path: .studio-deps/organic-historical
+
+      - name: Checkout current Organic owner head
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a
+          path: .studio-deps/organic-current
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact owner-adoption rebind evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_root_flex_zone_owner_adoption_rebind_evidence.py
+          evidence/nature-rear-tree-root-flex-zone-owner-adoption-rebind-002
+          --historical-organic-root .studio-deps/organic-historical
+          --current-organic-root .studio-deps/organic-current
+
+      - name: Verify bounded owner-adoption truth gate
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(
+              Path("evidence/nature-rear-tree-root-flex-zone-owner-adoption-rebind-002/summary.json").read_text()
+          )
+          assert data["state"] == "PASS_NATURE_ROOT_FLEX_OWNER_ADOPTION_REBIND"
+          assert data["decision"] == "PASS_EXACT_OWNER_ADOPTED_REVIEW_VARIANT_REBIND__HISTORICAL_FAMILY_PRESERVED__NO_PROCEDURAL_SOURCE_AUTHORITY"
+          assert data["historical_owner_head"] == "b681b8beb0f91c6cedb6067aa8a79ae9feea6482"
+          assert data["current_owner_head"] == "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a"
+          assert data["historical_source_digest"] == "0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307"
+          assert data["current_source_digest"] == "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61"
+          assert data["historical_family_digest"] == "a513d5576655782e6cf333900c8cf0ab04d708021b2de43003ca92f52c23b14f"
+          assert data["current_rebound_family_digest"] == data["historical_family_digest"]
+          assert data["review_base_source_digest"] == data["historical_source_digest"]
+          assert data["input_relation"] == "OWNER_SOURCE_EXACTLY_MATCHES_ONE_HISTORICAL_REVIEW_VARIANT"
+          assert data["adopted_radius_m"] == 0.12
+          assert data["alternative_radius_m"] == 0.14
+          assert data["historical_owner_example_count"] == 4
+          assert data["current_owner_example_count"] == 5
+          assert data["variant_count"] == 3
+          assert data["distinct_variant_source_digest_count"] == 3
+          assert len(data["three_materially_distinct_source_state_digests"]) == 3
+          assert data["historical_readiness_state"] == "HOLD_BRANCH_ROOT_FLEX_ZONE_COVERAGE"
+          assert data["historical_coverage"] == [4, 5]
+          assert data["current_readiness_state"] == "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED"
+          assert data["current_coverage"] == [5, 5]
+          assert data["alternative_readiness_state"] == "PASS_NEUTRAL_BRANCH_ROOT_SUPPORT__DEFORMATION_UNTESTED"
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 8
+          print("PASS_NATURE_ROOT_FLEX_OWNER_ADOPTION_REBIND_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained rebind evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-root-flex-owner-adoption-rebind-002-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-root-flex-zone-owner-adoption-rebind-002
+          if-no-files-found: error

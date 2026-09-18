@@ -1,0 +1,68 @@
+{
+  "automatic_downstream_adoption": false,
+  "automatic_rigging_adoption": false,
+  "branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "deformation_semantics_authorized": false,
+  "expected_generated_mesh": {
+    "triangles": 570,
+    "vertices": 390
+  },
+  "expected_partition": {
+    "branch_regions": 2,
+    "fixed_vertices": 338,
+    "leaf_regions": 4,
+    "triangles": 72,
+    "vertices": 52
+  },
+  "failure_policy": "FAIL_CLOSED_ON_PREDECESSOR_CONTRACT_OR_OWNER_GEOMETRY_HEAD_BLOB_SOURCE_MESH_REGION_TRIANGLE_MEMBERSHIP_SELECTION_OR_AUTHORITY_DRIFT",
+  "family_id": "east-rear-tree-primary-branch-child-partition-geometry-rebind-002",
+  "geometry_authority_transferred": false,
+  "geometry_receiver": {
+    "builder_blob": "82753ccd91e0ed377dc4649381cd61cb80a56bec",
+    "builder_path": "src/axm_nature_design/organic_form.py",
+    "mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31",
+    "pr": 9,
+    "ref": "9b451ba1f65281f550a6754e18574f7ab2951e28",
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "source_path": "examples/east_rear_tree_neutral_001.json"
+  },
+  "organic_provider": {
+    "builder_blob": "d4d8462eefc8faef513163c9d20280ad46428917",
+    "builder_path": "src/axm_nature_design/organic_form.py",
+    "mesh_digest": "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48",
+    "pr": 8,
+    "ref": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "source_path": "examples/east_rear_tree_neutral_001.json"
+  },
+  "predecessor_family_contract": {
+    "blob": "cfc7a0caa7dadf6c1a3c84829f9e1817b03f0e42",
+    "family_digest": "ab688f5281dc4e79770e133b49e7af3a533092acc1e0a0945bfa86e647e7b122",
+    "path": "examples/rear_tree_branch_child_partition_family_001.json"
+  },
+  "relation": "EXACT_GEOMETRY_RECEIVER_REBIND_SELECTION_ONLY",
+  "rigging_receiver_witness": {
+    "branch_id": "north-top",
+    "fixed_vertices": 338,
+    "geometry_receiver_head": "9b451ba1f65281f550a6754e18574f7ab2951e28",
+    "head": "f792d2369675d532be478e17c7a07f441d817c7c",
+    "pr": 14,
+    "relation": "COMPATIBILITY_WITNESS_ONLY_NOT_RIGGING_AUTHORITY",
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "selected_triangles": 72,
+    "selected_vertices": 52
+  },
+  "schema": "axm.nature-branch-child-partition-geometry-rebind/v0.1",
+  "source_mutation_authorized": false,
+  "truth_boundary": "This successor rebind proves only that the existing five deterministic primary-branch child selections survive the exact Geometry winding receiver migration after explicit re-execution. It does not transfer Geometry or Rigging authority, does not claim sibling deformation, does not rewrite Organic source form, and does not authorize Animation, VFX, Technical Art, Runtime, Map/Environment, Art/QA, CANON or production adoption."
+}

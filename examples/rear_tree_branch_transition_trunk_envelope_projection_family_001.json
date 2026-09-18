@@ -1,0 +1,51 @@
+{
+  "schema": "axm.nature-branch-transition-trunk-envelope-projection-family/v0.1",
+  "family_id": "east-rear-tree-primary-branch-transition-trunk-envelope-projection-family-001",
+  "relation": "DERIVED_TOPOLOGY_FREE_TAPERED_TRUNK_ENVELOPE_PROJECTION_ONLY__NO_RING_TOPOLOGY_TRUNK_CUT_WELD_RIGGING_OR_DOWNSTREAM_AUTHORITY",
+  "predecessor_frame_family_schema": "axm.nature-branch-transition-frame-parameter-family/v0.1",
+  "predecessor_frame_family_digest": "0b4bfc52accdf46e6d9f7a6d10f2c2670b2a13ed97a61bec9a6f9007107a50dc",
+  "organic_source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+  "authorized_branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "organic_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 8,
+    "head": "7f3b937b440e9870d07f7c356c5a3cbb779d0cd7",
+    "frame_observer_path": "src/axm_nature_design/rear_tree_transition_exit_frames.py",
+    "frame_observer_blob": "406c169963c34aed394e269f0dff2c91bb035cb8",
+    "transition_observer_path": "src/axm_nature_design/rear_tree_root_transition_readiness.py",
+    "transition_observer_blob": "1e8323b9bf6495a9f19704c217808300f3b46757",
+    "source_path": "examples/east_rear_tree_neutral_001.json",
+    "source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+  },
+  "geometry_reference": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 18,
+    "head": "14d05fdabc943376c231308001d00eb87dc23430",
+    "module_path": "src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py",
+    "module_blob": "47ba57110f43b0f3f1f29582b46a90505fa4515c",
+    "branch_id": "north-low",
+    "relation": "READ_ONLY_EXACT_CONSUMER_REFERENCE__PROCEDURAL_OWNS_PROJECTION_MATH_NOT_GEOMETRY_TOPOLOGY"
+  },
+  "source_mutation_authorized": false,
+  "ring_topology_authorized": false,
+  "bridge_topology_authorized": false,
+  "indexed_trunk_cut_authorized": false,
+  "connected_junction_authorized": false,
+  "weld_or_remesh_authorized": false,
+  "surface_normal_authorized": false,
+  "automatic_geometry_adoption": false,
+  "automatic_rigging_adoption": false,
+  "automatic_animation_adoption": false,
+  "automatic_vfx_adoption": false,
+  "automatic_technical_art_adoption": false,
+  "automatic_runtime_adoption": false,
+  "production_weight_authorized": false,
+  "failure_policy": "FAIL_CLOSED_ON_OWNER_SOURCE_FRAME_PREDECESSOR_GEOMETRY_REFERENCE_ENVELOPE_AXIAL_OR_AUTHORITY_DRIFT",
+  "truth_boundary": "This family centralizes only the deterministic topology-free math for projecting arbitrary source-space samples radially onto one exact authored tapered trunk segment while preserving axial coordinate. Five Organic-owned transition frames provide materially different retained diagnostic outputs, and exact Geometry PR #18 north-low ring projection is used only as a read-only compatibility witness. The family does not author or adopt a boundary ring, branch-side topology, bridge faces, indexed trunk cut, weld/remesh, connected branch/trunk junction, source compensation, surface normals, Rigging hierarchy/weights/deformation, Animation/VFX/Technical-Art/Runtime/Map adoption, CANON, production readiness, or Procedural mastery."
+}

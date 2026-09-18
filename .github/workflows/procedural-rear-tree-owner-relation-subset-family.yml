@@ -1,0 +1,111 @@
+name: Procedural Nature owner relation subset family
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact partition Organic source owner
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a
+          path: .studio-deps/organic-partition-source
+
+      - name: Checkout exact Organic interaction owner
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 925715d2f0491e2bcbc493b93dc6d14ab3dcb2a6
+          path: .studio-deps/organic-interaction-owner
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact owner relation subset evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_branch_child_owner_relation_subset_family_evidence.py
+          evidence/nature-rear-tree-owner-relation-subset-family-001
+          --partition-organic-root .studio-deps/organic-partition-source
+          --owner-organic-root .studio-deps/organic-interaction-owner
+
+      - name: Verify bounded owner relation subset truth gate
+        if: matrix.python == '3.11'
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          data = json.loads(
+              Path("evidence/nature-rear-tree-owner-relation-subset-family-001/summary.json").read_text()
+          )
+          assert data["state"] == "PASS_BOUNDED_OWNER_RELATION_BRANCH_SUBSET_FAMILY"
+          assert data["decision"] == "PASS_DERIVED_OWNER_RELATION_SUBSETS_ONLY__NO_SOURCE_RIGGING_WEIGHT_MOTION_OR_DOWNSTREAM_ADOPTION"
+          assert data["procedural_head"] == os.environ["EXPECTED_HEAD"]
+          assert data["partition_organic_head"] == "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a"
+          assert data["organic_interaction_owner_head"] == "925715d2f0491e2bcbc493b93dc6d14ab3dcb2a6"
+          assert data["organic_interaction_classifier_blob"] == "be31e22283d43dcb4e6e8bda870760fa67ab1628"
+          assert data["organic_source_blob"] == "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          assert data["partition_family_digest"] == "ab688f5281dc4e79770e133b49e7af3a533092acc1e0a0945bfa86e647e7b122"
+          assert data["owner_pair_count"] == 10
+          assert data["owner_attachment_intersection_pair_count"] == 1
+          assert data["family_digest"] == data["reverse_order_family_digest"]
+          assert data["output_count"] == 3
+          assert data["distinct_selection_digest_count"] == 3
+          assert data["distinct_vertex_index_digest_count"] == 3
+          rows = {row["subset_id"]: row for row in data["outputs"]}
+          assert rows["neutral-attachment-intersecting"]["branch_ids"] == ["east-mid"]
+          assert rows["neutral-attachment-intersecting"]["vertex_count"] == 52
+          assert rows["declared-overlap-neutral-disjoint"]["branch_ids"] == ["north-low"]
+          assert rows["declared-overlap-neutral-disjoint"]["vertex_count"] == 52
+          assert rows["neutral-attachment-disjoint"]["branch_ids"] == ["south-low", "north-low", "west-high", "north-top"]
+          assert rows["neutral-attachment-disjoint"]["vertex_count"] == 208
+          assert [rows[key]["triangle_count"] for key in (
+              "neutral-attachment-intersecting",
+              "declared-overlap-neutral-disjoint",
+              "neutral-attachment-disjoint",
+          )] == [72, 72, 288]
+          assert [rows[key]["fixed_vertex_count"] for key in (
+              "neutral-attachment-intersecting",
+              "declared-overlap-neutral-disjoint",
+              "neutral-attachment-disjoint",
+          )] == [338, 338, 182]
+          assert all(row["source_authorized"] is False for row in data["outputs"])
+          assert all(row["rigging_authorized"] is False for row in data["outputs"])
+          assert all(row["production_weight_authorized"] is False for row in data["outputs"])
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 10
+          print("PASS_NATURE_OWNER_RELATION_SUBSET_FAMILY_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained owner relation subset evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-rear-tree-owner-relation-subset-family-001-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-owner-relation-subset-family-001
+          if-no-files-found: error
