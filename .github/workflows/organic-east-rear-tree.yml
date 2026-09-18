@@ -71,9 +71,62 @@ jobs:
           assert abs(upper["neutral_cross_section_envelope_margin_m"] - 0.13) <= 1e-12, upper
           assert lower["flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", lower
           assert upper["flex_zone_status"] == "DECLARED_NOT_DEFORMATION_TESTED", upper
+
+          interactions = readiness["trunk_branch_flex_interactions"]
+          assert readiness["trunk_branch_flex_interaction_state"] == "PASS_DECLARED_TRUNK_BRANCH_FLEX_INTERACTION_MAP__DEFORMATION_UNTESTED", readiness
+          assert interactions["pair_count"] == 10, interactions
+          assert interactions["branch_roots_missing_exact_flex_zone"] == [], interactions
+          assert interactions["branch_root_centers_inside_trunk_flex_zone_count"] == 1, interactions
+          assert interactions["branch_root_center_containment_pairs"] == [
+              {
+                  "trunk_flex_zone_id": "trunk-upper-flex",
+                  "branch_id": "east-mid",
+                  "branch_flex_zone_id": "east-mid-branch-flex",
+              }
+          ], interactions
+          assert interactions["declared_flex_envelope_overlap_pair_count"] == 2, interactions
+          assert interactions["declared_flex_envelope_overlap_pairs"] == [
+              {
+                  "trunk_flex_zone_id": "trunk-upper-flex",
+                  "branch_id": "north-low",
+                  "branch_flex_zone_id": "north-low-branch-flex",
+              },
+              {
+                  "trunk_flex_zone_id": "trunk-upper-flex",
+                  "branch_id": "east-mid",
+                  "branch_flex_zone_id": "east-mid-branch-flex",
+              },
+          ], interactions
+          pairs = {
+              (row["trunk_flex_zone_id"], row["branch_id"]): row
+              for row in interactions["pairs"]
+          }
+          north_low = pairs[("trunk-upper-flex", "north-low")]
+          east_mid = pairs[("trunk-upper-flex", "east-mid")]
+          assert abs(north_low["center_distance_m"] - 0.3315116890850156) <= 1e-12, north_low
+          assert not north_low["branch_root_center_inside_trunk_flex_zone"], north_low
+          assert north_low["declared_flex_envelopes_overlap"], north_low
+          assert abs(north_low["declared_flex_envelope_overlap_margin_m"] - 0.028488310914984383) <= 1e-12, north_low
+          assert abs(east_mid["center_distance_m"] - 0.10630145812734658) <= 1e-12, east_mid
+          assert east_mid["branch_root_center_inside_trunk_flex_zone"], east_mid
+          assert abs(east_mid["branch_root_center_containment_margin_m"] - 0.11369854187265342) <= 1e-12, east_mid
+          assert east_mid["declared_flex_envelopes_overlap"], east_mid
+          assert abs(east_mid["declared_flex_envelope_overlap_margin_m"] - 0.23369854187265338) <= 1e-12, east_mid
+          lower_pairs = [
+              row for row in interactions["pairs"]
+              if row["trunk_flex_zone_id"] == "trunk-lower-flex"
+          ]
+          assert len(lower_pairs) == 5, lower_pairs
+          assert not any(row["declared_flex_envelopes_overlap"] for row in lower_pairs), lower_pairs
+          assert not interactions["truth_boundary"]["overlap_is_deformation_failure"], interactions
+          assert not interactions["truth_boundary"]["hierarchy_or_weighting_inferred"], interactions
+          assert not interactions["truth_boundary"]["trunk_branch_composition_tested"], interactions
+
           assert not readiness["truth_boundary"]["deformation_simulated"], readiness
           assert not readiness["truth_boundary"]["rigging_tested"], readiness
           assert not readiness["truth_boundary"]["trunk_deformation_tested"], readiness
+          assert not readiness["truth_boundary"]["trunk_branch_composition_tested"], readiness
+          assert not readiness["truth_boundary"]["hierarchy_or_weighting_inferred"], readiness
           print(json.dumps({"envelope": report, "deformation_readiness": readiness}, indent=2))
           PY
       - name: Upload exact rear-tree evidence
