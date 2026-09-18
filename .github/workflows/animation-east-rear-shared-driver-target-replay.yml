@@ -200,7 +200,9 @@ jobs:
           exit "$status"
 
       - name: Validate exact real-Godot Animation result
+        shell: bash
         run: |
+          set -euo pipefail
           python - <<'PY'
           import json
           from pathlib import Path
@@ -238,6 +240,8 @@ jobs:
           assert t['art_or_visual_qa_acceptance_claimed'] is False,p
           assert t['canon_or_production_readiness_claimed'] is False,p
           PY
+          cp evidence/nature-shared-driver-target-replay-005/animation-shared-driver-godot-target-receipt.json \
+            evidence/nature-shared-driver-target-replay-005/positive-animation-shared-driver-godot-target-receipt.json
 
       - name: Fail closed on wrong target byte offset
         shell: bash
@@ -262,6 +266,8 @@ jobs:
           p=json.loads(Path('evidence/nature-shared-driver-target-replay-005/negative-wrong-offset-receipt.json').read_text())
           assert p['state']=='FAIL_NATURE_SHARED_DRIVER_ANIMATIONPLAYER_TARGET_REPLAY',p
           PY
+          cp evidence/nature-shared-driver-target-replay-005/positive-animation-shared-driver-godot-target-receipt.json \
+            target-proof-animation/animation-shared-driver-godot-target-receipt.json
 
       - name: Retain exact replay provenance
         if: always()
