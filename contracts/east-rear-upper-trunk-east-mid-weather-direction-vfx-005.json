@@ -1,0 +1,43 @@
+{
+  "schema": "axm.nature-vfx-upper-trunk-east-mid-weather-direction-hierarchy/v0.1",
+  "scope": "REVIEW_ONLY_WEATHER_VISUAL_DIRECTION_SIGN_STABILITY_ACROSS_EXACT_RIGGING_PARENT_REPRESENTATIVES",
+  "lineage": {
+    "rigging_owner_pr": 14,
+    "rigging_owner_head": "6cf64925f0ea00737e4d3f2d4f15979c773f309d",
+    "vfx_sign_predecessor_pr": 17,
+    "vfx_sign_predecessor_head": "ef7b35af27d5ca98a6447c1e33be07863e387305",
+    "weather_pr": 2,
+    "weather_head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "weather_source_blob": "11298d447f262da8a78e43e2df68bc0346c99a2c"
+  },
+  "receiver": {
+    "branch_id": "east-mid",
+    "selected_vertices": 52,
+    "selected_triangles": 72,
+    "parent_representative_angles_deg": [-2.5, 0.0, 2.5],
+    "child_representative_angles_deg": [-5.0, 0.0, 5.0]
+  },
+  "weather": {
+    "wind_xy": [1.0, 0.35],
+    "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "measurement_rule": "FOR_EACH_PARENT_REPRESENTATIVE_COMPARE_CHILD_MINUS5_NEUTRAL_PLUS5_INCREMENTALLY_FROM_THE_SAME_PARENT_NEUTRAL_CENTROID",
+  "acceptance": {
+    "neutral_parent_must_reproduce_vfx_pr17_east_mid": true,
+    "all_parent_representatives_must_keep_positive_child_polarity": true,
+    "all_signed_child_witnesses_must_remain_separable": true
+  },
+  "truth_boundary": {
+    "physical_wind": false,
+    "wind_force_drag_turbulence": false,
+    "animation_timing_or_motion_adoption": false,
+    "biological_range_of_motion": false,
+    "whole_tree_simultaneous_motion": false,
+    "continuous_collision_or_self_intersection": false,
+    "target_host_playback": false,
+    "runtime_controller_or_device": false,
+    "gameplay_or_physics": false,
+    "art_direction_or_visual_qa_acceptance": false,
+    "canon_or_production_readiness": false
+  }
+}
