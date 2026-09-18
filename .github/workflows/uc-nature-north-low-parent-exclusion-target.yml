@@ -99,6 +99,7 @@ jobs:
             > /tmp/exact-geometry-attachment-contract.json
           PYTHONPATH=.animation/src \
             python .animation/tools/verify_rear_tree_animation_north_low_parent_exclusion_temporal_rebind.py \
+              --source .animation/examples/east_rear_tree_neutral_001.json \
               --geometry-contract /tmp/exact-geometry-attachment-contract.json \
               --output /tmp/exact-current-animation-evidence.json \
               | tee /tmp/exact-current-animation-verifier.log
