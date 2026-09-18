@@ -7,8 +7,9 @@ const OUTPUT := "res://nature-east-rear-dynamic-window-godot-target-receipt.json
 # This is only a target-import observation gate. The exact UC GLB stores FLOAT
 # positions; Godot's runtime import may quantize/pack its receiver arrays. We do
 # not promote this tolerance into source/Geometry/UC authority. The operational
-# proof below is stricter: full-position and [110,370) partial updates must
-# render byte-identically for every retained pose.
+# proof below is stricter: one target-host dynamic ArrayMesh receiver is reused
+# for full-position and [110,370) partial updates, and the retained renders must
+# be byte-identical for every pose.
 const IMPORT_OBSERVATION_TOL_M := 0.0001
 const EXPECTED_VERTICES := 390
 const EXPECTED_WINDOW_START := 110
@@ -17,7 +18,7 @@ const EXPECTED_WINDOW_END := 370
 var receipt := {
     "schema": "axm.nature-east-rear-dynamic-window-godot-target/v0.1",
     "state": "NOT_RUN",
-    "renderer_boundary": "Godot 4.7.2 GL Compatibility; exact current-UC GLB import, then target-host ArrayMesh dynamic receiver rebuilt from imported arrays and exercised with full versus partial position-buffer updates."
+    "renderer_boundary": "Godot 4.7.2 GL Compatibility; exact current-UC GLB import, then one target-host ArrayMesh dynamic receiver rebuilt from imported arrays and exercised with full versus partial position-buffer updates."
 }
 var camera := Camera3D.new()
 var environment := Environment.new()
@@ -258,8 +259,8 @@ func _run() -> void:
         return
 
     configure_scene(neutral_vertices)
-    var neutral_mesh := make_dynamic_mesh(arrays)
-    instance.mesh = neutral_mesh
+    var receiver_mesh := make_dynamic_mesh(arrays)
+    instance.mesh = receiver_mesh
     var neutral_image := await capture_image()
     if neutral_image.save_png("res://generated/neutral.png") != OK:
         fail("cannot retain neutral target frame")
@@ -274,6 +275,10 @@ func _run() -> void:
         return
     if full_length != EXPECTED_VERTICES * stride:
         fail("target full position byte budget drift")
+        return
+    var neutral_bytes := neutral_vertices.to_byte_array()
+    if neutral_bytes.size() != full_length:
+        fail("Godot imported neutral position byte serialization drift")
         return
 
     var rows := []
@@ -292,14 +297,11 @@ func _run() -> void:
             fail("Godot PackedVector3Array byte serialization drift")
             return
 
-        var control_mesh := make_dynamic_mesh(arrays)
-        control_mesh.surface_update_vertex_region(0, 0, full_bytes)
-        instance.mesh = control_mesh
+        receiver_mesh.surface_update_vertex_region(0, 0, full_bytes)
         var control_image := await capture_image()
 
-        var candidate_mesh := make_dynamic_mesh(arrays)
-        candidate_mesh.surface_update_vertex_region(0, dynamic_offset, dynamic_bytes)
-        instance.mesh = candidate_mesh
+        receiver_mesh.surface_update_vertex_region(0, 0, neutral_bytes)
+        receiver_mesh.surface_update_vertex_region(0, dynamic_offset, dynamic_bytes)
         var candidate_image := await capture_image()
 
         var pair := image_delta(control_image, candidate_image)
@@ -351,6 +353,7 @@ func _run() -> void:
     receipt["import_observation_tolerance_m"] = IMPORT_OBSERVATION_TOL_M
     receipt["target_update_api"] = "ArrayMesh.surface_update_vertex_region"
     receipt["dynamic_update_flag"] = "Mesh.ARRAY_FLAG_USE_DYNAMIC_UPDATE"
+    receipt["target_receiver_resource_reused_between_full_and_partial_updates"] = true
     receipt["dynamic_window_vertices"] = [EXPECTED_WINDOW_START, EXPECTED_WINDOW_END]
     receipt["dynamic_window_byte_offset"] = dynamic_offset
     receipt["dynamic_window_byte_length"] = dynamic_length
