@@ -1,0 +1,46 @@
+{
+  "schema": "axm.nature-vfx-north-low-analytic-bridge-weather-contract/v0.1",
+  "result": "PASS_NORTH_LOW_ANALYTIC_BRIDGE_WEATHER_VISUAL_RESPONSE_GRADIENT",
+  "rigging_owner": {
+    "pull_request": 14,
+    "head": "0bb186b4e22ab8911dd93675754690b68da99802",
+    "module_blob": "352e7c83e57779aef327390f5250875e26a7b610",
+    "contract_blob": "c82794fb44daee0889782ce1a30294b17a3ce94a",
+    "result": "PASS_NORTH_LOW_ANALYTIC_BRIDGE_ENDPOINT_PIN_DIAGNOSTIC__HOLD_CONNECTED_TOPOLOGY_PRODUCTION_SKINNING"
+  },
+  "vfx_polarity_predecessor": {
+    "pull_request": 25,
+    "head": "687a81590db35b1b06fa3d436a726cc272a8ea77"
+  },
+  "weather_visual_direction_donor": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pull_request": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "source_blob_sha": "11298d447f262da8a78e43e2df68bc0346c99a2c",
+    "wind_xy": [1.0, 0.35],
+    "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "receiver": {
+    "mode": "ANALYTIC_BRIDGE_TWO_BOUNDARY_DIAGNOSTIC_PIN",
+    "branch_boundary_vertices": 8,
+    "trunk_boundary_vertices": 8,
+    "interior_vertices": 0,
+    "branch_endpoint_diagnostic_weight": 1.0,
+    "trunk_endpoint_diagnostic_weight": 0.0,
+    "representative_angles_deg": [-5.0, -2.5, 0.0, 2.5, 5.0]
+  },
+  "reusable_rule": "PINNED_TRUNK_ENDPOINT_PLUS_SOCKET_DRIVEN_BRANCH_ENDPOINT_CREATES_A_MEASURED_VISUAL_RESPONSE_GRADIENT__NOT_PRODUCTION_SKINNING",
+  "truth_boundary": {
+    "source_space_visual_response_evidence_only": true,
+    "physical_wind_claimed": false,
+    "production_skinning_or_blending_claimed": false,
+    "indexed_connected_junction_claimed": false,
+    "continuous_foldover_collision_or_self_intersection_claimed": false,
+    "animation_acceptance_claimed": false,
+    "technical_art_target_host_acceptance_claimed": false,
+    "runtime_acceptance_claimed": false,
+    "gameplay_or_physics_claimed": false,
+    "art_direction_or_independent_visual_qa_acceptance_claimed": false,
+    "canon_or_production_readiness_claimed": false
+  }
+}

@@ -1,0 +1,141 @@
+name: VFX east rear north-low analytic bridge Weather response
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_vfx_north_low_bridge_weather_response.py"
+      - "tests/test_rear_tree_vfx_north_low_bridge_weather_response.py"
+      - "tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py"
+      - "contracts/east-rear-north-low-analytic-bridge-weather-vfx-011.json"
+      - "docs/VFX_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_WEATHER_011.md"
+      - ".github/workflows/vfx-east-rear-north-low-analytic-bridge-weather.yml"
+  push:
+    branches:
+      - "studio/vfx-north-low-analytic-bridge-weather-response-011"
+    paths:
+      - "src/axm_nature_design/rear_tree_vfx_north_low_bridge_weather_response.py"
+      - "tests/test_rear_tree_vfx_north_low_bridge_weather_response.py"
+      - "tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py"
+      - "contracts/east-rear-north-low-analytic-bridge-weather-vfx-011.json"
+      - "docs/VFX_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_WEATHER_011.md"
+      - ".github/workflows/vfx-east-rear-north-low-analytic-bridge-weather.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact VFX head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Checkout exact Weather donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-weather-design
+          ref: ca2eaba519e8449835b0ea6ef944b7080c3caa6a
+          path: .weather
+          fetch-depth: 1
+
+      - name: Bind exact Rigging, Geometry and Weather identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          rigging_owner=0bb186b4e22ab8911dd93675754690b68da99802
+          git merge-base --is-ancestor "$rigging_owner" HEAD
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py)" = "352e7c83e57779aef327390f5250875e26a7b610"
+          test "$(git rev-parse HEAD:contracts/east-rear-north-low-analytic-bridge-endpoint-rigging-009.json)" = "c82794fb44daee0889782ce1a30294b17a3ce94a"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_geometry_north_low_trunk_bridge_candidate.py)" = "47ba57110f43b0f3f1f29582b46a90505fa4515c"
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git -C .weather rev-parse HEAD)" = "ca2eaba519e8449835b0ea6ef944b7080c3caa6a"
+          test "$(git -C .weather rev-parse HEAD:examples/wind_atmosphere_baseline_001.json)" = "11298d447f262da8a78e43e2df68bc0346c99a2c"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('.weather/examples/wind_atmosphere_baseline_001.json').read_text())
+          assert p['wind_xy'] == [1.0, 0.35]
+          assert p['wind_semantics'] == 'VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED'
+          PY
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact VFX visual-response evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/north-low-analytic-bridge-weather-vfx-011
+          mkdir -p "$root"
+          python tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py \
+            --output "$root/evidence.json" \
+            --svg "$root/review.svg" | tee "$root/verifier.log"
+          cp contracts/east-rear-north-low-analytic-bridge-weather-vfx-011.json "$root/contract.json"
+          cp contracts/east-rear-north-low-analytic-bridge-endpoint-rigging-009.json "$root/rigging-owner-contract.json"
+          cp docs/VFX_EAST_REAR_NORTH_LOW_ANALYTIC_BRIDGE_WEATHER_011.md "$root/README.md"
+          cp src/axm_nature_design/rear_tree_vfx_north_low_bridge_weather_response.py "$root/observer.py"
+          cp src/axm_nature_design/rear_tree_rigging_north_low_bridge_endpoint_gate.py "$root/rigging-owner.py"
+          cp tests/test_rear_tree_vfx_north_low_bridge_weather_response.py "$root/test_observer.py"
+          cp tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py "$root/verifier.py"
+          cp .github/workflows/vfx-east-rear-north-low-analytic-bridge-weather.yml "$root/workflow.yml"
+          cp .weather/examples/wind_atmosphere_baseline_001.json "$root/weather-donor.json"
+          git rev-parse HEAD > "$root/exact-vfx-head.txt"
+          printf '%s\n' 0bb186b4e22ab8911dd93675754690b68da99802 > "$root/rigging-owner-head.txt"
+          printf '%s\n' ca2eaba519e8449835b0ea6ef944b7080c3caa6a > "$root/weather-owner-head.txt"
+
+      - name: Assert bounded truth gate and fail-closed controls
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('evidence/north-low-analytic-bridge-weather-vfx-011/evidence.json').read_text())
+          assert p['result'] == 'PASS_NORTH_LOW_ANALYTIC_BRIDGE_WEATHER_VISUAL_RESPONSE_GRADIENT'
+          assert all(p['checks'].values())
+          assert p['measurements']['weather_polarity_sign_violations'] == 0
+          assert p['measurements']['maximum_trunk_centroid_drift_m'] <= 1e-12
+          assert p['measurements']['maximum_bridge_vs_half_branch_centroid_residual_m'] <= 1e-12
+          assert p['measurements']['minus5_branch_downwind_parallel_m'] > 0.0
+          assert p['measurements']['plus5_branch_upwind_parallel_m'] < 0.0
+          truth = p['truth_boundary']
+          assert truth['source_space_visual_response_evidence_only'] is True
+          assert not any(value for key, value in truth.items() if key != 'source_space_visual_response_evidence_only')
+          PY
+          ! python tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py --output /tmp/x.json --svg /tmp/x.svg --weather-y 0.36
+          ! python tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py --output /tmp/x.json --svg /tmp/x.svg --claim-physical-wind
+          ! python tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py --output /tmp/x.json --svg /tmp/x.svg --claim-production-skinning
+          ! python tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py --output /tmp/x.json --svg /tmp/x.svg --claim-continuous-surface-safety
+          ! python tools/verify_rear_tree_vfx_north_low_bridge_weather_response.py --output /tmp/x.json --svg /tmp/x.svg --claim-target-host
+
+      - name: Upload retained VFX evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-analytic-bridge-weather-vfx-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-analytic-bridge-weather-vfx-011/
+          if-no-files-found: error
+          retention-days: 90

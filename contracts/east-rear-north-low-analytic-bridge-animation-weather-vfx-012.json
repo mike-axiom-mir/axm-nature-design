@@ -1,0 +1,65 @@
+{
+  "schema": "axm.nature-vfx-north-low-analytic-bridge-animation-weather-temporal/v0.1",
+  "owner": "VFX / Atmosphere",
+  "result": "PASS_NORTH_LOW_ANALYTIC_BRIDGE_TEMPORAL_WEATHER_VISUAL_RESPONSE",
+  "animation_owner": {
+    "pull_request": 26,
+    "head": "d4442cbbe6dcdcde1abadfcd358bb7a6bcdc3701",
+    "semantic_owner_head": "5cacd61e22433b0c33f29111827283b81cc0ba0d",
+    "duration_s": 1.0,
+    "authored_hz": 40,
+    "endpoint_inclusive_samples": 41,
+    "visible_repeat_samples": 40,
+    "curve": "sin(2*pi*t)^3",
+    "child_range_deg": [-5.0, 5.0],
+    "retimed_or_reauthored_by_vfx": false
+  },
+  "rigging_owner": {
+    "pull_request": 14,
+    "head": "efe99261459858636dbe65b16cbe1d5ad2b93a56",
+    "constraint": "ANALYTIC_BRIDGE_PAIRED_SPAN_CONTINUOUS_NONCOLLAPSE_CERTIFICATE",
+    "closed_child_domain_deg": [-5.0, 5.0],
+    "paired_span_count": 8
+  },
+  "weather_owner": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pull_request": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "wind_xy": [1.0, 0.35],
+    "semantics": "VISUAL_DIRECTION_ONLY_NOT_PHYSICAL_WIND_SPEED"
+  },
+  "receiver": {
+    "mode": "ANALYTIC_BRIDGE_TWO_BOUNDARY_DIAGNOSTIC_PIN",
+    "branch_boundary_vertices": 8,
+    "trunk_boundary_vertices": 8,
+    "interior_vertices": 0,
+    "branch_endpoint_diagnostic_weight": 1.0,
+    "trunk_endpoint_diagnostic_weight": 0.0
+  },
+  "required_checks": [
+    "re-run exact frozen Animation source receipt from the exact Animation head",
+    "re-run exact current Rigging continuous paired-span owner",
+    "reconstruct all 41 authored Animation samples on the exact analytic bridge endpoints",
+    "measure branch and full-bridge centroids in Weather's exact visual-direction frame",
+    "preserve north-low Weather polarity for every non-neutral authored sample",
+    "preserve exact neutral response at 0.00 / 0.50 / 1.00 seconds",
+    "preserve exact loop closure",
+    "preserve pinned trunk zero drift",
+    "preserve diagnostic bridge centroid equals one-half branch-endpoint centroid response",
+    "compare every direct paired endpoint span with current Rigging closed form",
+    "reject Weather donor drift and authority-inflating claims"
+  ],
+  "decision": "KEEP_EXACT_ANIMATION_TO_WEATHER_VISUAL_RESPONSE_CONTINUITY_ON_ANALYTIC_BRIDGE__NO_TARGET_RUNTIME_OR_PHYSICAL_WIND_ADOPTION",
+  "explicit_nonclaims": [
+    "physical wind speed force drag turbulence or pressure",
+    "connected branch-trunk topology or production skinning",
+    "continuous bridge-triangle orientation foldover collision or self-intersection freedom",
+    "VFX ownership of Animation timing or motion authorship",
+    "Technical Art target-host playback for this current pair",
+    "wall-clock 40 Hz delivery",
+    "Runtime controller state-machine input device or performance behavior",
+    "gameplay collision damage or physics",
+    "Art Direction or independent Visual QA acceptance",
+    "CANON game readiness or production readiness"
+  ]
+}
