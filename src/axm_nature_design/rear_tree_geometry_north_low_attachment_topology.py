@@ -1,8 +1,8 @@
 """Geometry-owned topology classification for the north-low diagnostic child.
 
-Rigging's parent-influence exclusion gate is a transform-policy result.  It must not be
+Rigging's parent-influence exclusion gate is a transform-policy result. It must not be
 silently promoted into a claim that the generated branch is a connected production
-junction with the trunk.  This observer re-executes the exact Rigging owner, inspects
+junction with the trunk. This observer re-executes the exact Rigging owner, inspects
 only indexed triangle topology, and records the actual attachment class of the current
 Geometry receiver.
 
@@ -15,6 +15,7 @@ from collections import Counter, defaultdict, deque
 
 from .organic_form import build_mesh, digest, validate_source
 from . import rear_tree_rigging_north_low_parent_influence_gate as rig_gate
+from . import rear_tree_rigging_primary_branch_family as family
 
 SCHEMA = "axm.nature-north-low-attachment-topology-geometry-evidence/v0.1"
 RESULT = "PASS_NORTH_LOW_DIAGNOSTIC_CHILD_TOPOLOGY_CLASSIFIED__HOLD_CONNECTED_BRANCH_TRUNK_ATTACHMENT"
@@ -148,15 +149,19 @@ def evaluate(
     if rigging["rigging_constraint"]["upper_trunk_parent_influence_enabled_for_north_low"] is not False:
         raise ValueError("north-low exclusion gate state drift")
 
+    family_result = family.evaluate(source)
+    child_probe = next(
+        row for row in family_result["rigging_family"]["probes"] if row["branch_id"] == BRANCH_ID
+    )
+
     mesh = build_mesh(source)
     mesh_digest = digest(mesh)
     if mesh_digest != EXPECTED_MESH_DIGEST:
         raise ValueError("exact Geometry migrated receiver identity drift")
 
-    child = rigging["child_socket"]
-    selected_indices = [int(i) for i in child["selected_vertex_indices"]]
+    selected_indices = [int(i) for i in child_probe["selected_vertex_indices"]]
     selected_set = set(selected_indices)
-    selected_regions = list(child["selected_regions"])
+    selected_regions = list(child_probe["selected_regions"])
     child_triangle_indices = _region_triangle_indices(mesh, selected_regions)
     child_vertices_from_faces = _vertices_for_triangles(mesh, child_triangle_indices)
 
