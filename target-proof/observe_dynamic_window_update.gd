@@ -179,9 +179,9 @@ func configure_scene(neutral_vertices: PackedVector3Array) -> void:
     camera.near = radius * 0.001
     camera.far = radius * 20.0
     camera.position = center + Vector3(1.45, 1.15, 1.8).normalized() * radius * 4.2
+    root.add_child(camera)
     camera.look_at(center)
     camera.current = true
-    root.add_child(camera)
 
     environment.background_mode = Environment.BG_COLOR
     environment.background_color = Color(0.035, 0.045, 0.06)
