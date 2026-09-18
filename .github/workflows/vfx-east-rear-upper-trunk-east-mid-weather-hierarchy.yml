@@ -73,6 +73,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005
+          mkdir -p evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005
           python tools/verify_rear_tree_vfx_upper_trunk_east_mid_weather_hierarchy.py \
             --output evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005 \
             | tee evidence/vfx-upper-trunk-east-mid-weather-hierarchy-005/verifier.log
