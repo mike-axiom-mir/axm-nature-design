@@ -1,0 +1,109 @@
+name: Procedural Nature branch partition current Rigging composition rebind
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact current Rigging composition owner
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: b4b480b415047fea90b4740f7702ced0dba9142d
+          path: .studio-deps/rigging-current
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Re-run exact current Rigging family, polarity and composition evidence
+        if: matrix.python == '3.11'
+        run: |
+          mkdir -p .studio-deps/rigging-evidence
+          (
+            cd .studio-deps/rigging-current
+            PYTHONPATH=src python tools/verify_rear_tree_primary_branch_rigging_family.py \
+              --output "$GITHUB_WORKSPACE/.studio-deps/rigging-evidence/family.json"
+            PYTHONPATH=src python tools/verify_rear_tree_rigging_shared_driver_polarity.py \
+              --output "$GITHUB_WORKSPACE/.studio-deps/rigging-evidence/polarity.json"
+            PYTHONPATH=src python tools/verify_rear_tree_rigging_shared_driver_composition.py \
+              --output "$GITHUB_WORKSPACE/.studio-deps/rigging-evidence/composition.json"
+          )
+
+      - name: Build exact current-Rigging composition rebind evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_branch_child_partition_rigging_composition_rebind_evidence.py
+          evidence/nature-rear-tree-branch-child-partition-rigging-composition-rebind-004
+          --rigging-root .studio-deps/rigging-current
+          --rigging-family-evidence .studio-deps/rigging-evidence/family.json
+          --polarity-evidence .studio-deps/rigging-evidence/polarity.json
+          --composition-evidence .studio-deps/rigging-evidence/composition.json
+
+      - name: Verify bounded composition-rebind truth gate
+        if: matrix.python == '3.11'
+        env:
+          PR_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          root = Path("evidence/nature-rear-tree-branch-child-partition-rigging-composition-rebind-004")
+          data = json.loads((root / "summary.json").read_text())
+          event_head = os.environ.get("PR_HEAD") or subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          assert data["state"] == "PASS_NATURE_BRANCH_PARTITION_CURRENT_RIGGING_COMPOSITION_REBIND"
+          assert data["decision"] == "PASS_EXACT_CURRENT_RIGGING_COMPOSITION_REBIND__FIVE_SELECTION_IDENTITIES_PRESERVED__NO_KINEMATIC_OR_MOTION_ADOPTION"
+          assert data["procedural_head"] == event_head
+          assert data["rigging_consumer_head"] == "b4b480b415047fea90b4740f7702ced0dba9142d"
+          assert data["predecessor_consumer_rebind_head"] == "30418f01aade157dde0913703e00ade3134bc3d9"
+          assert data["predecessor_consumer_rebind_digest"] == "5b34b90160ca97106be320e35dc7524d4637bf6ecb71c4f83e615a22d3e66248"
+          assert data["procedural_family_digest"] == "ab688f5281dc4e79770e133b49e7af3a533092acc1e0a0945bfa86e647e7b122"
+          assert data["reverse_order_family_digest"] == data["procedural_family_digest"]
+          assert data["branch_count"] == 5
+          assert data["distinct_partition_digest_count"] == 5
+          assert data["distinct_vertex_index_digest_count"] == 5
+          assert data["all_exact_selection_identities_match"] is True
+          assert data["pairwise_vertex_disjoint"] is True
+          assert data["rigging_composition_observed_not_adopted"] is True
+          assert all(row["selection_match"] for row in data["comparisons"])
+          assert all(row["vertex_count"] == 52 for row in data["comparisons"])
+          assert all(row["triangle_count"] == 72 for row in data["comparisons"])
+          assert all(row["fixed_vertex_count"] == 338 for row in data["comparisons"])
+          support = data["rigging_composition_support"]
+          assert support["selected_vertex_union"] == 260
+          assert support["globally_fixed_vertices"] == 130
+          assert set(support["per_branch_selected_vertices"].values()) == {52}
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 15
+          assert all(value is False for value in data["truth_boundary"].values())
+          print("PASS_NATURE_BRANCH_PARTITION_CURRENT_RIGGING_COMPOSITION_REBIND_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained current-Rigging composition rebind evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-rear-tree-branch-child-partition-rigging-composition-rebind-004-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-branch-child-partition-rigging-composition-rebind-004
+          if-no-files-found: error
