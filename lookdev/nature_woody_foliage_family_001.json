@@ -1,0 +1,33 @@
+{
+  "schema": "axm.nature-woody-foliage-material-family/v0.1",
+  "family_id": "nature-woody-foliage-family-001",
+  "supported_source_scope": [
+    "sapling-neutral-001",
+    "compact-east-tree-neutral-001",
+    "east-rear-tree-neutral-001"
+  ],
+  "renderer_scope": "PBR scalar/color family only; foliage review uses CULL_DISABLED in both control and candidate so sidedness is not a comparison variable. No UV, texture, subsurface, transmission, normal-map, runtime-cost, or universal vegetation claim.",
+  "materials": {
+    "woody": {
+      "color": "#5C3B27FF",
+      "metallic": 0.0,
+      "roughness": 0.84
+    },
+    "foliage": {
+      "color": "#5A823EFF",
+      "metallic": 0.0,
+      "roughness": 0.58
+    }
+  },
+  "intent": {
+    "woody": "Preserve the already-proven sapling woody response as one bounded family candidate across the three current source-owned stylized tree forms, without inventing per-tree color noise before receiving-scene direction requests it.",
+    "foliage": "Preserve the already-proven sapling foliage response as one bounded family candidate while testing whether woody/foliage separation remains visible across materially different current forms and camera contexts.",
+    "variation_policy": "NO_PER_SOURCE_VARIATION_YET__ESTABLISH_SHARED_FAMILY_BASELINE_FIRST"
+  },
+  "provenance": {
+    "origin_profile": "lookdev/sapling_material_profile_001.json",
+    "origin_source_scope": "sapling-neutral-001",
+    "promotion_rule": "This family is not justified by scalar reuse alone. It requires retained multi-source structural and renderer evidence against the original proof-only material pair before downstream adoption."
+  },
+  "truth_boundary": "Bounded three-source look-development family candidate only. Exact source forms remain owned upstream. This does not establish botanical color correctness, per-species material identity, final sidedness strategy, final Art Direction, Environment adoption, target-device runtime cost, renderer equivalence, UV/texture quality, wind/deformation acceptance, CANON, production readiness, or Materials mastery."
+}

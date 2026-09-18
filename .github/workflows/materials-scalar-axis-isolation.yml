@@ -1,0 +1,160 @@
+name: Materials Nature scalar axis isolation evidence
+
+on:
+  push:
+    branches: [studio/materials-sapling-lookdev-001]
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "tools/build_material_family_multisource.py"
+      - "lookdev-material-axis-isolation-proof/**"
+      - ".github/workflows/materials-scalar-axis-isolation.yml"
+  pull_request:
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "tools/build_material_family_multisource.py"
+      - "lookdev-material-axis-isolation-proof/**"
+      - ".github/workflows/materials-scalar-axis-isolation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scalar-axis-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Nature Materials lane
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout exact Nature Geometry donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da3adbef4de8cddb8f3ebe841d39bb31a8936f5f
+          path: .geometry-current
+
+      - name: Build exact three-source material-family packet
+        env:
+          AXM_MATERIALS_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/build_material_family_multisource.py
+          python tools/build_material_family_multisource.py \
+            --geometry-root .geometry-current \
+            --output evidence/material-axis-isolation-001
+
+      - name: Validate bounded scalar-axis premise
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/material-axis-isolation-001')
+          data=json.loads((root/'comparison.json').read_text())
+          assert data['state']=='PASS_EXACT_THREE_SOURCE_WOODY_FOLIAGE_FAMILY_PACKET',data
+          assert data['comparison_contract']['geometry_change']=='NONE',data['comparison_contract']
+          assert data['comparison_contract']['foliage_cull_mode_both']=='CULL_DISABLED_FOR_MATERIAL_REVIEW_ONLY',data['comparison_contract']
+          control=data['control_profile']['materials']
+          candidate=data['candidate_family']['materials']
+          assert set(control)==set(candidate)=={'woody','foliage'}
+          for name in ('woody','foliage'):
+              assert control[name]['metallic']==candidate[name]['metallic']==0.0
+              assert control[name]['color']!=candidate[name]['color'],name
+              assert control[name]['roughness']!=candidate[name]['roughness'],name
+          assert len(data['studies'])==3
+          print(json.dumps({'state':data['state'],'geometry_donor':data['geometry_donor'],'control':control,'candidate':candidate},indent=2))
+          PY
+
+      - name: Stage exact packet into Godot proof host
+        run: |
+          rm -rf lookdev-material-axis-isolation-proof/generated
+          mkdir -p lookdev-material-axis-isolation-proof/generated
+          cp evidence/material-axis-isolation-001/comparison.json lookdev-material-axis-isolation-proof/generated/
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Render control color-only roughness-only and combined variants
+        run: |
+          set -euo pipefail
+          rm -f lookdev-material-axis-isolation-proof/material-axis-isolation-runtime-receipt.json
+          rm -f lookdev-material-axis-isolation-proof/*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x760x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path lookdev-material-axis-isolation-proof \
+            --script observe.gd
+
+      - name: Validate independent color and roughness response
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('lookdev-material-axis-isolation-proof')
+          receipt=json.loads((root/'material-axis-isolation-runtime-receipt.json').read_text())
+          assert receipt['state']=='PASS_TARGET_HOST_COLOR_AND_ROUGHNESS_AXES_INDEPENDENTLY_VISIBLE',receipt
+          assert receipt['promotion_effect']=='NONE',receipt
+          assert receipt['total_contexts']==9,receipt
+          assert receipt['color_visible_contexts']==9,receipt
+          assert receipt['roughness_visible_contexts']==9,receipt
+          roughness=[]; color=[]; combined=[]
+          for study_name,study in receipt['studies'].items():
+              assert set(study['contexts'])=={'whole_three_quarter','crown_back','crown_low_grazing'},study_name
+              for context_name,row in study['contexts'].items():
+                  assert set(row['captures'])=={'control','color_only','roughness_only','combined'},(study_name,context_name,row)
+                  for variant,meta in row['captures'].items():
+                      assert meta['state']=='PASS',(study_name,context_name,variant,meta)
+                      assert meta['tree']['vertices']==390 and meta['tree']['triangles']==570,(study_name,context_name,variant,meta)
+                      assert meta['tree']['foliage_cull_mode']=='CULL_DISABLED',(study_name,context_name,variant,meta)
+                  d=row['pixel_deltas']
+                  assert d['control_to_color_only']['changed_pixels']>0,(study_name,context_name,d)
+                  assert d['control_to_roughness_only']['changed_pixels']>0,(study_name,context_name,d)
+                  assert d['control_to_combined']['changed_pixels']>0,(study_name,context_name,d)
+                  assert d['color_only_to_combined']['changed_pixels']>0,(study_name,context_name,d)
+                  assert d['roughness_only_to_combined']['changed_pixels']>0,(study_name,context_name,d)
+                  color.append(d['control_to_color_only']['changed_pixels'])
+                  roughness.append(d['control_to_roughness_only']['changed_pixels'])
+                  combined.append(d['control_to_combined']['changed_pixels'])
+          print(json.dumps({'state':receipt['state'],'contexts':receipt['total_contexts'],'color_changed_pixels_min':min(color),'color_changed_pixels_max':max(color),'roughness_changed_pixels_min':min(roughness),'roughness_changed_pixels_max':max(roughness),'combined_changed_pixels_min':min(combined),'combined_changed_pixels_max':max(combined)},indent=2))
+          PY
+
+      - name: Copy exact head binding into retained proof
+        run: cp evidence/material-axis-isolation-001/exact-head.txt lookdev-material-axis-isolation-proof/exact-head.txt
+
+      - name: Upload exact scalar-axis isolation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-material-axis-isolation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/material-axis-isolation-001/comparison.json
+            lookdev-material-axis-isolation-proof/exact-head.txt
+            lookdev-material-axis-isolation-proof/material-axis-isolation-runtime-receipt.json
+            lookdev-material-axis-isolation-proof/*.png
+          if-no-files-found: warn
+          retention-days: 30
