@@ -1,0 +1,69 @@
+{
+  "schema": "axm.nature-upper-trunk-east-mid-hierarchical-socket-rigging/v0.1",
+  "scope": "EXACT_UPPER_TRUNK_PARENT_FRAME_TO_EXISTING_EAST_MID_CHILD_SOCKET_REBASE_DIAGNOSTIC",
+  "lineage": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "organic_source_owner_pr": 8,
+    "organic_source_owner_head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "organic_readiness_donor_head": "f8d103a9f0a1e457539919a45c605c1edb8b9a7f",
+    "organic_source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "organic_readiness_module_blob": "0e787e5724c29878a86a425b43a39d5120bf1086",
+    "organic_interaction_doc_blob": "d103856df817d1b3c3ea7938fe8ac4067d7de0c9",
+    "geometry_receiver_head": "9b451ba1f65281f550a6754e18574f7ab2951e28",
+    "rigging_predecessor_head": "b4b480b415047fea90b4740f7702ced0dba9142d",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61",
+    "geometry_migrated_mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31"
+  },
+  "organic_interaction": {
+    "trunk_flex_zone_id": "trunk-upper-flex",
+    "trunk_point_id": "upper",
+    "trunk_flex_center_m": [-0.04, 0.02, 2.35],
+    "trunk_flex_radius_m": 0.22,
+    "child_branch_id": "east-mid",
+    "child_flex_zone_id": "east-mid-branch-flex",
+    "child_flex_center_m": [-0.01, 0.0, 2.45],
+    "child_flex_radius_m": 0.12,
+    "neutral_center_distance_m": 0.10630145812734658,
+    "neutral_containment_margin_m": 0.11369854187265342,
+    "neutral_declared_flex_envelope_overlap_margin_m": 0.23369854187265338,
+    "source_status": "DECLARED_NOT_DEFORMATION_TESTED"
+  },
+  "rigging_constraint": {
+    "parent_axis_derivation": "NORMALIZE(CROSS(NORMALIZE(upper-mid), NORMALIZE(crown-upper)))",
+    "parent_diagnostic_interval_deg": [-2.5, 2.5],
+    "parent_representative_angles_deg": [-2.5, 0.0, 2.5],
+    "child_socket_relation": "EXACT_EXISTING_EAST_MID_SOCKET_FROM_FIVE_BRANCH_RIGGING_FAMILY",
+    "child_diagnostic_interval_deg": [-5.0, 5.0],
+    "child_representative_angles_deg": [-5.0, 0.0, 5.0],
+    "policy": "TRANSPORT_CHILD_PIVOT_AND_AXIS_THROUGH_PARENT_TRUNK_FRAME_BEFORE_APPLYING_EXISTING_CHILD_LOCAL_ROTATION",
+    "continuous_product_domain_claim": true,
+    "source_or_biological_rom_claim": false
+  },
+  "acceptance": {
+    "representative_pose_count": 9,
+    "max_structural_residual_m": 1e-12,
+    "stale_neutral_child_frame_negative_min_error_m": 1e-6,
+    "east_mid_containment_preserved_for_every_parent_angle": true,
+    "declared_flex_overlap_margin_preserved_for_every_parent_angle": true,
+    "child_rigidity_preserved_for_every_parent_child_pair": true
+  },
+  "holds": {
+    "trunk_mesh_deformation_or_skin_weights": true,
+    "surface_attachment_or_blended_weighting": true,
+    "north_low_overlap_policy": true,
+    "simultaneous_whole_tree_motion": true,
+    "continuous_collision_or_self_intersection": true,
+    "physical_wind_or_biomechanics": true,
+    "animation_timing_interpolation_or_playback": true,
+    "technical_art_target_host": true,
+    "runtime_controller_or_device": true,
+    "art_direction_or_visual_qa": true,
+    "canon_or_production_readiness": true
+  },
+  "four_roots": [
+    "Truth",
+    "Agency / non-domination",
+    "Continuity",
+    "Wisdom before speed"
+  ]
+}
