@@ -1,0 +1,119 @@
+name: VFX east rear shared-driver response envelope
+
+on:
+  pull_request:
+    paths:
+      - "examples/east_rear_tree_neutral_001.json"
+      - "src/axm_nature_design/organic_form.py"
+      - "src/axm_nature_design/source_topology_migration.py"
+      - "src/axm_nature_design/rear_tree_rigging.py"
+      - "src/axm_nature_design/rear_tree_rigging_geometry_rebind.py"
+      - "src/axm_nature_design/rear_tree_rigging_primary_branch_family.py"
+      - "src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py"
+      - "src/axm_nature_design/rear_tree_vfx_shared_driver_response.py"
+      - "contracts/east-rear-primary-branch-root-socket-rigging-family-003.json"
+      - "contracts/east-rear-primary-branch-shared-driver-polarity-rigging-004.json"
+      - "contracts/east-rear-shared-driver-vfx-response-envelope-003.json"
+      - "tools/verify_rear_tree_vfx_shared_driver_response.py"
+      - "tests/test_rear_tree_vfx_shared_driver_response.py"
+      - "docs/VFX_EAST_REAR_SHARED_DRIVER_RESPONSE_ENVELOPE_003.md"
+      - ".github/workflows/vfx-east-rear-shared-driver-response-envelope.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Pin exact Rigging owner bytes and VFX donor identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          RIGGING_HEAD=754797a815266a643c6b08f1606eb76ba95dd8c6
+          VFX_DONOR=ef7b35af27d5ca98a6447c1e33be07863e387305
+          git merge-base --is-ancestor "$RIGGING_HEAD" HEAD
+          git diff --exit-code "$RIGGING_HEAD" HEAD -- \
+            examples/east_rear_tree_neutral_001.json \
+            src/axm_nature_design/organic_form.py \
+            src/axm_nature_design/source_topology_migration.py \
+            src/axm_nature_design/rear_tree_rigging.py \
+            src/axm_nature_design/rear_tree_rigging_geometry_rebind.py \
+            src/axm_nature_design/rear_tree_rigging_primary_branch_family.py \
+            src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py \
+            contracts/east-rear-primary-branch-root-socket-rigging-family-003.json \
+            contracts/east-rear-primary-branch-shared-driver-polarity-rigging-004.json
+          git cat-file -e "$VFX_DONOR^{commit}"
+          test "$(git rev-parse "$VFX_DONOR:contracts/east-rear-primary-branch-weather-direction-vfx-sign-family-002.json")" = "b06b5f6862c6c88ec5642e3bdbccfe0d3e65655f"
+          test "$(git rev-parse "$VFX_DONOR:src/axm_nature_design/rear_tree_vfx_weather_sign_family.py")" = "ae674ee8f6109d478446fbcd5348bcbee04b01e7"
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full receiving repository tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact VFX response-envelope evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/east-rear-shared-driver-vfx-response-envelope-003
+          git rev-parse HEAD > evidence/east-rear-shared-driver-vfx-response-envelope-003/exact-head.txt
+          printf '%s\n' 754797a815266a643c6b08f1606eb76ba95dd8c6 > evidence/east-rear-shared-driver-vfx-response-envelope-003/exact-rigging-owner-head.txt
+          printf '%s\n' ef7b35af27d5ca98a6447c1e33be07863e387305 > evidence/east-rear-shared-driver-vfx-response-envelope-003/exact-vfx-sign-donor-head.txt
+          printf '%s\n' ca2eaba519e8449835b0ea6ef944b7080c3caa6a > evidence/east-rear-shared-driver-vfx-response-envelope-003/exact-weather-donor-head.txt
+          printf '%s\n' 11298d447f262da8a78e43e2df68bc0346c99a2c > evidence/east-rear-shared-driver-vfx-response-envelope-003/exact-weather-source-blob.txt
+          python tools/verify_rear_tree_vfx_shared_driver_response.py \
+            --output evidence/east-rear-shared-driver-vfx-response-envelope-003/evidence.json \
+            --svg-output evidence/east-rear-shared-driver-vfx-response-envelope-003/review.svg
+          cp contracts/east-rear-shared-driver-vfx-response-envelope-003.json evidence/east-rear-shared-driver-vfx-response-envelope-003/
+          cp docs/VFX_EAST_REAR_SHARED_DRIVER_RESPONSE_ENVELOPE_003.md evidence/east-rear-shared-driver-vfx-response-envelope-003/
+
+      - name: Assert retained evidence truth boundary
+        if: matrix.python-version == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          root = Path("evidence/east-rear-shared-driver-vfx-response-envelope-003")
+          payload = json.loads((root / "evidence.json").read_text())
+          assert payload["result"] == "PASS_FIVE_SOCKET_SHARED_DRIVER_VISUAL_RESPONSE_ENVELOPE", payload
+          assert all(payload["checks"].values()), payload
+          assert payload["lineage"]["weather_visual_direction_xy"] == [1.0, 0.35], payload
+          assert payload["review"]["shared_driver_values_deg"] == [-5.0, -2.5, 0.0, 2.5, 5.0], payload
+          assert payload["review"]["pose_semantics"] == "STATIC_SIMULTANEOUS_VISUAL_RESPONSE_REVIEW_NOT_MOTION", payload
+          assert not any(payload["truth_boundary"].values()), payload
+          assert payload["all_failure_controls_rejected"] is True, payload
+          ET.parse(root / "review.svg")
+          PY
+
+      - name: Upload retained VFX response-envelope evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-vfx-shared-driver-response-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/east-rear-shared-driver-vfx-response-envelope-003/
+          if-no-files-found: error
