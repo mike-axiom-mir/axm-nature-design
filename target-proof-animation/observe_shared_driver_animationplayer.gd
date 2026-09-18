@@ -312,8 +312,14 @@ func _run() -> void:
             _fail("representative full-control packet shape drift")
             return
         mutable_mesh.surface_update_vertex_region(0, 0, neutral_bytes)
+        var applications_before_reseek := int(bridge.application_count)
+        player.stop()
+        player.play("shared_driver_loop")
         player.seek(float(representative_index) / 40.0, true)
         player.advance(0.0)
+        if int(bridge.application_count) <= applications_before_reseek:
+            _fail("representative AnimationPlayer seek did not reapply target packet after neutral reset")
+            return
         if int(bridge.sample_index) != representative_index:
             _fail("representative AnimationPlayer bridge index drift")
             return
