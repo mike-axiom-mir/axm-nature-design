@@ -1,0 +1,164 @@
+name: VFX east rear shared-driver temporal Weather response
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_vfx_shared_driver_temporal_response.py"
+      - "tools/verify_rear_tree_vfx_shared_driver_temporal_response.py"
+      - "tests/test_rear_tree_vfx_shared_driver_temporal_response.py"
+      - "contracts/east-rear-shared-driver-vfx-temporal-response-004.json"
+      - "docs/VFX_EAST_REAR_SHARED_DRIVER_TEMPORAL_RESPONSE_004.md"
+      - ".github/workflows/vfx-east-rear-shared-driver-temporal-response.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - name: Checkout exact VFX head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Preserve exact Animation and Rigging owner bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ANIMATION_HEAD=bfb66da82bc358b14e52711bbdef7b58e4c943af
+          RIGGING_HEAD=b4b480b415047fea90b4740f7702ced0dba9142d
+          git merge-base --is-ancestor "$ANIMATION_HEAD" HEAD
+          git merge-base --is-ancestor "$RIGGING_HEAD" HEAD
+          test "$(git rev-parse "$ANIMATION_HEAD:src/axm_nature_design/rear_tree_animation_shared_driver.py")" = "ac4e652948de4c7422f4f0ae8534e3be5937b896"
+          git diff --exit-code "$ANIMATION_HEAD" HEAD -- \
+            src/axm_nature_design/rear_tree_animation_shared_driver.py \
+            src/axm_nature_design/rear_tree_rigging_shared_driver_composition.py \
+            src/axm_nature_design/rear_tree_rigging_shared_driver_polarity.py \
+            src/axm_nature_design/rear_tree_rigging_primary_branch_family.py \
+            examples/east_rear_tree_neutral_001.json \
+            contracts/east-rear-shared-driver-animation-loop-004.json
+
+      - name: Compile current branch
+        run: python -m compileall -q src tools tests
+
+      - name: Full current repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Re-run exact Animation prerequisite
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/exact-animation
+          python tools/verify_rear_tree_animation_shared_driver.py \
+            --output /tmp/exact-animation/evidence.json \
+            --svg-output /tmp/exact-animation/review.svg
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/exact-animation/evidence.json').read_text())
+          assert payload['result'] == 'PASS_FIVE_SOCKET_SHARED_DRIVER_SIMULTANEOUS_DIAGNOSTIC_LOOP_SAMPLED_MOTION'
+          assert len(payload['samples']) == 41
+          assert payload['lineage']['rigging_owner_head'] == 'b4b480b415047fea90b4740f7702ced0dba9142d'
+          assert payload['truth_boundary']['target_engine_or_godot_playback_claimed'] is False
+          assert payload['truth_boundary']['physics_or_gameplay_claimed'] is False
+          PY
+
+      - name: Build exact VFX temporal Weather-direction evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=evidence/east-rear-shared-driver-vfx-temporal-response-004
+          mkdir -p "$ROOT"
+          git rev-parse HEAD > "$ROOT/exact-vfx-head.txt"
+          printf '%s\n' bfb66da82bc358b14e52711bbdef7b58e4c943af > "$ROOT/exact-animation-owner-head.txt"
+          printf '%s\n' b4b480b415047fea90b4740f7702ced0dba9142d > "$ROOT/exact-rigging-owner-head.txt"
+          printf '%s\n' ca2eaba519e8449835b0ea6ef944b7080c3caa6a > "$ROOT/exact-weather-owner-head.txt"
+          printf '%s\n' 11298d447f262da8a78e43e2df68bc0346c99a2c > "$ROOT/exact-weather-source-blob.txt"
+          cp /tmp/exact-animation/evidence.json "$ROOT/exact-animation-prerequisite.json"
+          python tools/verify_rear_tree_vfx_shared_driver_temporal_response.py \
+            --output "$ROOT/evidence.json" \
+            --svg-output "$ROOT/review.svg"
+          cp contracts/east-rear-shared-driver-vfx-temporal-response-004.json "$ROOT/"
+          cp docs/VFX_EAST_REAR_SHARED_DRIVER_TEMPORAL_RESPONSE_004.md "$ROOT/"
+          cp tools/verify_rear_tree_vfx_shared_driver_temporal_response.py "$ROOT/"
+
+      - name: Assert VFX evidence scope and review surface
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          root = Path('evidence/east-rear-shared-driver-vfx-temporal-response-004')
+          payload = json.loads((root / 'evidence.json').read_text())
+          assert payload['result'] == 'PASS_FIVE_SOCKET_SHARED_DRIVER_TEMPORAL_VISUAL_DIRECTION_RESPONSE_REVIEW'
+          assert all(payload['checks'].values()), payload
+          assert payload['review']['sample_count'] == 41
+          assert payload['review']['selected_vertex_union'] == 260
+          assert payload['review']['globally_fixed_vertices'] == 130
+          assert payload['lineage']['weather_visual_direction_xy'] == [1.0, 0.35]
+          assert payload['truth_boundary']['source_space_temporal_visual_direction_response_proven'] is True
+          assert payload['truth_boundary']['vfx_motion_adopted'] is False
+          assert payload['truth_boundary']['physical_wind_force_speed_or_turbulence_claimed'] is False
+          assert payload['truth_boundary']['technical_art_target_host_playback_claimed'] is False
+          assert payload['truth_boundary']['runtime_controller_or_device_claimed'] is False
+          assert payload['truth_boundary']['art_direction_or_visual_qa_acceptance_claimed'] is False
+          ET.parse(root / 'review.svg')
+          PY
+
+      - name: Fail closed on donor drift and authority inflation
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_must_fail() {
+            label="$1"; shift
+            if python tools/verify_rear_tree_vfx_shared_driver_temporal_response.py \
+              --output "/tmp/${label}.json" "$@"; then
+              echo "negative control unexpectedly passed: $label" >&2
+              exit 1
+            fi
+          }
+          run_must_fail animation-head-drift --animation-head 0000000000000000000000000000000000000000
+          run_must_fail weather-head-drift --weather-head 0000000000000000000000000000000000000000
+          run_must_fail weather-direction-drift --weather-y 0.36
+          run_must_fail vfx-adoption-promotion --claim-vfx-motion-adoption
+          run_must_fail physical-wind-promotion --claim-physical-wind
+          run_must_fail natural-motion-promotion --claim-natural-vegetation-motion
+          run_must_fail collision-promotion --claim-continuous-collision-clearance
+          run_must_fail target-host-promotion --claim-target-engine-playback
+          run_must_fail runtime-promotion --claim-runtime-acceptance
+          run_must_fail gameplay-promotion --claim-gameplay-acceptance
+          run_must_fail art-qa-promotion --claim-art-or-visual-qa-acceptance
+
+      - name: Upload retained VFX temporal response evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-east-rear-vfx-temporal-weather-response-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/east-rear-shared-driver-vfx-temporal-response-004/
+          if-no-files-found: error
