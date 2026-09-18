@@ -111,6 +111,7 @@ def assemble_rigging_composition_rebind(
     provider = contract["procedural_provider"]
     consumer = contract["rigging_consumer"]
     expected_branches = list(contract["branch_ids"])
+    expected_branch_set = set(expected_branches)
 
     exact_observed = {
         "ref": observed_rigging_head,
@@ -136,20 +137,20 @@ def assemble_rigging_composition_rebind(
     if not procedural_family.get("pairwise_vertex_disjoint"):
         raise ValueError("Procedural family is no longer pairwise vertex-disjoint")
     procedural_rows = _by_branch(procedural_family.get("partitions", []), label="Procedural")
-    if list(procedural_rows) != expected_branches:
-        raise ValueError("Procedural canonical branch order or identity drift")
+    if set(procedural_rows) != expected_branch_set:
+        raise ValueError("Procedural branch identity drift")
 
     if rigging_family_evidence.get("result") != consumer["family_result"]:
         raise ValueError("current Rigging family result drift")
+    rigging_family = rigging_family_evidence.get("rigging_family", {})
+    if rigging_family.get("branch_ids") != expected_branches:
+        raise ValueError("Rigging canonical branch order or identity drift")
     rig_lineage = rigging_family_evidence.get("lineage", {})
     if rig_lineage.get("procedural_rebind_contract_blob") != provider["geometry_rebind_contract_blob"]:
         raise ValueError("Rigging no longer consumes the exact Procedural Geometry-rebind contract")
-    rigging_rows = _by_branch(
-        rigging_family_evidence.get("rigging_family", {}).get("probes", []),
-        label="Rigging",
-    )
-    if list(rigging_rows) != expected_branches:
-        raise ValueError("Rigging canonical branch order or identity drift")
+    rigging_rows = _by_branch(rigging_family.get("probes", []), label="Rigging")
+    if set(rigging_rows) != expected_branch_set:
+        raise ValueError("Rigging probe branch identity drift")
 
     if polarity_evidence.get("result") != consumer["polarity_result"]:
         raise ValueError("current Rigging polarity result drift")
@@ -157,7 +158,7 @@ def assemble_rigging_composition_rebind(
     if binding.get("branch_ids") != expected_branches:
         raise ValueError("Rigging polarity branch order or identity drift")
     polarity_rows = _by_branch(binding.get("sockets", []), label="Rigging polarity")
-    if list(polarity_rows) != expected_branches:
+    if set(polarity_rows) != expected_branch_set:
         raise ValueError("Rigging polarity socket identity drift")
 
     if composition_evidence.get("result") != consumer["composition_result"]:
@@ -171,7 +172,7 @@ def assemble_rigging_composition_rebind(
         raise ValueError("Rigging composition fixed-receiver identity drift")
     per_branch = composition.get("per_branch_selected_vertices", {})
     expected_per_branch = consumer["expected_per_branch_selected_vertices"]
-    if set(per_branch) != set(expected_branches) or per_branch != expected_per_branch:
+    if set(per_branch) != expected_branch_set or per_branch != expected_per_branch:
         raise ValueError("Rigging composition per-branch support drift")
 
     certificate = composition_evidence.get("continuous_parameter_certificate", {})
