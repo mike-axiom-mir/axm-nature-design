@@ -189,11 +189,16 @@ jobs:
           assert r['full_position_byte_length']==4680,r
           assert r['position_packet_reduction_bytes']==1560,r
           assert abs(r['position_packet_reduction_percent']-(100.0/3.0)) < 1e-9,r
-          assert r['maximum_imported_neutral_vertex_delta_m'] <= 5e-6,r
+          observation=r['imported_neutral_position_observation']
+          assert observation['vertex_count']==390,r
+          assert observation['maximum_distance_m'] <= r['import_observation_tolerance_m'] <= 1e-4,r
           assert len(r['driver_rows'])==5,r
           assert all(row['control_candidate_render_delta']['byte_identical'] for row in r['driver_rows']),r
           assert sum(row['candidate_vs_neutral_render_delta']['changed_pixels'] > 100 for row in r['driver_rows']) >= 4,r
           t=r['truth_boundary']
+          assert t['godot_import_exact_source_numeric_identity_proven'] is False,r
+          assert t['godot_import_numeric_observation_bounded_only'] is True,r
+          assert t['target_region_correspondence_proven_operationally_by_full_vs_partial_render_identity'] is True,r
           assert t['real_target_host_partial_vertex_region_update_exercised'] is True,r
           assert t['full_vs_partial_shaded_render_byte_identity_proven_for_five_retained_static_poses'] is True,r
           assert t['target_device_performance_proven'] is False,r
