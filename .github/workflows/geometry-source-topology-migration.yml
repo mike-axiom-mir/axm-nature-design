@@ -36,6 +36,12 @@ jobs:
               assert item['migrated_mesh_digest'] == item['proven_reindex_digest'], item
               assert item['migrated_mesh_digest'] != item['historical_mesh_digest'], item
               assert item['topology']['shared_edge_orientation_conflicts'] == 0, item
+              assert item['truth_boundary']['predecessor_pass_transferred'] is False, item
+          rear = next(item for item in summary['items'] if item['study_id'] == 'east-rear-tree-neutral-001')
+          assert rear['source_ref'] == 'fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a', rear
+          assert rear['source_digest'] == '178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61', rear
+          assert rear['predecessor_source_ref'] == 'a4e5ee011e1d87f47866a7e6c6f4e66f57b6af12', rear
+          assert rear['predecessor_source_digest'] == '0adf2cde8cfc355ec21b6fb06c6759b753300164b5f72ba029dc1b8c6d2ef307', rear
           PY
       - name: Record exact workflow head
         if: matrix.python == '3.11'
