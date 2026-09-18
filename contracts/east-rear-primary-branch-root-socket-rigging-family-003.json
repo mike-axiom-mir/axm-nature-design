@@ -1,0 +1,67 @@
+{
+  "schema": "axm.nature-east-rear-primary-branch-root-socket-rigging-family/v0.1",
+  "family_id": "east-rear-primary-branch-root-socket-rigging-family-003",
+  "organic_source_owner": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 8,
+    "head": "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a",
+    "source_path": "examples/east_rear_tree_neutral_001.json",
+    "source_blob": "fb12b759e1abfd0455bf46fd39a0eba27095796b",
+    "source_digest": "178cd8cfb1a859bff411f60e13154109528062cf0ad2384b343d406cc0cc9d61"
+  },
+  "geometry_receiver": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 9,
+    "head": "9b451ba1f65281f550a6754e18574f7ab2951e28",
+    "mesh_digest": "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31"
+  },
+  "rigging_predecessor": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 14,
+    "head": "f792d2369675d532be478e17c7a07f441d817c7c",
+    "result": "PASS_NORTH_TOP_ROOT_SOCKET_GEOMETRY_MIGRATED_RECEIVER_REBIND_DIAGNOSTIC_MINUS5_TO_PLUS5",
+    "branch_id": "north-top"
+  },
+  "procedural_selection_handoff": {
+    "repository": "mike-axiom-mir/axm-nature-design",
+    "pr": 4,
+    "head": "342385c867050dc8e8f7312c63235a68bdd92d3d",
+    "contract_path": "examples/rear_tree_branch_child_partition_geometry_rebind_002.json",
+    "contract_blob": "73e38d08f426efb742e1d66b992ede04737ed576",
+    "partition_module_path": "src/axm_nature_design/branch_partition_geometry_rebind.py",
+    "partition_module_blob": "7b522f6c379d8cae1d1e9d95e941ac108cfc003b",
+    "family_module_path": "src/axm_nature_design/branch_partition_family.py",
+    "family_module_blob": "3c502029900916bb62cda8c501144e0a5ea5c076",
+    "relation": "EXACT_SELECTION_HANDOFF_ONLY_NOT_RIGGING_AUTHORITY",
+    "automatic_rigging_adoption": false
+  },
+  "branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "expected_flex_radii_m": {
+    "south-low": 0.14,
+    "north-low": 0.14,
+    "east-mid": 0.12,
+    "west-high": 0.12,
+    "north-top": 0.12
+  },
+  "expected_partition_per_branch": {
+    "selected_vertices": 52,
+    "selected_triangles": 72,
+    "fixed_vertices": 338
+  },
+  "diagnostic_interval_deg": [-5.0, 5.0],
+  "representative_angles_deg": [-5.0, -2.5, 0.0, 2.5, 5.0],
+  "diagnostic_interval_semantics": "RIGGING_VERIFICATION_PROBE_ONLY_NOT_SOURCE_OR_BIOLOGICAL_ROM",
+  "source_mutation_authorized": false,
+  "geometry_authority_transferred": false,
+  "procedural_authority_transferred": false,
+  "animation_acceptance_authorized": false,
+  "runtime_acceptance_authorized": false,
+  "failure_policy": "FAIL_CLOSED_ON_SOURCE_GEOMETRY_RIGGING_PROCEDURAL_BRANCH_PIVOT_RADIUS_PARTITION_INTERVAL_OR_AUTHORITY_DRIFT",
+  "truth_boundary": "This contract authorizes only an independent Rigging diagnostic retest of five exact source-declared primary branch root sockets on the exact Geometry-migrated receiver after a pinned Procedural selection handoff. It does not turn the diagnostic interval into source or biological ROM, does not prove blended skinning, branch attachment, simultaneous multi-branch motion, collision, wind, Animation timing/playback, Technical-Art target-host acceptance, Runtime/controller/device behavior, visual acceptance, CANON or production readiness."
+}
