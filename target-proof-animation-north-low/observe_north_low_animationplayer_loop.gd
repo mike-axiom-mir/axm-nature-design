@@ -169,8 +169,8 @@ func _run() -> void:
 
     var nodes := {}
     for branch_id in BRANCH_IDS:
-        var woody_name := branch_id + "-woody"
-        var foliage_name := branch_id + "-foliage"
+        var woody_name: String = String(branch_id) + "-woody"
+        var foliage_name: String = String(branch_id) + "-foliage"
         var woody := find_named(scene, woody_name)
         var foliage := find_named(scene, foliage_name)
         if woody == null or not (woody is MeshInstance3D):
@@ -200,7 +200,8 @@ func _run() -> void:
 
     var original_transforms := {}
     for branch_id in BRANCH_IDS:
-        original_transforms[branch_id] = (nodes[branch_id + "-woody"] as MeshInstance3D).transform
+        var branch_name: String = String(branch_id)
+        original_transforms[branch_name] = (nodes[branch_name + "-woody"] as MeshInstance3D).transform
     var base_transform := original_transforms["north-low"] as Transform3D
     var axis := vec3(oracle.get("target_axis_uc")).normalized()
 
@@ -255,11 +256,12 @@ func _run() -> void:
         if parent_stress > 0.000001:
             nonzero_parent_stress_samples += 1
         for other_id in BRANCH_IDS:
-            if other_id == "north-low":
+            var other_name: String = String(other_id)
+            if other_name == "north-low":
                 continue
-            var other := nodes[other_id + "-woody"] as MeshInstance3D
-            if not other.transform.is_equal_approx(original_transforms[other_id] as Transform3D):
-                fail("AnimationPlayer moved unrelated branch: " + other_id)
+            var other := nodes[other_name + "-woody"] as MeshInstance3D
+            if not other.transform.is_equal_approx(original_transforms[other_name] as Transform3D):
+                fail("AnimationPlayer moved unrelated branch: " + other_name)
                 return
         samples_verified += 1
 
