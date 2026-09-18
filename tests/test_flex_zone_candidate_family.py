@@ -14,6 +14,12 @@ from axm_nature_design.flex_zone_candidate_family import (
     validate_contract,
     validate_review_candidate,
 )
+from axm_nature_design.flex_zone_owner_adoption_rebind import (
+    HISTORICAL_RELATION,
+    OWNER_ADOPTED_RELATION,
+    assemble_rebound_family,
+    resolve_review_base,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "examples" / "east_rear_tree_neutral_001.json"
@@ -23,8 +29,10 @@ CONTRACT = ROOT / "examples" / "rear_tree_root_flex_zone_review_family_001.json"
 class RootFlexZoneReviewFamilyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.source = json.loads(SOURCE.read_text(encoding="utf-8"))
+        cls.input_source = json.loads(SOURCE.read_text(encoding="utf-8"))
         cls.contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+        cls.resolved = resolve_review_base(cls.input_source, cls.contract)
+        cls.source = cls.resolved["review_base_source"]
 
     def test_contract_and_owner_examples(self):
         validate_contract(self.contract)
@@ -45,6 +53,19 @@ class RootFlexZoneReviewFamilyTests(unittest.TestCase):
         reverse = copy.deepcopy(self.contract)
         reverse["allowed_review_radius_classes_m"] = list(reversed(reverse["allowed_review_radius_classes_m"]))
         self.assertEqual(family["family_digest"], assemble_family(self.source, reverse)["family_digest"])
+
+    def test_local_owner_source_rebind_preserves_historical_family(self):
+        historical = assemble_family(self.source, self.contract)
+        rebound = assemble_rebound_family(self.input_source, self.contract)
+        self.assertEqual(historical["family_digest"], rebound["family_digest"])
+        self.assertEqual(historical["variant_count"], rebound["variant_count"])
+        self.assertIn(rebound["input_relation"], {HISTORICAL_RELATION, OWNER_ADOPTED_RELATION})
+        if rebound["input_relation"] == OWNER_ADOPTED_RELATION:
+            self.assertEqual(0.12, rebound["adopted_radius_m"])
+            self.assertEqual(5, rebound["current_owner_example_count"])
+        else:
+            self.assertIsNone(rebound["adopted_radius_m"])
+            self.assertEqual(4, rebound["current_owner_example_count"])
 
     def test_two_owner_radius_classes_produce_distinct_review_candidates(self):
         low = derive_review_candidate(self.source, self.contract, 0.12)
