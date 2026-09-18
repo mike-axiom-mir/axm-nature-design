@@ -82,7 +82,7 @@ class RearTreeAnimationTests(unittest.TestCase):
         b = build_review_svg(self.load_source())
         self.assertEqual(a, b)
         self.assertTrue(a.startswith("<svg"))
-        self.assertEqual(a.count("t="), 5)
+        self.assertEqual(a.count(" deg</text>"), 5)
         self.assertIn("+5.0 deg", a)
         self.assertIn("-5.0 deg", a)
 
