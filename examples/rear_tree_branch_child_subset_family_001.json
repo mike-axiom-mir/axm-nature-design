@@ -1,0 +1,51 @@
+{
+  "schema": "axm.nature-branch-child-subset-family/v0.1",
+  "family_id": "east-rear-tree-primary-branch-child-subset-family-001",
+  "partition_family_schema": "axm.nature-branch-child-partition-family/v0.1",
+  "expected_partition_family_digest": "ab688f5281dc4e79770e133b49e7af3a533092acc1e0a0945bfa86e647e7b122",
+  "authorized_branch_ids": [
+    "south-low",
+    "north-low",
+    "east-mid",
+    "west-high",
+    "north-top"
+  ],
+  "total_vertices": 390,
+  "subset_specs": [
+    {
+      "subset_id": "single-south-low",
+      "branch_ids": ["south-low"]
+    },
+    {
+      "subset_id": "low-opposed-pair",
+      "branch_ids": ["south-low", "north-low"]
+    },
+    {
+      "subset_id": "mid-upper-trio",
+      "branch_ids": ["east-mid", "west-high", "north-top"]
+    },
+    {
+      "subset_id": "four-without-top",
+      "branch_ids": ["south-low", "north-low", "east-mid", "west-high"]
+    },
+    {
+      "subset_id": "all-five",
+      "branch_ids": ["south-low", "north-low", "east-mid", "west-high", "north-top"]
+    }
+  ],
+  "expected_outputs": {
+    "single-south-low": {"branches": 1, "vertices": 52, "triangles": 72, "fixed_vertices": 338},
+    "low-opposed-pair": {"branches": 2, "vertices": 104, "triangles": 144, "fixed_vertices": 286},
+    "mid-upper-trio": {"branches": 3, "vertices": 156, "triangles": 216, "fixed_vertices": 234},
+    "four-without-top": {"branches": 4, "vertices": 208, "triangles": 288, "fixed_vertices": 182},
+    "all-five": {"branches": 5, "vertices": 260, "triangles": 360, "fixed_vertices": 130}
+  },
+  "relation": "DERIVED_PARTITION_UNION_ONLY_NOT_SOURCE_RIGGING_ANIMATION_VFX_OR_RUNTIME_AUTHORITY",
+  "source_mutation_authorized": false,
+  "automatic_rigging_adoption": false,
+  "automatic_animation_adoption": false,
+  "automatic_vfx_adoption": false,
+  "automatic_runtime_adoption": false,
+  "failure_policy": "FAIL_CLOSED_ON_PARTITION_FAMILY_DIGEST_OR_BRANCH_SET_DRIFT_UNKNOWN_DUPLICATE_OR_EMPTY_SELECTION_SELECTION_OVERLAP_OUTPUT_COLLAPSE_TOTAL_VERTEX_DRIFT_OR_AUTHORITY_EXPANSION",
+  "truth_boundary": "This family only composes deterministic unions of the already-proven Procedural branch child partitions. It does not change Organic source form, Geometry topology, Rigging pivots/axes/kinematics, Animation timing, VFX response semantics, Technical-Art transport, Runtime update policy, Map adoption, visual acceptance, CANON or production readiness."
+}
