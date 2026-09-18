@@ -1,0 +1,134 @@
+name: Geometry east rear north-low owner-transition open ring
+
+on:
+  pull_request:
+    paths:
+      - "src/axm_nature_design/rear_tree_geometry_north_low_transition_open_ring.py"
+      - "tests/test_rear_tree_geometry_north_low_transition_open_ring.py"
+      - "tools/verify_rear_tree_geometry_north_low_transition_open_ring.py"
+      - "contracts/east-rear-north-low-transition-open-ring-geometry-006.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_TRANSITION_OPEN_RING_006.md"
+      - ".github/workflows/geometry-east-rear-north-low-transition-open-ring.yml"
+  push:
+    branches:
+      - "studio/geometry-east-rear-simultaneous-socket-001"
+    paths:
+      - "src/axm_nature_design/rear_tree_geometry_north_low_transition_open_ring.py"
+      - "tests/test_rear_tree_geometry_north_low_transition_open_ring.py"
+      - "tools/verify_rear_tree_geometry_north_low_transition_open_ring.py"
+      - "contracts/east-rear-north-low-transition-open-ring-geometry-006.json"
+      - "docs/GEOMETRY_EAST_REAR_NORTH_LOW_TRANSITION_OPEN_RING_006.md"
+      - ".github/workflows/geometry-east-rear-north-low-transition-open-ring.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact Geometry head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bind exact owner lineage and donor blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          geometry_predecessor=d5ebbf26afd466faad259621b60fa33f1126ef3c
+          rigging_owner=69640e558f0c1ac59d4d0e3155676e0967a03d04
+          organic_owner=4b5c291d6b044dafeadd6eeaf4849a6f3d4f4148
+          procedural_owner=b3283e255bfffb2979889fd542a93e35be2a4b03
+
+          git merge-base --is-ancestor "$geometry_predecessor" HEAD
+          git merge-base --is-ancestor "$rigging_owner" HEAD
+
+          git fetch --no-tags origin "$organic_owner" "$procedural_owner"
+          test "$(git rev-parse "$organic_owner":src/axm_nature_design/rear_tree_root_transition_readiness.py)" = "1e8323b9bf6495a9f19704c217808300f3b46757"
+          test "$(git rev-parse "$procedural_owner":examples/rear_tree_branch_transition_parameter_family_001.json)" = "08df5c1eb79a596a05b37a3187b5fa010e8d658d"
+          test "$(git rev-parse HEAD:examples/east_rear_tree_neutral_001.json)" = "fb12b759e1abfd0455bf46fd39a0eba27095796b"
+          test "$(git rev-parse HEAD:src/axm_nature_design/rear_tree_rigging_north_low_attachment_representation_gate.py)" = "de00694e103b975f9a25a72a50054821b469b528"
+
+          python - <<'PY'
+          import json, subprocess
+          raw = subprocess.check_output(
+              ["git", "show", "b3283e255bfffb2979889fd542a93e35be2a4b03:examples/rear_tree_branch_transition_parameter_family_001.json"],
+              text=True,
+          )
+          payload = json.loads(raw)
+          row = payload["expected_transitions"]["north-low"]
+          assert abs(float(row["embedded_fraction_of_first_segment"]) - 0.14801958337760968) <= 1e-12
+          assert abs(float(row["embedded_length_along_first_segment_m"]) - 0.0645372173379806) <= 1e-12
+          assert payload["organic_owner"]["head"] == "4b5c291d6b044dafeadd6eeaf4849a6f3d4f4148"
+          assert payload["connected_topology_claim_authorized"] is False
+          assert payload["junction_strategy_authorized"] is False
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Full repository unit tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Build exact Geometry open-ring evidence
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONPATH: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/exact-geometry-head.txt
+          printf '%s\n' 'd5ebbf26afd466faad259621b60fa33f1126ef3c' > evidence/exact-geometry-predecessor-head.txt
+          printf '%s\n' '69640e558f0c1ac59d4d0e3155676e0967a03d04' > evidence/exact-rigging-owner-head.txt
+          printf '%s\n' '4b5c291d6b044dafeadd6eeaf4849a6f3d4f4148' > evidence/exact-organic-transition-owner-head.txt
+          printf '%s\n' 'b3283e255bfffb2979889fd542a93e35be2a4b03' > evidence/exact-procedural-transition-owner-head.txt
+
+          python tools/verify_rear_tree_geometry_north_low_transition_open_ring.py \
+            --output evidence/east-rear-north-low-transition-open-ring-geometry-006.json \
+            | tee evidence/verifier.log
+
+          cp contracts/east-rear-north-low-transition-open-ring-geometry-006.json evidence/
+          cp docs/GEOMETRY_EAST_REAR_NORTH_LOW_TRANSITION_OPEN_RING_006.md evidence/
+          cp src/axm_nature_design/rear_tree_geometry_north_low_transition_open_ring.py evidence/
+          cp tests/test_rear_tree_geometry_north_low_transition_open_ring.py evidence/
+          cp tools/verify_rear_tree_geometry_north_low_transition_open_ring.py evidence/
+          cp .github/workflows/geometry-east-rear-north-low-transition-open-ring.yml evidence/
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path("evidence/east-rear-north-low-transition-open-ring-geometry-006.json").read_text())
+          assert p["result"] == "PASS_NORTH_LOW_OWNER_TRANSITION_OPEN_RING_CANDIDATE__HOLD_TRUNK_OPENING_BRIDGE_CONNECTED_JUNCTION"
+          t = p["candidate_topology"]
+          assert (t["vertices"], t["triangles"], t["edges"]) == (17, 24, 40)
+          assert t["boundary_edges"] == 8
+          assert t["boundary_cycles"] == 1
+          assert t["boundary_cycle_lengths"] == [8]
+          assert t["nonmanifold_edges"] == 0
+          assert t["winding_conflicts"] == 0
+          assert p["all_failure_controls_rejected"] is True
+          assert p["truth_boundary"]["connected_branch_trunk_topology_proven"] is False
+          PY
+
+      - name: Upload retained Geometry evidence
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-north-low-transition-open-ring-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 90
