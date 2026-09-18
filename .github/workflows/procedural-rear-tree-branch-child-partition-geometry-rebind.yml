@@ -1,0 +1,98 @@
+name: Procedural Nature branch child-partition Geometry rebind
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact procedural head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Checkout exact Organic owner head
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a
+          path: .studio-deps/organic-current
+
+      - name: Checkout exact Geometry receiver head
+        if: matrix.python == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 9b451ba1f65281f550a6754e18574f7ab2951e28
+          path: .studio-deps/geometry-current
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile
+        run: python -m compileall -q src tools tests
+
+      - name: Test full receiving repository
+        run: python -m unittest discover -s tests -v
+
+      - name: Build exact Geometry-receiver partition rebind evidence
+        if: matrix.python == '3.11'
+        run: >-
+          python tools/build_rear_tree_branch_child_partition_geometry_rebind_evidence.py
+          evidence/nature-rear-tree-branch-child-partition-geometry-rebind-002
+          --organic-root .studio-deps/organic-current
+          --geometry-root .studio-deps/geometry-current
+
+      - name: Verify bounded rebind truth gate
+        if: matrix.python == '3.11'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(
+              Path("evidence/nature-rear-tree-branch-child-partition-geometry-rebind-002/summary.json").read_text()
+          )
+          assert data["state"] == "PASS_NATURE_PRIMARY_BRANCH_CHILD_PARTITION_GEOMETRY_RECEIVER_REBIND"
+          assert data["decision"] == "PASS_EXACT_GEOMETRY_RECEIVER_PARTITION_REBIND__SELECTION_IDENTITIES_PRESERVED__NO_RIGGING_OR_DOWNSTREAM_ADOPTION"
+          assert data["organic_owner_head"] == "fdc9d2b6ee729728551e22fd3eafa23ad60b6c7a"
+          assert data["geometry_receiver_head"] == "9b451ba1f65281f550a6754e18574f7ab2951e28"
+          assert data["historical_receiver_mesh_digest"] == "d7fc5deaa1c12d1d8c7d7b6dc95bf1e8544ce26140ee2e4a7d2c67a2c4133e48"
+          assert data["geometry_receiver_mesh_digest"] == "aa9d450a78fef722672ea9af0f9aca98b4c1a0ca3705661784f5f61f3e9b6a31"
+          assert data["historical_receiver_mesh_digest"] != data["geometry_receiver_mesh_digest"]
+          assert data["receiver_mesh_identity_changed"] is True
+          assert data["vertex_positions_preserved"] is True
+          assert data["triangle_membership_preserved"] is True
+          assert data["generated_regions_preserved"] is True
+          assert data["ordered_triangle_changes"] > 0
+          assert data["branch_count"] == 5
+          assert data["distinct_partition_digest_count"] == 5
+          assert data["distinct_vertex_index_digest_count"] == 5
+          assert data["historical_family_digest"] == "ab688f5281dc4e79770e133b49e7af3a533092acc1e0a0945bfa86e647e7b122"
+          assert data["geometry_receiver_family_digest"] == data["historical_family_digest"]
+          assert data["reverse_order_geometry_receiver_family_digest"] == data["historical_family_digest"]
+          assert data["selection_family_identity_preserved"] is True
+          assert all(row["selection_preserved"] for row in data["comparisons"])
+          assert all(row["vertex_count"] == 52 for row in data["comparisons"])
+          assert all(row["triangle_count"] == 72 for row in data["comparisons"])
+          assert all(row["fixed_vertex_count"] == 338 for row in data["comparisons"])
+          assert data["rigging_receiver_witness"]["head"] == "f792d2369675d532be478e17c7a07f441d817c7c"
+          assert data["all_failure_controls_rejected"] is True
+          assert len(data["failure_controls"]) == 11
+          print("PASS_NATURE_BRANCH_PARTITION_GEOMETRY_REBIND_TRUTH_GATE")
+          PY
+
+      - name: Upload exact retained Geometry-rebind evidence
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-rear-tree-branch-child-partition-geometry-rebind-002-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/nature-rear-tree-branch-child-partition-geometry-rebind-002
+          if-no-files-found: error
