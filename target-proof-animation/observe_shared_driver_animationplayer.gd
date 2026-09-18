@@ -331,6 +331,14 @@ func _run() -> void:
         max_control_candidate_changed_pixels = maxi(max_control_candidate_changed_pixels, changed_pixels)
         if not bool(control_candidate.get("byte_identical", false)):
             receipt["representative_rows"] = representative_rows
+            receipt["failing_representative"] = {
+                "sample_index": representative_index,
+                "render_delta": control_candidate,
+                "applications_before_reseek": applications_before_reseek,
+                "applications_after_reseek": int(bridge.application_count),
+                "bridge_index": int(bridge.sample_index),
+                "applied_indices_tail": bridge.applied_indices.slice(maxi(0, bridge.applied_indices.size() - 8), bridge.applied_indices.size())
+            }
             _fail("AnimationPlayer partial target update diverged from host-normalized full control at sample %s" % representative_index)
             return
         if representative_index == 0:
