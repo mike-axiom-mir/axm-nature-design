@@ -1,0 +1,226 @@
+name: VFX north-low Weather response current Godot target
+
+on:
+  pull_request:
+    paths:
+      - "contracts/nature-north-low-weather-vfx-target-010.json"
+      - "target-proof/observe_north_low_weather_target_response.gd"
+      - "tools/build_north_low_weather_target_review.py"
+      - "docs/VFX_NORTH_LOW_WEATHER_TARGET_010.md"
+      - ".github/workflows/vfx-north-low-weather-target.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  target-weather-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - name: Checkout exact VFX head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Pin exact Technical Art base and unchanged owner transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          TA=02c5223dd9288c12607f0553e2f1103be38ae71f
+          git merge-base --is-ancestor "$TA" HEAD
+          for P in \
+            contracts/nature-north-low-parent-exclusion-target-002.json \
+            tools/build_uc_north_low_parent_exclusion_target_evidence.py \
+            target-proof/observe_north_low_parent_exclusion.gd \
+            src/axm_nature_design/uc_primary_branch_receiver.py; do
+            test "$(git rev-parse "HEAD:$P")" = "$(git rev-parse "$TA:$P")"
+          done
+          printf '%s\n' "$TA" > /tmp/exact-technical-art-base.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile review tool and run receiving repository suite
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m py_compile tools/build_north_low_weather_target_review.py
+          python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Download exact Technical Art retained target packet
+        if: matrix.python-version == '3.11'
+        uses: actions/download-artifact@v4
+        with:
+          name: nature-north-low-parent-exclusion-target-02c5223dd9288c12607f0553e2f1103be38ae71f
+          path: _ta_evidence
+          github-token: ${{ github.token }}
+          repository: mike-axiom-mir/axm-nature-design
+          run-id: 35336912571
+
+      - name: Download exact source-space VFX predecessor packet
+        if: matrix.python-version == '3.11'
+        uses: actions/download-artifact@v4
+        with:
+          name: nature-vfx-north-low-parent-stress-weather-e6704c311818561f47d503615427a06b37f1c0d1
+          path: _vfx_source_evidence
+          github-token: ${{ github.token }}
+          repository: mike-axiom-mir/axm-nature-design
+          run-id: 35335957299
+
+      - name: Checkout exact Weather donor
+        if: matrix.python-version == '3.11'
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-weather-design
+          ref: ca2eaba519e8449835b0ea6ef944b7080c3caa6a
+          path: _weather_donor
+
+      - name: Verify exact donor identities and boundaries
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat _ta_evidence/exact-technical-art-head.txt)" = "02c5223dd9288c12607f0553e2f1103be38ae71f"
+          test "$(cat _vfx_source_evidence/exact-head.txt)" = "e6704c311818561f47d503615427a06b37f1c0d1"
+          test "$(git -C _weather_donor rev-parse HEAD)" = "ca2eaba519e8449835b0ea6ef944b7080c3caa6a"
+          test "$(git -C _weather_donor hash-object examples/wind_atmosphere_baseline_001.json)" = "11298d447f262da8a78e43e2df68bc0346c99a2c"
+          python - <<'PY'
+          import json
+          ta=json.load(open('_ta_evidence/nature-north-low-parent-exclusion-godot-target-receipt.json'))
+          src=json.load(open('_vfx_source_evidence/evidence.json'))
+          assert ta['state']=='PASS_NATURE_NORTH_LOW_PARENT_EXCLUSION_CURRENT_UC_GODOT_TARGET',ta
+          assert ta['samples_verified']==41,ta
+          assert ta['truth_boundary']['wind_or_vfx_behavior_proven'] is False,ta
+          assert src['result']=='PASS_NORTH_LOW_DETACHED_TEMPORAL_WEATHER_RESPONSE_PARENT_STRESS_DISCRIMINATION',src
+          assert src['measurements']['weather_polarity_sign_violations']==0,src
+          assert src['truth_boundary']['target_engine_playback_claimed'] is False,src
+          PY
+
+      - name: Download pinned Godot 4.7.2
+        if: matrix.python-version == '3.11'
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        if: matrix.python-version == '3.11'
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Exercise exact Weather response in real Godot target receiver
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=evidence/north-low-weather-vfx-target-010
+          rm -rf "$OUT" target-proof/generated
+          mkdir -p "$OUT" target-proof/generated
+          cp _ta_evidence/nature-north-low-parent-exclusion-uc-target-receipt.json target-proof/generated/
+          cp _ta_evidence/nature-north-low-parent-exclusion-target-oracle.json target-proof/generated/
+          cp _ta_evidence/nature-north-low-parent-exclusion-receiver-rigid.glb target-proof/generated/
+          rm -f target-proof/nature-north-low-weather-vfx-godot-target-receipt.json
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path target-proof \
+            --script observe_north_low_weather_target_response.gd \
+            | tee "$OUT/godot-vfx-target.log"
+          cp target-proof/nature-north-low-weather-vfx-godot-target-receipt.json "$OUT/"
+
+      - name: Build source-to-target VFX review and assert truth boundary
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=evidence/north-low-weather-vfx-target-010
+          python tools/build_north_low_weather_target_review.py \
+            --target-receipt "$OUT/nature-north-low-weather-vfx-godot-target-receipt.json" \
+            --source-vfx-evidence _vfx_source_evidence/evidence.json \
+            --output "$OUT/evidence.json" \
+            --svg "$OUT/review.svg" \
+            | tee "$OUT/review-builder.log"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/north-low-weather-vfx-target-010/evidence.json').read_text())
+          assert r['result']=='PASS_NORTH_LOW_WEATHER_POLARITY_CURRENT_GODOT_TARGET_REVIEW',r
+          m=r['measurements']
+          assert m['sample_count']==41,m
+          assert m['target_weather_polarity_sign_violations']==0,m
+          assert m['source_weather_polarity_sign_violations']==0,m
+          assert m['source_target_sign_agreement_samples']==41,m
+          assert m['source_target_sign_mismatch_indices']==[],m
+          assert m['target_witness_peak_downwind_parallel_m']>0.001,m
+          assert m['target_witness_peak_upwind_parallel_m']<-0.001,m
+          assert m['maximum_target_sample_position_residual_m']<=5e-6,m
+          assert m['maximum_weather_parallel_target_vs_analytic_residual_m']<=5e-6,m
+          t=r['truth_boundary']
+          assert t['real_godot_target_host_visual_direction_observation'] is True,t
+          assert t['physical_wind_speed_force_drag_or_turbulence_claimed'] is False,t
+          assert t['runtime_controller_or_target_device_performance_claimed'] is False,t
+          assert t['collision_gameplay_damage_or_physics_claimed'] is False,t
+          assert t['art_direction_or_independent_visual_qa_acceptance_claimed'] is False,t
+          assert t['canon_or_production_readiness_claimed'] is False,t
+          PY
+
+      - name: Fail closed on Weather drift and authority inflation
+        if: matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=evidence/north-low-weather-vfx-target-010
+          BASE="python tools/build_north_low_weather_target_review.py --target-receipt $OUT/nature-north-low-weather-vfx-godot-target-receipt.json --source-vfx-evidence _vfx_source_evidence/evidence.json --output /tmp/negative.json --svg /tmp/negative.svg"
+          if $BASE --weather-y 0.36; then echo "Weather drift unexpectedly passed" >&2; exit 1; fi
+          if $BASE --claim-physical-wind; then echo "physical-wind authority inflation unexpectedly passed" >&2; exit 1; fi
+          if $BASE --claim-runtime-performance; then echo "Runtime performance authority inflation unexpectedly passed" >&2; exit 1; fi
+          if $BASE --claim-gameplay-or-physics; then echo "gameplay/physics authority inflation unexpectedly passed" >&2; exit 1; fi
+          if $BASE --claim-art-or-qa-acceptance; then echo "Art/QA authority inflation unexpectedly passed" >&2; exit 1; fi
+          printf '%s\n' PASS_REJECTED_WEATHER_DRIFT_AND_AUTHORITY_INFLATION > "$OUT/negative-controls.txt"
+
+      - name: Retain exact VFX provenance
+        if: always() && matrix.python-version == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=evidence/north-low-weather-vfx-target-010
+          mkdir -p "$OUT"
+          cp contracts/nature-north-low-weather-vfx-target-010.json "$OUT/" || true
+          cp docs/VFX_NORTH_LOW_WEATHER_TARGET_010.md "$OUT/README.md" || true
+          cp target-proof/observe_north_low_weather_target_response.gd "$OUT/" || true
+          cp tools/build_north_low_weather_target_review.py "$OUT/" || true
+          cp .github/workflows/vfx-north-low-weather-target.yml "$OUT/" || true
+          cp _ta_evidence/nature-north-low-parent-exclusion-godot-target-receipt.json "$OUT/technical-art-predecessor-godot-receipt.json" || true
+          cp _vfx_source_evidence/evidence.json "$OUT/source-vfx-predecessor-evidence.json" || true
+          git rev-parse HEAD > "$OUT/exact-vfx-head.txt"
+          cat /tmp/exact-technical-art-base.txt > "$OUT/exact-technical-art-base.txt"
+          git -C _weather_donor rev-parse HEAD > "$OUT/exact-weather-head.txt" || true
+
+      - name: Upload exact target-host VFX evidence
+        if: always() && matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-vfx-north-low-weather-target-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/north-low-weather-vfx-target-010
+          if-no-files-found: warn
+          retention-days: 30
