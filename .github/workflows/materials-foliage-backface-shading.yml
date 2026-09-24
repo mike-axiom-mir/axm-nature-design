@@ -1,0 +1,167 @@
+name: Materials foliage backface shading evidence
+
+on:
+  push:
+    branches: [studio/materials-sapling-lookdev-001]
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "tools/build_leaf_sidedness_material_multisource.py"
+      - "lookdev-foliage-backface-shading-proof/**"
+      - ".github/workflows/materials-foliage-backface-shading.yml"
+  pull_request:
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "tools/build_leaf_sidedness_material_multisource.py"
+      - "lookdev-foliage-backface-shading-proof/**"
+      - ".github/workflows/materials-foliage-backface-shading.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  target-host-backface-shading:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Nature Materials lane
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout exact Geometry leaf donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da3adbef4de8cddb8f3ebe841d39bb31a8936f5f
+          path: .geometry-leaf
+
+      - name: Run inherited Materials tests and build exact bounded family packet
+        env:
+          AXM_MATERIALS_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/build_leaf_sidedness_material_multisource.py
+          PYTHONPATH=src python -m unittest tests.test_materials_lookdev -v
+          python tools/build_leaf_sidedness_material_multisource.py \
+            --geometry-root .geometry-leaf \
+            --profile lookdev/nature_woody_foliage_family_001.json \
+            --output evidence/material-foliage-backface-shading-001
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('evidence/material-foliage-backface-shading-001/comparison.json')
+          d=json.loads(p.read_text())
+          assert d['state']=='PASS_EXACT_MULTI_SOURCE_LEAF_SIDEDNESS_MATERIAL_AB_PACKET',d
+          assert d['profile_mode']=='BOUNDED_THREE_SOURCE_FAMILY_CANDIDATE',d
+          assert d['review_material_profile']['family_id']=='nature-woody-foliage-family-001',d
+          assert all(d['global_checks'].values()),d['global_checks']
+          print(json.dumps({'state':d['state'],'scope':d['review_material_profile']['supported_source_scope']},indent=2))
+          PY
+
+      - name: Prepare proof host
+        run: |
+          set -euo pipefail
+          rm -rf lookdev-foliage-backface-shading-proof/generated
+          mkdir -p lookdev-foliage-backface-shading-proof/generated
+          cp evidence/material-foliage-backface-shading-001/comparison.json lookdev-foliage-backface-shading-proof/generated/comparison.json
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Render exact four-way foliage shading diagnostic
+        run: |
+          set -euo pipefail
+          rm -f lookdev-foliage-backface-shading-proof/foliage-backface-shading-runtime-receipt.json
+          rm -f lookdev-foliage-backface-shading-proof/*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x760x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path lookdev-foliage-backface-shading-proof \
+            --script observe.gd
+
+      - name: Validate target-host capture and summarize deltas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('lookdev-foliage-backface-shading-proof')
+          r=json.loads((root/'foliage-backface-shading-runtime-receipt.json').read_text())
+          assert r['state']=='PASS_TARGET_HOST_FOLIAGE_BACKFACE_SHADING_DIAGNOSTIC_CAPTURED',r
+          assert r['schema']=='axm.nature-foliage-backface-shading-runtime/v0.1',r
+          assert r['promotion_effect']=='NONE',r
+          assert len(r['studies'])==3,r['studies'].keys()
+          pairs={
+              'standard_vs_shader_authored':[],
+              'shader_authored_vs_faceforward':[],
+              'standard_vs_faceforward':[],
+              'faceforward_vs_explicit_backfaces':[],
+              'standard_vs_explicit_backfaces':[],
+          }
+          image_count=0
+          for study_name,study in r['studies'].items():
+              assert set(study['contexts'])=={'whole_three_quarter','crown_back','crown_low_grazing'},(study_name,study['contexts'])
+              for context_name,row in study['contexts'].items():
+                  assert set(row['captures'])=={'standard_twosided','shader_authored_normal_twosided','shader_faceforward_normal_twosided','explicit_backfaces'},row['captures']
+                  for capture in row['captures'].values():
+                      assert capture['state']=='PASS',capture
+                      assert capture['capture']['width']==720 and capture['capture']['height']==560,capture
+                      assert capture['capture']['bytes']>3000,capture
+                      image_count+=1
+                  for pair,delta in row['deltas'].items():
+                      assert delta['state']=='PASS',(study_name,context_name,pair,delta)
+                      assert delta['total_pixels']==720*560,(study_name,context_name,pair,delta)
+                      pairs[pair].append(delta['changed_percent'])
+          summary={
+              'state':'PASS_TARGET_HOST_FOLIAGE_BACKFACE_SHADING_DIAGNOSTIC_CAPTURED',
+              'image_count':image_count,
+              'comparison_contexts':9,
+              'pair_ranges':{k:{'min_percent':min(v),'max_percent':max(v),'mean_percent':sum(v)/len(v)} for k,v in pairs.items()},
+              'final_shader_preference_promoted':False,
+              'environment_adoption_promoted':False,
+              'target_device_cost_accepted':False,
+          }
+          (root/'foliage-backface-shading-summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          PY
+
+      - name: Copy exact head binding into artifact
+        run: cp evidence/material-foliage-backface-shading-001/exact-head.txt lookdev-foliage-backface-shading-proof/exact-head.txt
+
+      - name: Upload exact foliage backface shading evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-material-foliage-backface-shading-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/material-foliage-backface-shading-001/comparison.json
+            lookdev-foliage-backface-shading-proof/exact-head.txt
+            lookdev-foliage-backface-shading-proof/observe.gd
+            lookdev-foliage-backface-shading-proof/foliage-backface-shading-runtime-receipt.json
+            lookdev-foliage-backface-shading-proof/foliage-backface-shading-summary.json
+            lookdev-foliage-backface-shading-proof/*.png
+          if-no-files-found: warn
+          retention-days: 30

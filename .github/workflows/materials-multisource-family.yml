@@ -1,0 +1,160 @@
+name: Materials multi-source woody foliage family evidence
+
+on:
+  push:
+    branches: [studio/materials-sapling-lookdev-001]
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "tools/build_material_family_multisource.py"
+      - "lookdev-material-family-multisource-proof/**"
+      - ".github/workflows/materials-multisource-family.yml"
+  pull_request:
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "tools/build_material_family_multisource.py"
+      - "lookdev-material-family-multisource-proof/**"
+      - ".github/workflows/materials-multisource-family.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-three-source-material-family:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Nature Materials lane
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout exact current Nature Geometry donor
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: da3adbef4de8cddb8f3ebe841d39bb31a8936f5f
+          path: .geometry-current
+
+      - name: Build exact three-source material-family packet
+        env:
+          AXM_MATERIALS_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/build_material_family_multisource.py
+          python tools/build_material_family_multisource.py \
+            --geometry-root .geometry-current \
+            --output evidence/material-family-multisource-001
+
+      - name: Validate source scope and material-only boundary
+        run: |
+          python - <<'PY'
+          import copy, json
+          from pathlib import Path
+          root=Path('evidence/material-family-multisource-001')
+          data=json.loads((root/'comparison.json').read_text())
+          assert data['state']=='PASS_EXACT_THREE_SOURCE_WOODY_FOLIAGE_FAMILY_PACKET',data
+          assert all(data['checks'].values()),data['checks']
+          expected=['sapling-neutral-001','compact-east-tree-neutral-001','east-rear-tree-neutral-001']
+          assert data['candidate_family']['supported_source_scope']==expected,data['candidate_family']
+          assert set(data['studies'])==set(expected),data['studies'].keys()
+          assert data['comparison_contract']['foliage_cull_mode_both']=='CULL_DISABLED_FOR_MATERIAL_REVIEW_ONLY',data['comparison_contract']
+          assert data['comparison_contract']['geometry_change']=='NONE',data['comparison_contract']
+          assert data['candidate_luminance_gap']>data['control_luminance_gap'],data
+          assert data['candidate_roughness_gap']>data['control_roughness_gap'],data
+          for name,row in data['studies'].items():
+              assert all(row['checks'].values()),(name,row['checks'])
+              assert len(row['mesh']['vertices'])==390,(name,len(row['mesh']['vertices']))
+              assert len(row['mesh']['triangles'])==570,(name,len(row['mesh']['triangles']))
+          # Fail-closed scope sanity: an unlisted source is not implicitly supported.
+          assert 'invented-tree-999' not in data['candidate_family']['supported_source_scope']
+          print(json.dumps({'checks':data['checks'],'control_luminance_gap':data['control_luminance_gap'],'candidate_luminance_gap':data['candidate_luminance_gap'],'control_roughness_gap':data['control_roughness_gap'],'candidate_roughness_gap':data['candidate_roughness_gap']},indent=2))
+          PY
+
+      - name: Stage exact packet into Godot proof host
+        run: |
+          rm -rf lookdev-material-family-multisource-proof/generated
+          mkdir -p lookdev-material-family-multisource-proof/generated
+          cp evidence/material-family-multisource-001/comparison.json lookdev-material-family-multisource-proof/generated/
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" --output .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display when needed
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+
+      - name: Render control versus family candidate across three exact sources
+        run: |
+          set -euo pipefail
+          rm -f lookdev-material-family-multisource-proof/material-family-multisource-runtime-receipt.json
+          rm -f lookdev-material-family-multisource-proof/*.png
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x760x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 \
+            --rendering-method gl_compatibility \
+            --path lookdev-material-family-multisource-proof \
+            --script observe.gd
+
+      - name: Validate target-host evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('lookdev-material-family-multisource-proof')
+          receipt=json.loads((root/'material-family-multisource-runtime-receipt.json').read_text())
+          assert receipt['state']=='PASS_TARGET_HOST_THREE_SOURCE_MATERIAL_FAMILY_AB_CAPTURED',receipt
+          assert receipt['promotion_effect']=='NONE',receipt
+          assert receipt['candidate_family_id']=='nature-woody-foliage-family-001',receipt
+          expected={'sapling-neutral-001','compact-east-tree-neutral-001','east-rear-tree-neutral-001'}
+          assert set(receipt['studies'])==expected,receipt['studies'].keys()
+          changed=[]
+          for study_name,study in receipt['studies'].items():
+              assert set(study['contexts'])=={'whole_three_quarter','crown_back','crown_low_grazing'},(study_name,study['contexts'])
+              for context_name,row in study['contexts'].items():
+                  assert row['control']['state']=='PASS',(study_name,context_name,row)
+                  assert row['candidate']['state']=='PASS',(study_name,context_name,row)
+                  assert row['control']['tree']['vertices']==390 and row['control']['tree']['triangles']==570,(study_name,context_name,row)
+                  assert row['candidate']['tree']['vertices']==390 and row['candidate']['tree']['triangles']==570,(study_name,context_name,row)
+                  assert row['control']['tree']['foliage_cull_mode']=='CULL_DISABLED',(study_name,context_name,row)
+                  assert row['candidate']['tree']['foliage_cull_mode']=='CULL_DISABLED',(study_name,context_name,row)
+                  delta=row['pixel_delta']
+                  assert delta['state']=='PASS' and delta['total_pixels']==720*560,(study_name,context_name,delta)
+                  assert delta['changed_pixels']>0,(study_name,context_name,delta)
+                  changed.append(delta['changed_percent'])
+          print(json.dumps({'state':receipt['state'],'changed_percent_min':min(changed),'changed_percent_max':max(changed),'changed_percent_mean':sum(changed)/len(changed)},indent=2))
+          PY
+
+      - name: Copy exact head binding into retained proof
+        run: cp evidence/material-family-multisource-001/exact-head.txt lookdev-material-family-multisource-proof/exact-head.txt
+
+      - name: Upload exact three-source material-family evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-material-family-multisource-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            evidence/material-family-multisource-001/comparison.json
+            lookdev-material-family-multisource-proof/exact-head.txt
+            lookdev-material-family-multisource-proof/material-family-multisource-runtime-receipt.json
+            lookdev-material-family-multisource-proof/*.png
+          if-no-files-found: warn
+          retention-days: 30

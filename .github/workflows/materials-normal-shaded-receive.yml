@@ -1,0 +1,214 @@
+name: Materials Nature shaded normal receive evidence
+
+on:
+  push:
+    branches: [studio/materials-sapling-lookdev-001]
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "lookdev-material-axis-isolation-proof/observe_normal_shaded_receive.gd"
+      - ".github/workflows/materials-normal-shaded-receive.yml"
+  pull_request:
+    paths:
+      - "lookdev/nature_woody_foliage_family_001.json"
+      - "lookdev-material-axis-isolation-proof/observe_normal_shaded_receive.gd"
+      - ".github/workflows/materials-normal-shaded-receive.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shaded-normal-receive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact Materials head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Bind exact Materials family identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:lookdev/nature_woody_foliage_family_001.json)" = "6b9b7ffd760bd169657b9e3dd73689d334ee2dd7"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('lookdev/nature_woody_foliage_family_001.json').read_text())
+          assert data['schema']=='axm.nature-woody-foliage-material-family/v0.1',data
+          assert data['family_id']=='nature-woody-foliage-family-001',data
+          assert data['materials']['woody']=={'color':'#5C3B27FF','metallic':0.0,'roughness':0.84},data
+          assert data['materials']['foliage']=={'color':'#5A823EFF','metallic':0.0,'roughness':0.58},data
+          PY
+
+      - name: Checkout exact Technical Art pass-54 normal owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 1cd1784cbc2d0fb5ffdf23e9e2d9a50b50d90641
+          path: .ta-owner
+
+      - name: Checkout exact Runtime shader candidate
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 520068e1167f369b24e749831954f9bda1cd7aec
+          path: .runtime-candidate
+
+      - name: Checkout exact Runtime semantic owner
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-nature-design
+          ref: 6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f
+          path: .runtime-owner
+
+      - name: Checkout exact UC donor used by Technical Art
+        uses: actions/checkout@v4
+        with:
+          repository: mike-axiom-mir/axm-universal-creation
+          ref: 520584c87071837e8dc1ff9a39da140f5efa229d
+          path: .uc
+
+      - name: Rebuild exact Runtime carrier and Technical Art normal packet
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/material-shaded-normal-receive-001
+          rm -rf "$root"; mkdir -p "$root"
+          test "$(git -C .ta-owner rev-parse HEAD)" = "1cd1784cbc2d0fb5ffdf23e9e2d9a50b50d90641"
+          test "$(git -C .runtime-candidate rev-parse HEAD)" = "520068e1167f369b24e749831954f9bda1cd7aec"
+          test "$(git -C .runtime-owner rev-parse HEAD)" = "6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f"
+          test "$(git -C .uc rev-parse HEAD)" = "520584c87071837e8dc1ff9a39da140f5efa229d"
+          PYTHONPATH=.runtime-owner/src python .runtime-candidate/tools/build_rear_tree_runtime_shader_driver.py \
+            --runtime-root .runtime-owner --out "$root" \
+            > "$root/runtime-carrier-build.log" 2>&1
+          PYTHONPATH=.ta-owner/src:.uc/src python .ta-owner/tools/build_uc_runtime_shader_normal_transport.py \
+            --runtime-owner-root .runtime-owner \
+            --runtime-candidate-root .runtime-candidate \
+            --uc-root .uc \
+            --runtime-oracle "$root/runtime-shader-driver-oracle.json" \
+            --runtime-shader "$root/runtime-shader-driver.gdshader" \
+            --out "$root" \
+            > "$root/technical-art-normal-build.log" 2>&1
+
+      - name: Validate exact donor packet and Materials non-promotion boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/material-shaded-normal-receive-001')
+          packet=json.loads((root/'technical-art-normal-transport-packet.json').read_text())
+          oracle=json.loads((root/'runtime-shader-driver-oracle.json').read_text())
+          assert packet['result']=='PASS_NATURE_RUNTIME_SHADER_NORMAL_TRANSPORT_PACKET_READY',packet
+          assert packet['heads']=={
+              'runtime_owner':'6d89e1fc0f8dc5e2ef6c57fc99c1dc6b1727780f',
+              'runtime_shader_candidate':'520068e1167f369b24e749831954f9bda1cd7aec',
+              'uc':'520584c87071837e8dc1ff9a39da140f5efa229d',
+          },packet
+          assert packet['uc']['vertices']==390 and packet['uc']['normal_count']==390 and packet['uc']['triangles']==570,packet
+          assert packet['runtime_carrier']['vertex_id_run_count']==10,packet
+          assert packet['technical_art_adapter']['normal_direction_rotated_by_same_source_axis_angle'] is True,packet
+          assert packet['truth_boundary']['tangent_transport_proven'] is False,packet
+          assert oracle['result']=='PASS_FRAGMENTED_VERTEX_ID_RUNS_TILE_EXACT_DYNAMIC_WINDOW',oracle
+          assert oracle['representative_driver_deg']==[-5.0,-2.5,0.0,2.5,5.0],oracle
+          PY
+
+      - name: Stage exact packet into Materials proof host
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/material-shaded-normal-receive-001
+          proof=lookdev-material-axis-isolation-proof
+          rm -rf "$proof/generated" "$proof/renders/normal-shaded-receive"
+          mkdir -p "$proof/generated"
+          cp "$root/nature-east-rear-runtime-normal-receiver.glb" "$proof/generated/"
+          cp "$root/runtime-shader-driver-oracle.json" "$proof/generated/"
+          cp "$root/technical-art-normal-transport-packet.json" "$proof/generated/"
+          cp "$root/runtime-position-only-normal-debug.gdshader" "$proof/generated/"
+          cp "$root/technical-art-position-plus-normal-debug.gdshader" "$proof/generated/"
+          cp lookdev/nature_woody_foliage_family_001.json "$proof/generated/"
+          rm -f "$proof/normal-shaded-receive-runtime-receipt.json"
+
+      - name: Download pinned Godot 4.7.2
+        env:
+          GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+        run: |
+          set -euo pipefail
+          mkdir -p .godot-bin
+          curl --fail --location --retry 3 --retry-delay 2 "$GODOT_URL" -o .godot-bin/godot.zip
+          echo "$GODOT_SHA256  .godot-bin/godot.zip" | sha256sum --check --strict
+          unzip -q .godot-bin/godot.zip -d .godot-bin
+          chmod +x .godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          .godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install virtual display
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then sudo apt-get update && sudo apt-get install -y xvfb; fi
+
+      - name: Render exact shaded control corrected and position-only negative
+        shell: bash
+        run: |
+          set -euo pipefail
+          proof=lookdev-material-axis-isolation-proof
+          xvfb-run --auto-servernum --server-args="-screen 0 1000x800x24" \
+            .godot-bin/Godot_v4.7.2-stable_linux.x86_64 \
+            --display-driver x11 --rendering-method gl_compatibility \
+            --path "$proof" --script observe_normal_shaded_receive.gd \
+            2>&1 | tee evidence/material-shaded-normal-receive-001/godot-shaded-normal-receive.log
+          cp "$proof/normal-shaded-receive-runtime-receipt.json" evidence/material-shaded-normal-receive-001/
+          cp -R "$proof/renders/normal-shaded-receive" evidence/material-shaded-normal-receive-001/renders
+
+      - name: Validate bounded shaded Materials result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('evidence/material-shaded-normal-receive-001')
+          r=json.loads((root/'normal-shaded-receive-runtime-receipt.json').read_text())
+          assert r['state']=='PASS_NATURE_TA_PROOF_NORMAL_DIRECTION_SURVIVES_SHADED_MATERIAL_RECEIVER__PASS54_EXACT_CARRIER_ONLY',r
+          assert r['receiver']=={'vertices':390,'normals':390,'triangles':570,'runtime_vertex_id_runs':10},r
+          assert r['material_probe_contract']['family_id']=='nature-woody-foliage-family-001',r
+          assert r['material_probe_contract']['whole_receiver_probe_only_not_region_assignment'] is True,r
+          m=r['measurements']
+          assert m['nonzero_comparisons']==16 and m['nonzero_corrected_better']==16,m
+          assert m['neutral_equivalence_checks']==4,m
+          assert m['active_driver_checks']==4,m
+          assert m['active_material_context_checks']==2,m
+          assert m['position_only_negative_pixels_gt_1_lsb_total']>500,m
+          assert m['corrected_absolute_channel_delta_sum']<m['position_only_negative_absolute_channel_delta_sum'],m
+          assert r['truth_boundary']['current_animation_runtime_owner_chain_rebound'] is False,r
+          assert r['truth_boundary']['tangent_transport_proven'] is False,r
+          assert r['truth_boundary']['final_nature_lookdev_or_art_acceptance_proven'] is False,r
+          PY
+
+      - name: Retain exact provenance and tooling
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=evidence/material-shaded-normal-receive-001; mkdir -p "$root"
+          git rev-parse HEAD > "$root/exact-materials-head.txt"
+          git rev-parse HEAD:lookdev/nature_woody_foliage_family_001.json > "$root/exact-material-family-blob.txt"
+          git -C .ta-owner rev-parse HEAD > "$root/exact-technical-art-head.txt"
+          git -C .runtime-owner rev-parse HEAD > "$root/exact-runtime-owner-head.txt"
+          git -C .runtime-candidate rev-parse HEAD > "$root/exact-runtime-candidate-head.txt"
+          git -C .uc rev-parse HEAD > "$root/exact-uc-head.txt"
+          cp lookdev-material-axis-isolation-proof/observe_normal_shaded_receive.gd "$root/" || true
+          cp .github/workflows/materials-normal-shaded-receive.yml "$root/" || true
+
+      - name: Upload exact shaded Materials evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nature-material-shaded-normal-receive-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/material-shaded-normal-receive-001
+          if-no-files-found: error
+          retention-days: 30
