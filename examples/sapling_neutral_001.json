@@ -1,0 +1,69 @@
+{
+  "schema": "axm.nature-organic-form-study/v0.1",
+  "study_id": "sapling-neutral-001",
+  "coordinate_system": "+X east/right, +Y north/forward, +Z up; metres",
+  "purpose": "One stylized source-owned vegetation form candidate with readable trunk/branch masses, explicit taper, and declared flex reserves before wind/deformation testing.",
+  "environment_handoff": {
+    "repository": "mike-axiom-mir/axm-map-design",
+    "pr": 2,
+    "head": "a233763af97fd0ac187013c97659af3496fbe177",
+    "replacement_target": "proxy:nature-tree-west-a",
+    "proxy_size_m": [2.2, 2.2, 5.2],
+    "status": "CANDIDATE_REPLACEMENT_NOT_COMPOSED"
+  },
+  "weather_handoff": {
+    "repository": "mike-axiom-mir/axm-weather-design",
+    "pr": 2,
+    "head": "ca2eaba519e8449835b0ea6ef944b7080c3caa6a",
+    "visual_wind_xy": [1.0, 0.35],
+    "status": "CONTEXT_ONLY_NOT_APPLIED_TO_FORM"
+  },
+  "donor_provenance": {
+    "repository": "mike-axiom-mir/axm-universal-creation",
+    "commit": "b434a349cf159b392148b4dc9d68146573531a60",
+    "path": "src/axm_uc/rts_mesh.py",
+    "mechanism": "small stylized vegetation using a stem plus simple planar leaf blades; receiving implementation is independently authored and re-tested in nature-design",
+    "license": "Apache-2.0",
+    "evidence_relation": "DONOR_HINT_NOT_INHERITED_PASS"
+  },
+  "trunk": [
+    {"id": "base", "position": [0.00, 0.00, 0.00], "radius": 0.20},
+    {"id": "lower", "position": [0.04, 0.01, 0.92], "radius": 0.17},
+    {"id": "mid", "position": [-0.04, 0.04, 1.82], "radius": 0.135},
+    {"id": "upper", "position": [0.06, -0.02, 2.76], "radius": 0.105},
+    {"id": "crown", "position": [0.00, -0.04, 3.62], "radius": 0.072},
+    {"id": "tip", "position": [-0.04, 0.02, 4.68], "radius": 0.040}
+  ],
+  "branches": [
+    {"id": "east-low", "points": [[0.02,0.02,2.28],[0.48,0.10,2.68],[0.84,0.19,3.08]], "radii": [0.070,0.045,0.022]},
+    {"id": "west-low", "points": [[-0.01,0.03,2.50],[-0.47,-0.08,2.89],[-0.84,-0.18,3.29]], "radii": [0.067,0.043,0.021]},
+    {"id": "east-high", "points": [[0.03,-0.02,3.05],[0.42,-0.23,3.43],[0.72,-0.36,3.82]], "radii": [0.055,0.035,0.018]},
+    {"id": "west-high", "points": [[-0.02,-0.01,3.27],[-0.40,0.22,3.62],[-0.69,0.39,4.00]], "radii": [0.052,0.033,0.017]},
+    {"id": "north-top", "points": [[0.00,-0.03,3.57],[0.08,0.38,3.92],[0.12,0.70,4.27]], "radii": [0.045,0.029,0.015]}
+  ],
+  "leaf_clusters": [
+    {"id":"east-low-leaves","center":[0.84,0.19,3.08],"length":0.26,"width":0.16,"blades":[[5,23],[48,12],[96,18],[145,28]]},
+    {"id":"west-low-leaves","center":[-0.84,-0.18,3.29],"length":0.26,"width":0.15,"blades":[[188,20],[225,15],[272,25],[318,11]]},
+    {"id":"east-high-leaves","center":[0.72,-0.36,3.82],"length":0.36,"width":0.14,"blades":[[18,25],[62,18],[112,30],[158,14]]},
+    {"id":"west-high-leaves","center":[-0.69,0.39,4.00],"length":0.34,"width":0.13,"blades":[[195,18],[238,27],[286,16],[334,25]]},
+    {"id":"north-top-leaves","center":[0.12,0.70,4.27],"length":0.32,"width":0.12,"blades":[[82,20],[126,28],[173,14],[220,25]]},
+    {"id":"crown-tip-leaves","center":[-0.04,0.02,4.68],"length":0.30,"width":0.11,"blades":[[12,35],[70,25],[135,32],[205,22],[280,29]]}
+  ],
+  "flex_zones": [
+    {"id":"trunk-lower-flex","center":[0.04,0.01,0.92],"radius":0.32,"status":"DECLARED_NOT_DEFORMATION_TESTED"},
+    {"id":"trunk-upper-flex","center":[0.06,-0.02,2.76],"radius":0.25,"status":"DECLARED_NOT_DEFORMATION_TESTED"},
+    {"id":"east-low-branch-flex","center":[0.02,0.02,2.28],"radius":0.16,"status":"DECLARED_NOT_DEFORMATION_TESTED"},
+    {"id":"west-low-branch-flex","center":[-0.01,0.03,2.50],"radius":0.16,"status":"DECLARED_NOT_DEFORMATION_TESTED"},
+    {"id":"east-high-branch-flex","center":[0.03,-0.02,3.05],"radius":0.13,"status":"DECLARED_NOT_DEFORMATION_TESTED"},
+    {"id":"west-high-branch-flex","center":[-0.02,-0.01,3.27],"radius":0.13,"status":"DECLARED_NOT_DEFORMATION_TESTED"}
+  ],
+  "design_checks": {
+    "height_m": [4.6, 5.1],
+    "crown_width_x_m": [1.6, 2.2],
+    "crown_depth_y_m": [1.0, 2.2],
+    "minimum_branch_tip_height_m": 2.9,
+    "trunk_taper": "STRICTLY_DECREASING",
+    "ground_min_z_m": -0.012
+  },
+  "truth_boundary": "This is a stylized authored vegetation form study. It does not establish botanical species correctness, biological growth, rigging, wind physics, deformation quality, environment acceptance, engine/runtime readiness, or mastery."
+}
